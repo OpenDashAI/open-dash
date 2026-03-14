@@ -19,6 +19,7 @@ import {
 } from '../lib/hud-store'
 import { MODE_CONFIGS } from '../lib/hud-mode'
 import { useKeyboardShortcuts } from '../lib/use-keyboard'
+import { useLiveData } from '../lib/use-live-data'
 
 export const Route = createFileRoute('/')({
   component: HUD,
@@ -42,6 +43,7 @@ function HUD() {
   const loaderData = Route.useLoaderData()
   const { mode } = useHudState()
   useKeyboardShortcuts()
+  useLiveData()
 
   const [leftWidth, setLeftWidth] = useState(DEFAULT_LEFT)
   const [rightWidth, setRightWidth] = useState(DEFAULT_RIGHT)
@@ -63,25 +65,10 @@ function HUD() {
     setIssues(loaderData.issues)
   }, [loaderData])
 
-  // Poll for updates every 30 seconds
-  useEffect(() => {
-    const interval = setInterval(async () => {
-      try {
-        const [machines, events, metrics] = await Promise.all([
-          getMachines(),
-          getActivity(),
-          getMetrics(),
-        ])
-        setMachines(machines)
-        setEvents(events)
-        setMetrics(metrics)
-      } catch {
-        // Silently fail — display stale data
-      }
-    }, 30_000)
-
-    return () => clearInterval(interval)
-  }, [])
+  // Live data polling handled by useLiveData() hook
+  // - 15s polling (down from 30s)
+  // - Pauses when tab hidden
+  // - Fast-polls on visibility regain + network reconnect
 
   const onlineMachines = loaderData.machines.filter((m) => m.status === 'online').length
 
