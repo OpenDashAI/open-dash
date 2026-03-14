@@ -3,6 +3,8 @@ import { MachineCard } from '../components/cards/MachineCard'
 import { BrandCard } from '../components/cards/BrandCard'
 import { ActivityCard } from '../components/cards/ActivityCard'
 import { StatusCard } from '../components/cards/StatusCard'
+import { ApprovalCard } from '../components/cards/ApprovalCard'
+import { IssueCard } from '../components/cards/IssueCard'
 
 /**
  * Card Registry — maps card type names to React components.
@@ -18,6 +20,8 @@ const registry: Record<string, CardComponent> = {
   brand_card: BrandCard,
   activity_card: ActivityCard,
   status_card: StatusCard,
+  approval_card: ApprovalCard,
+  issue_card: IssueCard,
 }
 
 export function getCard(type: string): CardComponent | null {
