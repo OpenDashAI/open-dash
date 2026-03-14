@@ -15,3 +15,4 @@ dist-ssr/
 .cta.json
 __unconfig*
 todos.json
+public/tailscale-status.json

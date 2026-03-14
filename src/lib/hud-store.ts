@@ -1,5 +1,5 @@
-import { useSyncExternalStore, useCallback } from 'react'
-import type { HudState, CardDirective, Machine, Brand, ActivityEvent, StatusMetric } from './types'
+import { useSyncExternalStore } from 'react'
+import type { HudState, CardDirective, Machine, Brand, ActivityEvent, StatusMetric, Issue } from './types'
 
 /**
  * Minimal reactive store for HUD state.
@@ -17,6 +17,7 @@ let state: HudState = {
   brands: [],
   events: [],
   metrics: [],
+  issues: [],
   cards: [],
 }
 
@@ -75,6 +76,11 @@ export function addEvent(event: ActivityEvent) {
 
 export function setMetrics(metrics: StatusMetric[]) {
   state = { ...state, metrics }
+  emit()
+}
+
+export function setIssues(issues: Issue[]) {
+  state = { ...state, issues }
   emit()
 }
 

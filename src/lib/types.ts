@@ -37,6 +37,15 @@ export interface StatusMetric {
   trend?: 'up' | 'down' | 'flat'
 }
 
+/** GitHub issue */
+export interface Issue {
+  number: number
+  title: string
+  labels: string[]
+  state: 'open' | 'closed'
+  assignee?: string
+}
+
 /** Card directive emitted by AI alongside chat text */
 export interface CardDirective {
   type: string
@@ -58,5 +67,6 @@ export interface HudState {
   brands: Brand[]
   events: ActivityEvent[]
   metrics: StatusMetric[]
+  issues: Issue[]
   cards: CardDirective[]
 }

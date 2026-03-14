@@ -6,20 +6,29 @@ import { ChatPanel } from '../components/panels/ChatPanel'
 import { getMachines } from '../server/machines'
 import { getBrands } from '../server/brands'
 import { getActivity, getMetrics } from '../server/activity'
-import { useHudState, setMachines, setBrands, setEvents, setMetrics, setMode } from '../lib/hud-store'
+import { getIssues } from '../server/issues'
+import {
+  useHudState,
+  setMachines,
+  setBrands,
+  setEvents,
+  setMetrics,
+  setMode,
+  setIssues,
+} from '../lib/hud-store'
 import { MODE_CONFIGS } from '../lib/hud-mode'
 
 export const Route = createFileRoute('/')({
   component: HUD,
   loader: async () => {
-    // Fetch all data in parallel on first load (SSR)
-    const [machines, brands, events, metrics] = await Promise.all([
+    const [machines, brands, events, metrics, issues] = await Promise.all([
       getMachines(),
       getBrands(),
       getActivity(),
       getMetrics(),
+      getIssues(),
     ])
-    return { machines, brands, events, metrics }
+    return { machines, brands, events, metrics, issues }
   },
 })
 
@@ -33,6 +42,7 @@ function HUD() {
     setBrands(loaderData.brands)
     setEvents(loaderData.events)
     setMetrics(loaderData.metrics)
+    setIssues(loaderData.issues)
   }, [loaderData])
 
   // Poll for updates every 30 seconds
@@ -54,6 +64,8 @@ function HUD() {
 
     return () => clearInterval(interval)
   }, [])
+
+  const onlineMachines = loaderData.machines.filter((m) => m.status === 'online').length
 
   return (
     <div className="hud-layout">
@@ -80,13 +92,15 @@ function HUD() {
         </div>
         <div className="flex items-center gap-3 text-[12px]">
           <span className="flex items-center gap-1.5">
-            <span className={`status-dot ${loaderData.machines.filter((m) => m.status === 'online').length > 0 ? 'online' : 'offline'}`} />
-            <span>{loaderData.machines.filter((m) => m.status === 'online').length}/{loaderData.machines.length} machines</span>
+            <span className={`status-dot ${onlineMachines > 0 ? 'online' : 'offline'}`} />
+            <span>
+              {onlineMachines}/{loaderData.machines.length} machines
+            </span>
           </span>
           <span className="text-[var(--hud-border)]">|</span>
           <span>{loaderData.brands.length} brands</span>
           <span className="text-[var(--hud-border)]">|</span>
-          <span>Train 10</span>
+          <span>{loaderData.issues.length} issues</span>
         </div>
       </div>
 
