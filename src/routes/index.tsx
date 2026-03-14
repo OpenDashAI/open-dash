@@ -1,8 +1,9 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { useEffect } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { ContextPanel } from '../components/panels/ContextPanel'
 import { FocusPanel } from '../components/panels/FocusPanel'
 import { ChatPanel } from '../components/panels/ChatPanel'
+import { PanelResizer } from '../components/PanelResizer'
 import { getMachines } from '../server/machines'
 import { getBrands } from '../server/brands'
 import { getActivity, getMetrics } from '../server/activity'
@@ -33,10 +34,25 @@ export const Route = createFileRoute('/')({
   },
 })
 
+const MIN_PANEL = 180
+const DEFAULT_LEFT = 280
+const DEFAULT_RIGHT = 320
+
 function HUD() {
   const loaderData = Route.useLoaderData()
   const { mode } = useHudState()
   useKeyboardShortcuts()
+
+  const [leftWidth, setLeftWidth] = useState(DEFAULT_LEFT)
+  const [rightWidth, setRightWidth] = useState(DEFAULT_RIGHT)
+
+  const handleLeftResize = useCallback((delta: number) => {
+    setLeftWidth((w) => Math.max(MIN_PANEL, w + delta))
+  }, [])
+
+  const handleRightResize = useCallback((delta: number) => {
+    setRightWidth((w) => Math.max(MIN_PANEL, w - delta))
+  }, [])
 
   // Hydrate store from SSR loader data
   useEffect(() => {
@@ -70,7 +86,12 @@ function HUD() {
   const onlineMachines = loaderData.machines.filter((m) => m.status === 'online').length
 
   return (
-    <div className="hud-layout">
+    <div
+      className="hud-layout"
+      style={{
+        gridTemplateColumns: `${leftWidth}px 6px 1fr 6px ${rightWidth}px`,
+      }}
+    >
       <div className="hud-topbar">
         <div className="flex items-center gap-3">
           <span className="font-semibold text-[var(--hud-text-bright)] tracking-wide">OPENDASH</span>
@@ -108,7 +129,9 @@ function HUD() {
       </div>
 
       <ContextPanel />
+      <PanelResizer onResize={handleLeftResize} />
       <FocusPanel />
+      <PanelResizer onResize={handleRightResize} />
       <ChatPanel />
     </div>
   )
