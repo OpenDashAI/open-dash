@@ -17,6 +17,7 @@ import {
   setIssues,
 } from '../lib/hud-store'
 import { MODE_CONFIGS } from '../lib/hud-mode'
+import { useKeyboardShortcuts } from '../lib/use-keyboard'
 
 export const Route = createFileRoute('/')({
   component: HUD,
@@ -35,6 +36,7 @@ export const Route = createFileRoute('/')({
 function HUD() {
   const loaderData = Route.useLoaderData()
   const { mode } = useHudState()
+  useKeyboardShortcuts()
 
   // Hydrate store from SSR loader data
   useEffect(() => {
@@ -74,11 +76,12 @@ function HUD() {
           <span className="font-semibold text-[var(--hud-text-bright)] tracking-wide">OPENDASH</span>
           <span className="text-[var(--hud-border)]">|</span>
           <div className="flex gap-1">
-            {Object.entries(MODE_CONFIGS).map(([key, config]) => (
+            {Object.entries(MODE_CONFIGS).map(([key, config], i) => (
               <button
                 key={key}
                 type="button"
                 onClick={() => setMode(key as typeof mode)}
+                title={`${config.label} (Alt+${i + 1})`}
                 className={`px-2 py-0.5 rounded text-[10px] font-semibold uppercase tracking-wider transition-colors ${
                   mode === key
                     ? 'bg-[var(--hud-accent-dim)] text-[var(--hud-accent)]'
