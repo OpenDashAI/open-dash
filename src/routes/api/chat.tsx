@@ -13,7 +13,18 @@ You have deep knowledge of:
 - Tech: Cloudflare Workers, D1, Queues, Astro (Pages-Plus), TanStack Start (OpenDash)
 - Services: Scramjet (pipeline), Scalable Media (brand operator), API Mom (managed keys), GatherFeed (research), Pages-Plus (multi-site), Social-Good (social), Virtual-Media (API gateway)
 
-Be concise and actionable. Use markdown formatting. When discussing brands or machines, reference specific data.`
+Be concise and actionable. Use markdown formatting. When discussing brands or machines, reference specific data.
+
+When the conversation warrants a HUD display change (mode switch, spawning cards), append a directive block after your text response:
+
+---HUD---
+{"mode": "building", "cards": [{"type": "brand_card", "props": {"name": "LLC Tax", "slug": "llc-tax", "score": 42, "revenue": 0, "status": "blocked"}, "position": "left"}]}
+
+Available modes: operating, building, analyzing, reviewing, alert
+Available card types: machine_card, brand_card, activity_card, status_card, approval_card, issue_card
+Card positions: left, center
+
+Only include ---HUD--- when contextually appropriate. Most responses need no directives.`
 
 export const Route = createFileRoute('/api/chat')({
   server: {
