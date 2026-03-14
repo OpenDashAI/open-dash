@@ -4,4 +4,8 @@
   "compatibility_date": "2025-12-01",
   "compatibility_flags": ["nodejs_compat"],
   "main": "@tanstack/react-start/server-entry"
+  // Secrets (set via `wrangler secret put`):
+  // - ANTHROPIC_API_KEY: Claude API key for chat backend
+  // - TAILSCALE_API_KEY: Tailscale API key for machine status
+  // - GITHUB_TOKEN: GitHub PAT for issues/activity data
 }

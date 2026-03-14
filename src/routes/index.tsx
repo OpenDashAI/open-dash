@@ -1,15 +1,59 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { useState } from 'react'
+import { useEffect } from 'react'
 import { ContextPanel } from '../components/panels/ContextPanel'
 import { FocusPanel } from '../components/panels/FocusPanel'
 import { ChatPanel } from '../components/panels/ChatPanel'
-import type { HudMode } from '../lib/hud-mode'
+import { getMachines } from '../server/machines'
+import { getBrands } from '../server/brands'
+import { getActivity, getMetrics } from '../server/activity'
+import { useHudState, setMachines, setBrands, setEvents, setMetrics, setMode } from '../lib/hud-store'
 import { MODE_CONFIGS } from '../lib/hud-mode'
 
-export const Route = createFileRoute('/')({ component: HUD })
+export const Route = createFileRoute('/')({
+  component: HUD,
+  loader: async () => {
+    // Fetch all data in parallel on first load (SSR)
+    const [machines, brands, events, metrics] = await Promise.all([
+      getMachines(),
+      getBrands(),
+      getActivity(),
+      getMetrics(),
+    ])
+    return { machines, brands, events, metrics }
+  },
+})
 
 function HUD() {
-  const [mode, setMode] = useState<HudMode>('operating')
+  const loaderData = Route.useLoaderData()
+  const { mode } = useHudState()
+
+  // Hydrate store from SSR loader data
+  useEffect(() => {
+    setMachines(loaderData.machines)
+    setBrands(loaderData.brands)
+    setEvents(loaderData.events)
+    setMetrics(loaderData.metrics)
+  }, [loaderData])
+
+  // Poll for updates every 30 seconds
+  useEffect(() => {
+    const interval = setInterval(async () => {
+      try {
+        const [machines, events, metrics] = await Promise.all([
+          getMachines(),
+          getActivity(),
+          getMetrics(),
+        ])
+        setMachines(machines)
+        setEvents(events)
+        setMetrics(metrics)
+      } catch {
+        // Silently fail — display stale data
+      }
+    }, 30_000)
+
+    return () => clearInterval(interval)
+  }, [])
 
   return (
     <div className="hud-layout">
@@ -22,7 +66,7 @@ function HUD() {
               <button
                 key={key}
                 type="button"
-                onClick={() => setMode(key as HudMode)}
+                onClick={() => setMode(key as typeof mode)}
                 className={`px-2 py-0.5 rounded text-[10px] font-semibold uppercase tracking-wider transition-colors ${
                   mode === key
                     ? 'bg-[var(--hud-accent-dim)] text-[var(--hud-accent)]'
@@ -34,20 +78,20 @@ function HUD() {
             ))}
           </div>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 text-[12px]">
           <span className="flex items-center gap-1.5">
-            <span className="status-dot online" />
-            <span>3 machines</span>
+            <span className={`status-dot ${loaderData.machines.filter((m) => m.status === 'online').length > 0 ? 'online' : 'offline'}`} />
+            <span>{loaderData.machines.filter((m) => m.status === 'online').length}/{loaderData.machines.length} machines</span>
           </span>
           <span className="text-[var(--hud-border)]">|</span>
-          <span>19 brands</span>
+          <span>{loaderData.brands.length} brands</span>
           <span className="text-[var(--hud-border)]">|</span>
           <span>Train 10</span>
         </div>
       </div>
 
-      <ContextPanel mode={mode} />
-      <FocusPanel mode={mode} />
+      <ContextPanel />
+      <FocusPanel />
       <ChatPanel />
     </div>
   )

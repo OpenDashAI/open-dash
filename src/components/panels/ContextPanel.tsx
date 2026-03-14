@@ -1,27 +1,14 @@
 import { MachineCard } from '../cards/MachineCard'
 import { BrandCard } from '../cards/BrandCard'
-import type { HudMode } from '../../lib/hud-mode'
+import { useHudState } from '../../lib/hud-store'
+import { renderCard } from '../../lib/card-registry'
 
-interface ContextPanelProps {
-  mode: HudMode
-}
+export function ContextPanel() {
+  const { mode, machines, brands, cards } = useHudState()
 
-// Demo data — will be replaced by live data from D1/APIs
-const MACHINES = [
-  { hostname: 'providence', os: 'macOS', status: 'online' as const, ip: '100.84.211.58', tasks: 1, cpu: 12 },
-  { hostname: 'destiny', os: 'macOS', status: 'offline' as const, ip: '100.84.253.65', tasks: 0 },
-  { hostname: 'stargate', os: 'Windows', status: 'online' as const, ip: '100.107.60.12', tasks: 0, cpu: 3 },
-  { hostname: 'stargate-wsl', os: 'Linux', status: 'online' as const, ip: '100.92.249.32', tasks: 0, cpu: 8 },
-]
+  // Filter AI-spawned cards destined for left panel
+  const leftCards = cards.filter((c) => c.position === 'left')
 
-const BRANDS = [
-  { name: 'Bank Statement to Excel', slug: 'bse', score: 87, revenue: 0, status: 'healthy' as const },
-  { name: 'LLC Tax', slug: 'llc-tax', score: 42, revenue: 0, status: 'blocked' as const, blockedOn: 'SES secrets' },
-  { name: 'UGC Marketing', slug: 'ugc-marketing', score: 28, revenue: 0, status: 'warning' as const },
-  { name: 'Vibe Marketing', slug: 'vibe-marketing', score: 15, revenue: 0, status: 'warning' as const },
-]
-
-export function ContextPanel({ mode }: ContextPanelProps) {
   return (
     <div className="hud-panel left">
       <div className="panel-header">
@@ -29,23 +16,32 @@ export function ContextPanel({ mode }: ContextPanelProps) {
         <span className="text-[var(--hud-accent)] text-[10px]">{mode.toUpperCase()}</span>
       </div>
       <div className="panel-body">
-        {(mode === 'operating' || mode === 'alert') && (
+        {/* AI-spawned cards render first */}
+        {leftCards.map((card, i) => renderCard(card.type, card.props, `ai-left-${i}`))}
+
+        {/* Machine cards in operating/alert mode */}
+        {(mode === 'operating' || mode === 'alert') && machines.length > 0 && (
           <>
             <div className="text-[10px] font-semibold text-[var(--hud-text-muted)] uppercase tracking-wider mb-2 px-1">
               Machines
             </div>
-            {MACHINES.map((m) => (
+            {machines.map((m) => (
               <MachineCard key={m.hostname} {...m} />
             ))}
           </>
         )}
 
+        {/* Brand cards always visible */}
         <div className="text-[10px] font-semibold text-[var(--hud-text-muted)] uppercase tracking-wider mb-2 mt-3 px-1">
           Brands
         </div>
-        {BRANDS.map((b) => (
+        {brands.map((b) => (
           <BrandCard key={b.slug} {...b} />
         ))}
+
+        {brands.length === 0 && (
+          <div className="text-[12px] text-[var(--hud-text-muted)] px-1">Loading brands...</div>
+        )}
       </div>
     </div>
   )

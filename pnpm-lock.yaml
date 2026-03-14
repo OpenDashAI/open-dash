@@ -14,9 +14,21 @@ importers:
       '@tailwindcss/vite':
         specifier: ^4.1.18
         version: 4.2.1(vite@7.3.1(@types/node@22.19.15)(jiti@2.6.1)(lightningcss@1.31.1)(tsx@4.21.0))
+      '@tanstack/ai':
+        specifier: ^0.8.0
+        version: 0.8.0
+      '@tanstack/ai-client':
+        specifier: ^0.7.1
+        version: 0.7.1
+      '@tanstack/ai-react':
+        specifier: ^0.7.1
+        version: 0.7.1(@tanstack/ai@0.8.0)(@types/react@19.2.14)(react@19.2.4)
       '@tanstack/react-devtools':
         specifier: latest
         version: 0.9.13(@types/react-dom@19.2.3(@types/react@19.2.14))(@types/react@19.2.14)(csstype@3.2.3)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(solid-js@1.9.11)
+      '@tanstack/react-query':
+        specifier: ^5.90.21
+        version: 5.90.21(react@19.2.4)
       '@tanstack/react-router':
         specifier: latest
         version: 1.167.0(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
@@ -44,6 +56,9 @@ importers:
       tailwindcss:
         specifier: ^4.1.18
         version: 4.2.1
+      zod:
+        specifier: ^4.3.6
+        version: 4.3.6
     devDependencies:
       '@biomejs/biome':
         specifier: 2.4.5
@@ -1155,6 +1170,25 @@ packages:
     peerDependencies:
       vite: ^5.2.0 || ^6 || ^7
 
+  '@tanstack/ai-client@0.7.1':
+    resolution: {integrity: sha512-F40ZyxKCSOISrjTvGySE8TE/ikaEKCRUJ5pIYltZ1WIMS9IdeE9KDj8JrhOhCG+WM9G8xSZ3/Gv9Nm60+kg6ww==}
+
+  '@tanstack/ai-event-client@0.1.0':
+    resolution: {integrity: sha512-BeO344Tk+qAmbdtZ7sIV8Dw+z4x3yUHQxPg+e0aUxZ8fJbiPx3+jsEOrMbjKPh8AM/xFvTUrMBQIiYvqngFldw==}
+    peerDependencies:
+      '@tanstack/ai': 0.8.0
+
+  '@tanstack/ai-react@0.7.1':
+    resolution: {integrity: sha512-2MTfB3NNVrI0fxq33t04fSZZwFy7RyokTdRz0wUe5OQyHdtFXrDze4K0z/ZOCTfUk/OJ6s64wWOa8DQZzb40+Q==}
+    peerDependencies:
+      '@tanstack/ai': ^0.8.0
+      '@types/react': '>=18.0.0'
+      react: '>=18.0.0'
+
+  '@tanstack/ai@0.8.0':
+    resolution: {integrity: sha512-rcvALkrH6mSEeyZyVHaZiwXKMpNC18YKG6Ao/QDcDP68hLBnIXwYBDq+kmRWgAW6fN2VWwue+PrcH4LgB7fj1w==}
+    engines: {node: '>=18'}
+
   '@tanstack/devtools-client@0.0.6':
     resolution: {integrity: sha512-f85ZJXJnDIFOoykG/BFIixuAevJovCvJF391LPs6YjBAPhGYC50NWlx1y4iF/UmK5/cCMx+/JqI5SBOz7FanQQ==}
     engines: {node: '>=18'}
@@ -1944,6 +1978,9 @@ packages:
   parse5@8.0.0:
     resolution: {integrity: sha512-9m4m5GSgXjL4AjumKzq1Fgfp3Z8rsvjRNbnkVwfu2ImRqE5D0LnY2QfDen18FSY9C573YU5XxSapdHZTZ2WolA==}
 
+  partial-json@0.1.7:
+    resolution: {integrity: sha512-Njv/59hHaokb/hRUjce3Hdv12wd60MtM9Z5Olmn+nehe0QDAsRtRbJPvJ0Z91TusF0SuZRIvnM+S4l6EIP8leA==}
+
   path-to-regexp@6.3.0:
     resolution: {integrity: sha512-Yhpw4T9C6hPpgPeA28us07OJeqZ5EzQTkbfwuhsUg0c237RomFoETJgmp2sa3F/41gfLE6G5cqcYwznmeEeOlQ==}
 
@@ -2396,6 +2433,9 @@ packages:
 
   zod@3.25.76:
     resolution: {integrity: sha512-gzUt/qt81nXsFGKIFcC3YnfEAx5NkunCfnDlvuBSSFS02bcXu4Lmea0AFIUwbLWxWPx3d9p8S5QoaujKcNQxcQ==}
+
+  zod@4.3.6:
+    resolution: {integrity: sha512-rftlrkhHZOcjDwkGlnUtZZkvaPHCsDATp4pGpuOOMDaTdDDXF91wuVDJoWoPsKX/3YPQ5fHuF3STjcYyKr+Qhg==}
 
 snapshots:
 
@@ -3151,6 +3191,28 @@ snapshots:
       '@tailwindcss/oxide': 4.2.1
       tailwindcss: 4.2.1
       vite: 7.3.1(@types/node@22.19.15)(jiti@2.6.1)(lightningcss@1.31.1)(tsx@4.21.0)
+
+  '@tanstack/ai-client@0.7.1':
+    dependencies:
+      '@tanstack/ai': 0.8.0
+      '@tanstack/ai-event-client': 0.1.0(@tanstack/ai@0.8.0)
+
+  '@tanstack/ai-event-client@0.1.0(@tanstack/ai@0.8.0)':
+    dependencies:
+      '@tanstack/ai': 0.8.0
+      '@tanstack/devtools-event-client': 0.4.3
+
+  '@tanstack/ai-react@0.7.1(@tanstack/ai@0.8.0)(@types/react@19.2.14)(react@19.2.4)':
+    dependencies:
+      '@tanstack/ai': 0.8.0
+      '@tanstack/ai-client': 0.7.1
+      '@types/react': 19.2.14
+      react: 19.2.4
+
+  '@tanstack/ai@0.8.0':
+    dependencies:
+      '@tanstack/ai-event-client': 0.1.0(@tanstack/ai@0.8.0)
+      partial-json: 0.1.7
 
   '@tanstack/devtools-client@0.0.6':
     dependencies:
@@ -4085,6 +4147,8 @@ snapshots:
     dependencies:
       entities: 6.0.1
 
+  partial-json@0.1.7: {}
+
   path-to-regexp@6.3.0: {}
 
   pathe@2.0.3: {}
@@ -4521,3 +4585,5 @@ snapshots:
       youch-core: 0.3.3
 
   zod@3.25.76: {}
+
+  zod@4.3.6: {}
