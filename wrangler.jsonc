@@ -5,7 +5,9 @@
   "compatibility_flags": ["nodejs_compat"],
   "main": "@tanstack/react-start/server-entry"
   // Secrets (set via `wrangler secret put`):
-  // - ANTHROPIC_API_KEY: Claude API key for chat backend
+  // - API_MOM_URL: API Mom proxy URL (https://apimom.dev)
+  // - API_MOM_KEY: API Mom project key for open-dash
+  // - OPENROUTER_KEY: OpenRouter API key (BYOK through API Mom)
   // - TAILSCALE_API_KEY: Tailscale API key for machine status
   // - GITHUB_TOKEN: GitHub PAT for issues/activity data
 }
