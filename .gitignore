@@ -16,3 +16,4 @@ dist-ssr/
 __unconfig*
 todos.json
 public/tailscale-status.json
+src-tauri/target/
