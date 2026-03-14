@@ -17,4 +17,6 @@
   // - OPENROUTER_KEY: OpenRouter API key (BYOK through API Mom)
   // - TAILSCALE_API_KEY: Tailscale API key for machine status
   // - GITHUB_TOKEN: GitHub PAT for issues/activity data
+  // - SM_API_URL: Scalable Media API URL (L2 orchestrator)
+  // - SM_SERVICE_KEY: Scalable Media X-Service-Key (L2 orchestrator)
 }
