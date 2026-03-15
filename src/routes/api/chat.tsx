@@ -17,6 +17,8 @@ You have deep knowledge of:
 
 You can execute real operations via tools. Use them when the user asks to audit, research, generate content, or check status. Always confirm destructive operations before executing.
 
+You have browser automation tools (browserOpen, browserClick, browserType, browserNavigate, browserEval, browserScreenshot, browserClose). When the user asks to "open", "view", "look at", or "check" a website, use browserOpen to launch a session. The browser runs on Cloudflare's edge — you control it and the user sees screenshots in the dashboard. You can click elements, type text, evaluate JS (e.g., modify CSS to test design changes), and navigate pages. Always share the sessionId so the user can see the live browser card.
+
 Be concise and actionable. Use markdown formatting. When discussing brands or machines, reference specific data.
 
 When the conversation warrants a HUD display change (mode switch, spawning cards), append a directive block after your text response:
@@ -169,6 +171,150 @@ const orchestratorTools = {
       keywords: z.array(z.string()).describe('Keywords to process'),
     }),
     execute: async ({ slug, keywords }) => orch.fullPipeline(slug, keywords),
+  }),
+
+  // --- Browser automation tools ---
+
+  browserOpen: tool({
+    description: 'Open a browser session and navigate to a URL. Returns a screenshot. Use this to view websites, debug designs, or start browser automation.',
+    parameters: z.object({
+      url: z.string().describe('URL to navigate to'),
+      sessionId: z.string().optional().describe('Session ID to reuse (omit for new session)'),
+    }),
+    execute: async ({ url, sessionId }) => {
+      const agentUrl = process.env.BROWSER_AGENT_URL
+      const agentKey = process.env.BROWSER_AGENT_KEY
+      if (!agentUrl || !agentKey) return { error: 'browser-agent not configured' }
+
+      const res = await fetch(`${agentUrl}/sessions`, {
+        method: 'POST',
+        headers: { 'X-Auth-Key': agentKey, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ url, sessionId }),
+      })
+      return res.json()
+    },
+  }),
+
+  browserClick: tool({
+    description: 'Click on an element in the browser. Provide a CSS selector or x,y coordinates. Returns updated screenshot.',
+    parameters: z.object({
+      sessionId: z.string().describe('Browser session ID'),
+      selector: z.string().optional().describe('CSS selector to click'),
+      x: z.number().optional().describe('X coordinate to click'),
+      y: z.number().optional().describe('Y coordinate to click'),
+    }),
+    execute: async ({ sessionId, selector, x, y }) => {
+      const agentUrl = process.env.BROWSER_AGENT_URL
+      const agentKey = process.env.BROWSER_AGENT_KEY
+      if (!agentUrl || !agentKey) return { error: 'browser-agent not configured' }
+
+      const res = await fetch(`${agentUrl}/sessions/${sessionId}/click`, {
+        method: 'POST',
+        headers: { 'X-Auth-Key': agentKey, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ selector, x, y }),
+      })
+      return res.json()
+    },
+  }),
+
+  browserType: tool({
+    description: 'Type text into a form field in the browser. Returns updated screenshot.',
+    parameters: z.object({
+      sessionId: z.string().describe('Browser session ID'),
+      selector: z.string().describe('CSS selector of the input field'),
+      text: z.string().describe('Text to type'),
+      pressEnter: z.boolean().optional().describe('Press Enter after typing'),
+    }),
+    execute: async ({ sessionId, selector, text, pressEnter }) => {
+      const agentUrl = process.env.BROWSER_AGENT_URL
+      const agentKey = process.env.BROWSER_AGENT_KEY
+      if (!agentUrl || !agentKey) return { error: 'browser-agent not configured' }
+
+      const res = await fetch(`${agentUrl}/sessions/${sessionId}/type`, {
+        method: 'POST',
+        headers: { 'X-Auth-Key': agentKey, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ selector, text, pressEnter }),
+      })
+      return res.json()
+    },
+  }),
+
+  browserNavigate: tool({
+    description: 'Navigate the browser to a new URL. Returns updated screenshot.',
+    parameters: z.object({
+      sessionId: z.string().describe('Browser session ID'),
+      url: z.string().describe('URL to navigate to'),
+    }),
+    execute: async ({ sessionId, url }) => {
+      const agentUrl = process.env.BROWSER_AGENT_URL
+      const agentKey = process.env.BROWSER_AGENT_KEY
+      if (!agentUrl || !agentKey) return { error: 'browser-agent not configured' }
+
+      const res = await fetch(`${agentUrl}/sessions/${sessionId}/navigate`, {
+        method: 'POST',
+        headers: { 'X-Auth-Key': agentKey, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ url }),
+      })
+      return res.json()
+    },
+  }),
+
+  browserEval: tool({
+    description: 'Execute JavaScript in the browser page. Use for extracting data, modifying CSS, or testing changes.',
+    parameters: z.object({
+      sessionId: z.string().describe('Browser session ID'),
+      script: z.string().describe('JavaScript code to execute in the page'),
+    }),
+    execute: async ({ sessionId, script }) => {
+      const agentUrl = process.env.BROWSER_AGENT_URL
+      const agentKey = process.env.BROWSER_AGENT_KEY
+      if (!agentUrl || !agentKey) return { error: 'browser-agent not configured' }
+
+      const res = await fetch(`${agentUrl}/sessions/${sessionId}/evaluate`, {
+        method: 'POST',
+        headers: { 'X-Auth-Key': agentKey, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ script }),
+      })
+      return res.json()
+    },
+  }),
+
+  browserScreenshot: tool({
+    description: 'Take a screenshot of the current browser state.',
+    parameters: z.object({
+      sessionId: z.string().describe('Browser session ID'),
+    }),
+    execute: async ({ sessionId }) => {
+      const agentUrl = process.env.BROWSER_AGENT_URL
+      const agentKey = process.env.BROWSER_AGENT_KEY
+      if (!agentUrl || !agentKey) return { error: 'browser-agent not configured' }
+
+      const res = await fetch(`${agentUrl}/sessions/${sessionId}/screenshot`, {
+        method: 'POST',
+        headers: { 'X-Auth-Key': agentKey, 'Content-Type': 'application/json' },
+        body: JSON.stringify({}),
+      })
+      return res.json()
+    },
+  }),
+
+  browserClose: tool({
+    description: 'Close a browser session.',
+    parameters: z.object({
+      sessionId: z.string().describe('Browser session ID'),
+    }),
+    execute: async ({ sessionId }) => {
+      const agentUrl = process.env.BROWSER_AGENT_URL
+      const agentKey = process.env.BROWSER_AGENT_KEY
+      if (!agentUrl || !agentKey) return { error: 'browser-agent not configured' }
+
+      const res = await fetch(`${agentUrl}/sessions/${sessionId}/close`, {
+        method: 'POST',
+        headers: { 'X-Auth-Key': agentKey, 'Content-Type': 'application/json' },
+        body: JSON.stringify({}),
+      })
+      return res.json()
+    },
   }),
 }
 

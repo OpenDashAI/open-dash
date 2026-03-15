@@ -31,6 +31,15 @@ export interface DataSourceInfo {
 	status: DataSourceStatus;
 }
 
+export interface BrowserSession {
+	sessionId: string;
+	status: string;
+	url: string | null;
+	title?: string;
+	screenshotUrl: string | null;
+	timestamp?: string;
+}
+
 export interface HudStoreState extends HudState {
 	experience: HudExperience;
 	briefingItems: BriefingItem[];
@@ -39,6 +48,7 @@ export interface HudStoreState extends HudState {
 	focusBrand: string | null;
 	lastVisited: string | null;
 	dataSources: DataSourceInfo[];
+	browserSession: BrowserSession | null;
 }
 
 let state: HudStoreState = {
@@ -56,6 +66,7 @@ let state: HudStoreState = {
 	focusBrand: null,
 	lastVisited: null,
 	dataSources: [],
+	browserSession: null,
 };
 
 function emit() {
@@ -140,6 +151,13 @@ export function setLastVisited(lastVisited: string | null) {
 
 export function setDataSources(dataSources: DataSourceInfo[]) {
 	state = { ...state, dataSources };
+	emit();
+}
+
+// --- Browser Session ---
+
+export function setBrowserSession(session: BrowserSession | null) {
+	state = { ...state, browserSession: session };
 	emit();
 }
 

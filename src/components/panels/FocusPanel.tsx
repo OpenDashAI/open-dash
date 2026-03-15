@@ -3,9 +3,11 @@ import { renderCard } from "../../lib/card-registry";
 import {
 	dismissBriefingItem,
 	getVisibleBriefingItems,
+	setBrowserSession,
 	snoozeBriefingItem,
 	useHudState,
 } from "../../lib/hud-store";
+import { BrowserCard } from "../cards/BrowserCard";
 import { resolveEscalation } from "../../server/escalations";
 import { ActivityCard } from "../cards/ActivityCard";
 import { BriefingCard } from "../cards/BriefingCard";
@@ -233,7 +235,7 @@ function PortfolioView() {
 }
 
 export function FocusPanel() {
-	const { experience, cards } = useHudState();
+	const { experience, cards, browserSession } = useHudState();
 
 	// AI-spawned cards render first in all views
 	const centerCards = cards.filter((c) => c.position === "center");
@@ -250,6 +252,15 @@ export function FocusPanel() {
 				</span>
 			</div>
 			<div className="panel-body">
+				{/* Live browser view — shown in any experience when active */}
+				{browserSession && (
+					<BrowserCard
+						session={browserSession}
+						onUpdate={(s) => setBrowserSession(s)}
+						onClose={() => setBrowserSession(null)}
+					/>
+				)}
+
 				{centerCards.map((card, i) =>
 					renderCard(card.type, card.props, `ai-center-${i}`),
 				)}
