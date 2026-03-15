@@ -44,6 +44,7 @@ export interface Issue {
   labels: string[]
   state: 'open' | 'closed'
   assignee?: string
+  updatedAt?: string
 }
 
 /** Card directive emitted by AI alongside chat text */

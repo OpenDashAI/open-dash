@@ -10,7 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as ApiThreadsRouteImport } from './routes/api/threads'
+import { Route as ApiWsRouteImport } from './routes/api/ws'
 import { Route as ApiOrchestrateRouteImport } from './routes/api/orchestrate'
 import { Route as ApiChatRouteImport } from './routes/api/chat'
 
@@ -19,9 +19,9 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiThreadsRoute = ApiThreadsRouteImport.update({
-  id: '/api/threads',
-  path: '/api/threads',
+const ApiWsRoute = ApiWsRouteImport.update({
+  id: '/api/ws',
+  path: '/api/ws',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiOrchestrateRoute = ApiOrchestrateRouteImport.update({
@@ -39,34 +39,34 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/api/chat': typeof ApiChatRoute
   '/api/orchestrate': typeof ApiOrchestrateRoute
-  '/api/threads': typeof ApiThreadsRoute
+  '/api/ws': typeof ApiWsRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/api/chat': typeof ApiChatRoute
   '/api/orchestrate': typeof ApiOrchestrateRoute
-  '/api/threads': typeof ApiThreadsRoute
+  '/api/ws': typeof ApiWsRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/api/chat': typeof ApiChatRoute
   '/api/orchestrate': typeof ApiOrchestrateRoute
-  '/api/threads': typeof ApiThreadsRoute
+  '/api/ws': typeof ApiWsRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/api/chat' | '/api/orchestrate' | '/api/threads'
+  fullPaths: '/' | '/api/chat' | '/api/orchestrate' | '/api/ws'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/api/chat' | '/api/orchestrate' | '/api/threads'
-  id: '__root__' | '/' | '/api/chat' | '/api/orchestrate' | '/api/threads'
+  to: '/' | '/api/chat' | '/api/orchestrate' | '/api/ws'
+  id: '__root__' | '/' | '/api/chat' | '/api/orchestrate' | '/api/ws'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   ApiChatRoute: typeof ApiChatRoute
   ApiOrchestrateRoute: typeof ApiOrchestrateRoute
-  ApiThreadsRoute: typeof ApiThreadsRoute
+  ApiWsRoute: typeof ApiWsRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -78,11 +78,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/threads': {
-      id: '/api/threads'
-      path: '/api/threads'
-      fullPath: '/api/threads'
-      preLoaderRoute: typeof ApiThreadsRouteImport
+    '/api/ws': {
+      id: '/api/ws'
+      path: '/api/ws'
+      fullPath: '/api/ws'
+      preLoaderRoute: typeof ApiWsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/orchestrate': {
@@ -106,7 +106,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   ApiChatRoute: ApiChatRoute,
   ApiOrchestrateRoute: ApiOrchestrateRoute,
-  ApiThreadsRoute: ApiThreadsRoute,
+  ApiWsRoute: ApiWsRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

@@ -1,35 +1,37 @@
-import { useEffect } from 'react'
-import { setMode } from './hud-store'
-import type { HudState } from './types'
+import { useEffect } from "react";
+import type { HudExperience } from "./briefing";
+import { setExperience } from "./hud-store";
 
 /**
  * Global keyboard shortcuts for the HUD.
- * Alt+1-5: switch modes
+ * Alt+1-3: switch experiences
  * Alt+/: focus chat input
  */
 export function useKeyboardShortcuts() {
-  useEffect(() => {
-    const modes: HudState['mode'][] = ['operating', 'building', 'analyzing', 'reviewing', 'alert']
+	useEffect(() => {
+		const experiences: HudExperience[] = ["briefing", "focus", "portfolio"];
 
-    function handleKeyDown(e: KeyboardEvent) {
-      // Alt+1 through Alt+5: switch modes
-      if (e.altKey && e.key >= '1' && e.key <= '5') {
-        e.preventDefault()
-        const index = Number.parseInt(e.key) - 1
-        if (modes[index]) setMode(modes[index])
-        return
-      }
+		function handleKeyDown(e: KeyboardEvent) {
+			// Alt+1 through Alt+3: switch experiences
+			if (e.altKey && e.key >= "1" && e.key <= "3") {
+				e.preventDefault();
+				const index = Number.parseInt(e.key) - 1;
+				if (experiences[index]) setExperience(experiences[index]);
+				return;
+			}
 
-      // Alt+/: focus chat input
-      if (e.altKey && e.key === '/') {
-        e.preventDefault()
-        const chatInput = document.querySelector('.chat-input') as HTMLTextAreaElement | null
-        chatInput?.focus()
-        return
-      }
-    }
+			// Alt+/: focus chat input
+			if (e.altKey && e.key === "/") {
+				e.preventDefault();
+				const chatInput = document.querySelector(
+					".aui-composer-input",
+				) as HTMLTextAreaElement | null;
+				chatInput?.focus();
+				return;
+			}
+		}
 
-    window.addEventListener('keydown', handleKeyDown)
-    return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [])
+		window.addEventListener("keydown", handleKeyDown);
+		return () => window.removeEventListener("keydown", handleKeyDown);
+	}, []);
 }

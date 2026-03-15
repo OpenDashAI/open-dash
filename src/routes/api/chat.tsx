@@ -5,7 +5,7 @@ import { z } from 'zod'
 import type { UIMessage } from 'ai'
 import * as orch from '../../server/orchestrator'
 
-const SYSTEM_PROMPT = `You are the OpenDash AI — an operations control plane assistant. You help manage machines, brands, and execution across a multi-project portfolio.
+const BASE_SYSTEM_PROMPT = `You are the OpenDash AI — an operations control plane assistant. You help manage machines, brands, and execution across a multi-project portfolio.
 
 You have deep knowledge of:
 - 4 machines on Tailscale: providence (macOS, primary), destiny (macOS, secondary), stargate (Windows, GPU), stargate-wsl (Linux/WSL)
@@ -29,6 +29,75 @@ Available card types: machine_card, brand_card, activity_card, status_card, appr
 Card positions: left, center
 
 Only include ---HUD--- when contextually appropriate. Most responses need no directives.`
+
+/** Brand context injected when the user is in Focus mode */
+const BRAND_CONTEXT: Record<string, string> = {
+  'bank-statement-to-excel': `FOCUSED PROJECT: Bank Statement to Excel (bankstatementtoexcel.com)
+- Content brand. 33 articles published. Only homepage indexed by Google.
+- Zero DA, zero backlinks. SERP for main keyword is 100% tools, not articles.
+- Archetype: Tool/Converter. Needs tool page + PDF converter to rank.
+- Revenue: $0. Monetization: AdSense + affiliate links.`,
+
+  'llc-tax': `FOCUSED PROJECT: LLC Tax Tips (llctax.co)
+- Content brand. 10 affiliate articles shipped (44,881 words, 16,870 monthly search vol).
+- 9 directory entries seeded. Revenue potential: $375/month at 1% conversion.
+- Human task pending: sign up for ZenBusiness/Bizee/LegalZoom affiliate programs.
+- Archetype: Blog + Directory. Monetization: affiliate commissions.`,
+
+  'ugc-marketing': `FOCUSED PROJECT: UGC Playbook (ugcplaybook.com)
+- Content brand focused on UGC marketing education.
+- Social-Good account: UGCPlaybook. Social drafts generated.
+- Archetype: Blog + Newsletter. Monetization: courses + affiliate.`,
+
+  'vibe-marketing': `FOCUSED PROJECT: Vibe Marketing Pro (vibemarketing.pro)
+- Content brand. Fast-track candidate: lead magnet + AI tool affiliate funnel.
+- Social-Good account: VibeMarketPro. Social drafts generated.
+- Archetype: Blog + Tool. Monetization: affiliate + sponsored content.`,
+
+  'indie-game': `FOCUSED PROJECT: Indie Game Dev (indiegamedev.tips)
+- Content brand for indie game developers.
+- Social-Good account: IndieGameDev. Social drafts generated.
+- Archetype: Blog + Newsletter. Monetization: affiliate + courses.`,
+
+  'pages-plus': `FOCUSED PROJECT: Pages Plus (pages.plus)
+- Product brand. Multi-site SSR platform on Cloudflare Workers.
+- One Worker serves N sites. Astro-based. 36 competitors analyzed.
+- LTD strategy planned. Beta waitlist live.
+- Revenue: product sales. Target: $49-199 LTD.`,
+
+  'scramjet': `FOCUSED PROJECT: Scramjet
+- Pipeline engine. D1+R2+DO+Workflows+Queues. 22+ operators.
+- Internal infrastructure — powers all other brands.
+- Not directly monetized.`,
+
+  'scalable-media': `FOCUSED PROJECT: Scalable Media
+- Autonomous brand operator. BrandAgent DO + ContentWorkflow + Queues.
+- Auth: X-Service-Key. The "brain" of the system.
+- Queue topology: 8 queues + 4 DLQs.`,
+
+  'api-mom': `FOCUSED PROJECT: API Mom (apimom.dev)
+- Managed API keys, cost attribution, cache. 8 providers.
+- MCP server for Claude Code integration.
+- Monetization: internal cost savings.`,
+
+  'gatherfeed': `FOCUSED PROJECT: GatherFeed
+- Async research engine + iterative deep research (L1-L4).
+- L3 = 16x cheaper than Perplexity. Keyword storage.
+- The "eyes" of the system.`,
+}
+
+function buildSystemPrompt(focusBrand: string | null): string {
+  if (!focusBrand) return BASE_SYSTEM_PROMPT
+
+  const brandContext = BRAND_CONTEXT[focusBrand]
+  const contextBlock = brandContext
+    ? `\n\n${brandContext}`
+    : `\n\nFOCUSED PROJECT: ${focusBrand}\nThe user is currently focused on this project. When they say "this", "it", or "audit", they mean this brand. Use the brand slug "${focusBrand}" when calling tools.`
+
+  return `${BASE_SYSTEM_PROMPT}${contextBlock}
+
+IMPORTANT: The user is in Project Focus mode for "${focusBrand}". When they refer to "this project", "this brand", "this", or "it", they mean ${focusBrand}. Automatically use slug "${focusBrand}" for any tool calls that need a brand slug — don't ask which brand.`
+}
 
 const orchestratorTools = {
   listBrands: tool({
@@ -107,7 +176,8 @@ export const Route = createFileRoute('/api/chat')({
   server: {
     handlers: {
       POST: async ({ request }) => {
-        const { messages } = (await request.json()) as { messages: UIMessage[] }
+        const body = (await request.json()) as { messages: UIMessage[]; focusBrand?: string | null }
+        const { messages, focusBrand } = body
 
         if (!messages || !Array.isArray(messages)) {
           return Response.json({ error: 'messages array required' }, { status: 400 })
@@ -131,7 +201,7 @@ export const Route = createFileRoute('/api/chat')({
         // Use a model that supports tool calling
         const result = streamText({
           model: openrouter.chatModel('qwen/qwen-2.5-72b-instruct'),
-          system: SYSTEM_PROMPT,
+          system: buildSystemPrompt(focusBrand ?? null),
           messages: await convertToModelMessages(messages),
           tools: orchestratorTools,
           maxSteps: 5, // Allow multi-step tool use
