@@ -120,7 +120,7 @@ function fallbackBrands(): Brand[] {
 		},
 		{
 			name: "Code Turtle",
-			slug: "code-turtle",
+			slug: "mulan",
 			score: 20,
 			revenue: 0,
 			status: "warning",
