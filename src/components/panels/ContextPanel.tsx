@@ -1,11 +1,14 @@
 import { renderCard } from "../../lib/card-registry";
-import { setFocusBrand, useHudState } from "../../lib/hud-store";
+import { setFocusBrand, useHudState, getBrandSummaries } from "../../lib/hud-store";
 import { BrandCard } from "../cards/BrandCard";
 import { MachineCard } from "../cards/MachineCard";
 
 export function ContextPanel() {
-	const { experience, machines, brands, cards, focusBrand, dataSources } =
-		useHudState();
+	const state = useHudState();
+	const { experience, machines, brands, cards, focusBrand, dataSources } = state;
+
+	// Issue #27.3: Get pending item counts per brand
+	const brandSummaries = getBrandSummaries(state);
 
 	// Filter AI-spawned cards destined for left panel
 	const leftCards = cards.filter((c) => c.position === "left");
@@ -48,7 +51,11 @@ export function ContextPanel() {
 								: ""
 						}`}
 					>
-						<BrandCard {...b} />
+						<BrandCard
+					{...b}
+					itemCount={(brandSummaries[b.slug] || { count: 0 }).count}
+					urgentCount={(brandSummaries[b.slug] || { urgent: 0 }).urgent}
+				/>
 					</button>
 				))}
 

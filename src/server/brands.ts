@@ -1,14 +1,37 @@
 import { createServerFn } from "@tanstack/react-start";
 import type { Brand } from "../lib/types";
 import { githubFetch } from "./github";
+import { getRequestAuthContext, hasRequestAuthContext } from "../lib/worker-context";
+import { initDb, getBrandsByOrg } from "../lib/db/queries";
+import type { EventContext } from "@cloudflare/workers-types";
 
 /**
- * Fetch brand data from GitHub Issues API.
- * Reads issue labels + body to determine brand health.
- * Falls back to static data if GITHUB_TOKEN not set.
+ * Fetch brand data — org-aware (Issue #27.3)
+ *
+ * For authenticated org requests:
+ * - Fetches brands from D1 for the current org
+ * - Shows only brands user is member of
+ *
+ * For public routes (no org context):
+ * - Falls back to static data or GitHub API
  */
 export const getBrands = createServerFn().handler(
-	async (): Promise<Brand[]> => {
+	async (context?: EventContext): Promise<Brand[]> => {
+		// Try to get org context from request (Issue #27.2 RBAC middleware)
+		if (hasRequestAuthContext && context?.req) {
+			try {
+				const auth = getRequestAuthContext(context.req as Request);
+				if (auth && context.env?.DB) {
+					// Return org-specific brands from D1
+					return await getOrgBrands(auth.orgId, context.env.DB);
+				}
+			} catch (err) {
+				// Fallback if auth context not available
+				console.debug("Auth context not available, using fallback brands");
+			}
+		}
+
+		// Fallback: GitHub API or static data (public routes)
 		const token = process.env.GITHUB_TOKEN;
 		if (!token) {
 			return fallbackBrands();
@@ -35,6 +58,28 @@ export const getBrands = createServerFn().handler(
 		}
 	},
 );
+
+/**
+ * Fetch brands for a specific organization from D1
+ */
+async function getOrgBrands(orgId: string, db: any): Promise<Brand[]> {
+	try {
+		const drizzleDb = initDb(db);
+		const brands = await getBrandsByOrg(drizzleDb, orgId);
+
+		return brands.map((b) => ({
+			name: b.name,
+			slug: b.slug,
+			score: 75, // TODO: Calculate from metrics
+			revenue: 0, // TODO: Pull from analytics
+			status: b.active ? "healthy" : "archived",
+			archetype: "saas" as const,
+		}));
+	} catch (err) {
+		console.error("Failed to fetch org brands from D1:", err);
+		return [];
+	}
+}
 
 interface GitHubIssue {
 	number: number;

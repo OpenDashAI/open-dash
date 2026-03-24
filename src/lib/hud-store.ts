@@ -136,8 +136,41 @@ export function getVisibleBriefingItems(s: HudStoreState): BriefingItem[] {
 		if (s.dismissedIds.has(item.id)) return false;
 		const snoozedUntil = s.snoozedIds.get(item.id);
 		if (snoozedUntil && new Date(snoozedUntil).getTime() > now) return false;
+
+		// Issue #27.3: Filter by selected brand
+		// If focusBrand is set, show only items for that brand
+		// If focusBrand is null, show all items (aggregated view)
+		if (s.focusBrand && item.brand && item.brand !== s.focusBrand) {
+			return false;
+		}
+
 		return true;
 	});
+}
+
+/**
+ * Get briefing summary for each brand (Issue #27.3)
+ * Shows count of items per brand, useful for brand selector UI
+ */
+export function getBrandSummaries(
+	s: HudStoreState
+): Record<string, { count: number; urgent: number }> {
+	const summaries: Record<string, { count: number; urgent: number }> = {};
+
+	const visibleItems = getVisibleBriefingItems(s);
+
+	for (const item of visibleItems) {
+		const brandKey = item.brand || "uncategorized";
+		if (!summaries[brandKey]) {
+			summaries[brandKey] = { count: 0, urgent: 0 };
+		}
+		summaries[brandKey].count += 1;
+		if (item.priority === "urgent") {
+			summaries[brandKey].urgent += 1;
+		}
+	}
+
+	return summaries;
 }
 
 // --- Last visited ---

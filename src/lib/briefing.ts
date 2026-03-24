@@ -74,6 +74,58 @@ const PRIORITY_ORDER: Record<BriefingPriority, number> = {
 	low: 3,
 };
 
+/**
+ * Filter briefing items by brand (Issue #27.3)
+ * If focusBrand is set, show only items for that brand
+ * If focusBrand is null, show all items (aggregated view)
+ */
+export function filterByBrand(
+	items: BriefingItem[],
+	focusBrand: string | null
+): BriefingItem[] {
+	if (!focusBrand) {
+		// Aggregated view: show all items
+		return items;
+	}
+
+	// Filtered view: show only items for selected brand
+	return items.filter((item) => item.brand === focusBrand || !item.brand);
+}
+
+/**
+ * Group briefing items by brand
+ * Useful for showing brand-specific summaries or metrics
+ */
+export function groupByBrand(items: BriefingItem[]): Map<string, BriefingItem[]> {
+	const groups = new Map<string, BriefingItem[]>();
+
+	for (const item of items) {
+		const brand = item.brand || "uncategorized";
+		if (!groups.has(brand)) {
+			groups.set(brand, []);
+		}
+		groups.get(brand)!.push(item);
+	}
+
+	return groups;
+}
+
+/**
+ * Count briefing items by priority for a specific brand
+ */
+export function countByPriority(
+	items: BriefingItem[],
+	brand?: string
+): Record<BriefingPriority, number> {
+	const filtered = brand ? items.filter((i) => i.brand === brand) : items;
+	return {
+		urgent: filtered.filter((i) => i.priority === "urgent").length,
+		high: filtered.filter((i) => i.priority === "high").length,
+		normal: filtered.filter((i) => i.priority === "normal").length,
+		low: filtered.filter((i) => i.priority === "low").length,
+	};
+}
+
 /** Sort briefing items by priority, then by time (newest first) */
 export function sortBriefingItems(items: BriefingItem[]): BriefingItem[] {
 	return [...items].sort((a, b) => {
