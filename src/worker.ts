@@ -8,6 +8,8 @@ import {
 	loginPage,
 	verifySessionToken,
 } from "./server/auth";
+import { initWorkerContext } from "./lib/worker-context";
+import { metricsTracker } from "./lib/monitoring";
 
 // Export Durable Object classes for Cloudflare bindings
 export { HudSocket } from "./server/hud-socket";
@@ -40,6 +42,12 @@ export default {
 		ctx: ExecutionContext,
 	): Promise<Response> {
 		try {
+			// Initialize worker context with D1 database
+			if (env.DB) {
+				initWorkerContext(env.DB);
+				metricsTracker.initialize(env.DB);
+			}
+
 			const url = new URL(request.url);
 			const isSecure = url.protocol === "https:";
 

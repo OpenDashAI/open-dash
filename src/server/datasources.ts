@@ -9,6 +9,7 @@ import {
 	FetchBrandDashboardInputSchema,
 	validateInput,
 } from "../lib/schemas/input";
+import { metricsTracker } from "../lib/monitoring";
 
 export interface DataSourceInfo {
 	id: string;
@@ -50,6 +51,16 @@ export const fetchAllSources = createServerFn().handler(
 		};
 
 		const { items, statuses } = await registry.fetchAll(config);
+
+		// Record metrics for each datasource
+		for (const [sourceId, status] of statuses) {
+			const source = registry.get(sourceId);
+			if (source && status.lastFetch) {
+				const latency = (status as any).lastFetchLatency ?? 0;
+				const success = status.connected === true;
+				await metricsTracker.recordFetch(sourceId, source.name, latency, success);
+			}
+		}
 
 		const sources: DataSourceInfo[] = registry.list().map((s) => ({
 			id: s.id,
@@ -150,6 +161,7 @@ export const fetchBrandDashboard = createServerFn()
 						return [];
 					}
 
+					const startTime = Date.now();
 					try {
 						// Merge global config with brand-specific config
 						const brandSpecificConfig: DataSourceConfig = {
@@ -158,18 +170,40 @@ export const fetchBrandDashboard = createServerFn()
 						};
 
 						const items = await source.fetch(brandSpecificConfig);
+						const latency = Date.now() - startTime;
+
 						sourceStatuses.set(sourceConfig.id, {
 							connected: true,
 							lastFetch: new Date().toISOString(),
 							itemCount: items.length,
 						});
+
+						// Record metric to D1
+						await metricsTracker.recordFetch(
+							sourceConfig.id,
+							source.name,
+							latency,
+							true
+						);
+
 						return items;
 					} catch (err) {
+						const latency = Date.now() - startTime;
+
 						sourceStatuses.set(sourceConfig.id, {
 							connected: false,
 							lastFetch: new Date().toISOString(),
 							error: err instanceof Error ? err.message : "Unknown error",
 						});
+
+						// Record failure metric
+						await metricsTracker.recordFetch(
+							sourceConfig.id,
+							source.name || "unknown",
+							latency,
+							false
+						);
+
 						return [];
 					}
 				}),

@@ -125,7 +125,7 @@ export async function insertMetric(
 	db: ReturnType<typeof initDb>,
 	metric: typeof datasourceMetricsTable.$inferInsert
 ) {
-	return db.insert(datasourceMetricsTable).values(metric);
+	return await db.insert(datasourceMetricsTable).values(metric);
 }
 
 /**

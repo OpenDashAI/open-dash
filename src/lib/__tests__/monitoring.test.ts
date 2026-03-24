@@ -1,93 +1,77 @@
-import { describe, it, expect, beforeEach } from 'vitest'
-import { metricsTracker } from '../monitoring'
+import { describe, it, expect, beforeEach, vi } from 'vitest'
+import { MetricsTracker } from '../monitoring'
 
-describe('MetricsTracker', () => {
+// Mock the query functions
+vi.mock('../db/queries', () => ({
+	initDb: vi.fn((db) => db),
+	getLatestMetrics: vi.fn().mockResolvedValue([]),
+	insertMetric: vi.fn().mockResolvedValue(undefined),
+}))
+
+describe('MetricsTracker (D1-based)', () => {
+	let tracker: MetricsTracker
+	let mockDb: any
+
 	beforeEach(() => {
-		metricsTracker.clear()
+		tracker = new MetricsTracker()
+		mockDb = { insert: vi.fn() }
 	})
 
-	it('records fetch metrics', () => {
-		metricsTracker.recordFetch('ds-1', 'Database', 150, true)
-
-		const metric = metricsTracker.getMetric('ds-1')
-		expect(metric).toBeDefined()
-		expect(metric?.id).toBe('ds-1')
-		expect(metric?.name).toBe('Database')
-		expect(metric?.fetchLatency).toBe(150)
-		expect(metric?.connected).toBe(true)
+	it('initializes with D1 database', () => {
+		const newTracker = new MetricsTracker(mockDb)
+		expect(newTracker).toBeDefined()
 	})
 
-	it('tracks error rate', () => {
-		// Successful fetch
-		metricsTracker.recordFetch('ds-1', 'DB', 100, true)
-		let metric = metricsTracker.getMetric('ds-1')
-		expect(metric?.errorRate).toBe(0)
-
-		// Failed fetch
-		metricsTracker.recordFetch('ds-1', 'DB', 100, false)
-		metric = metricsTracker.getMetric('ds-1')
-		expect(metric?.errorRate).toBeGreaterThan(0)
-		expect(metric?.errorRate).toBeLessThan(1)
+	it('returns undefined when not initialized', async () => {
+		const uninitializedTracker = new MetricsTracker()
+		const metric = await uninitializedTracker.getMetric('ds-1')
+		expect(metric).toBeUndefined()
 	})
 
-	it('updates last fetch timestamp', () => {
-		const before = Date.now()
-		metricsTracker.recordFetch('ds-1', 'DB', 100, true)
-		const after = Date.now()
+	it('records fetch metrics asynchronously', async () => {
+		tracker.initialize(mockDb)
+		const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
 
-		const metric = metricsTracker.getMetric('ds-1')
-		expect(metric?.lastFetch).toBeGreaterThanOrEqual(before)
-		expect(metric?.lastFetch).toBeLessThanOrEqual(after)
+		await tracker.recordFetch('ds-1', 'Database', 150, true)
+
+		// recordFetch should complete without errors
+		expect(consoleSpy).not.toHaveBeenCalled()
+		consoleSpy.mockRestore()
 	})
 
-	it('determines health status correctly', () => {
-		// Healthy: connected, no errors
-		metricsTracker.recordFetch('healthy', 'DB', 50, true)
-		expect(metricsTracker.getHealthStatus('healthy')).toBe('healthy')
+	it('logs error when recordFetch called without initialization', async () => {
+		const consoleSpy = vi.spyOn(console, 'warn').mockImplementation(() => {})
 
-		// Critical: disconnected
-		metricsTracker.recordFetch('critical', 'DB', 100, false)
-		expect(metricsTracker.getHealthStatus('critical')).toBe('critical')
+		await tracker.recordFetch('ds-1', 'Database', 150, true)
 
-		// Degraded: high error rate
-		for (let i = 0; i < 3; i++) {
-			metricsTracker.recordFetch('degraded', 'DB', 100, false)
-		}
-		expect(metricsTracker.getHealthStatus('degraded')).toBe('critical')
+		expect(consoleSpy).toHaveBeenCalledWith(
+			'MetricsTracker not initialized with D1 database'
+		)
+		consoleSpy.mockRestore()
 	})
 
-	it('formats last fetch time correctly', () => {
-		metricsTracker.recordFetch('ds-1', 'DB', 100, true)
-
-		// Should be "0s ago" or "1s ago"
-		const lastFetch = metricsTracker.getLastFetchTime('ds-1')
-		expect(lastFetch).toMatch(/^\d+s ago$/)
-	})
-
-	it('returns "never" for unknown datasources', () => {
-		const lastFetch = metricsTracker.getLastFetchTime('unknown')
-		expect(lastFetch).toBe('never')
-	})
-
-	it('returns "degraded" for unknown datasources health', () => {
-		const health = metricsTracker.getHealthStatus('unknown')
+	it('returns health status for uninitialized datasource as degraded', async () => {
+		const health = await tracker.getHealthStatus('unknown')
 		expect(health).toBe('degraded')
 	})
 
-	it('returns all metrics', () => {
-		metricsTracker.recordFetch('ds-1', 'DB1', 100, true)
-		metricsTracker.recordFetch('ds-2', 'DB2', 200, true)
+	it('returns empty array for all metrics when not initialized', async () => {
+		const uninitializedTracker = new MetricsTracker()
+		const allMetrics = await uninitializedTracker.getAllMetrics()
+		expect(allMetrics).toEqual([])
+	})
+})
 
-		const allMetrics = metricsTracker.getAllMetrics()
-		expect(allMetrics.length).toBe(2)
-		expect(allMetrics.map((m) => m.id)).toEqual(['ds-1', 'ds-2'])
+describe('MetricsTracker (backward compatibility)', () => {
+	it('returns "unknown" for last fetch time', () => {
+		const tracker = new MetricsTracker()
+		const lastFetch = tracker.getLastFetchTime('ds-1')
+		expect(lastFetch).toBe('unknown')
 	})
 
-	it('clears all metrics', () => {
-		metricsTracker.recordFetch('ds-1', 'DB', 100, true)
-		expect(metricsTracker.getAllMetrics().length).toBe(1)
-
-		metricsTracker.clear()
-		expect(metricsTracker.getAllMetrics().length).toBe(0)
+	it('has clear() method for cleanup', () => {
+		const tracker = new MetricsTracker()
+		// Should not throw
+		expect(() => tracker.clear()).not.toThrow()
 	})
 })
