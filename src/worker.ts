@@ -18,6 +18,9 @@ import {
 } from "./lib/worker-context";
 import { metricsTracker } from "./lib/monitoring";
 import { initEmailService } from "./server/email-service";
+import { addSecurityHeaders } from "./lib/security-headers";
+import { checkRateLimit, rateLimitResponse, addRateLimitHeaders, rateLimitDefaults } from "./lib/rate-limit";
+import { getRequestAuthContext } from "./lib/worker-context";
 
 // Export Durable Object classes for Cloudflare bindings
 export { HudSocket } from "./server/hud-socket";
@@ -75,7 +78,7 @@ export default {
 
 			// Health check — always public, minimal info
 			if (url.pathname === "/health") {
-				return Response.json({ status: "ok" });
+				return addSecurityHeaders(Response.json({ status: "ok" }));
 			}
 
 			// IP allowlist bypass — trusted IPs skip auth entirely
@@ -84,6 +87,27 @@ export default {
 				? new Set(env.ALLOWED_IPS.split(",").map((ip) => ip.trim()))
 				: new Set<string>();
 			const ipAllowed = clientIp !== "" && allowedIps.has(clientIp);
+
+			// SECURITY: Apply rate limiting (unless IP allowlisted)
+			if (!ipAllowed && !url.pathname.startsWith("/login") && !url.pathname.startsWith("/landing")) {
+				const authContextForRateLimit = getRequestAuthContext(request);
+				const userIdForRateLimit = authContextForRateLimit?.userId;
+
+				// Determine rate limit config based on endpoint
+				let rateLimitConfig = rateLimitDefaults.api;
+				if (url.pathname.startsWith("/auth")) {
+					rateLimitConfig = rateLimitDefaults.auth;
+				} else if (url.pathname.startsWith("/export") || url.pathname.includes("download")) {
+					rateLimitConfig = rateLimitDefaults.export;
+				} else if (url.pathname.includes("search")) {
+					rateLimitConfig = rateLimitDefaults.search;
+				}
+
+				const rateLimitResult = checkRateLimit(request, rateLimitConfig, userIdForRateLimit || undefined);
+				if (!rateLimitResult.allowed) {
+					return rateLimitResponse(rateLimitConfig, rateLimitResult.remaining, rateLimitResult.resetAt);
+				}
+			}
 
 			// Auth gate — Clerk session verification
 			if (env.CLERK_SECRET_KEY && !ipAllowed) {
@@ -261,7 +285,8 @@ export default {
 			}
 
 			// Delegate to TanStack Start
-			return await (startEntry as WorkerHandler).fetch(request, env, ctx);
+			const response = await (startEntry as WorkerHandler).fetch(request, env, ctx);
+			return addSecurityHeaders(response);
 		} catch (err) {
 			const errorMsg = err instanceof Error ? err.message : String(err);
 			const errorStack = err instanceof Error ? err.stack : '';
@@ -276,11 +301,12 @@ export default {
 			});
 			// SECURITY: Never return stack traces to clients
 			// Only return generic error with request ID for debugging
-			return Response.json({
+			const errorResponse = Response.json({
 				error: "Internal Server Error",
 				requestId: requestId,
 				timestamp: new Date().toISOString()
 			}, { status: 500 });
+			return addSecurityHeaders(errorResponse);
 		}
 	},
 };

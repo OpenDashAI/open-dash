@@ -1,17 +1,46 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { getRequestAuthContext } from "../../lib/worker-context";
+import { z } from "zod";
+import { validate, validationErrorResponse, validators } from "../../lib/validation";
 
-type Action =
-	| { action: "seed-competitors" }
-	| { action: "list-competitors" }
-	| { action: "run-daily-jobs" }
-	| { action: "run-weekly-jobs" }
-	| { action: "get-serp-status"; keyword: string };
+const ciActionSchema = z.discriminatedUnion("action", [
+	z.object({ action: z.literal("seed-competitors") }),
+	z.object({ action: z.literal("list-competitors") }),
+	z.object({ action: z.literal("run-daily-jobs") }),
+	z.object({ action: z.literal("run-weekly-jobs") }),
+	z.object({ action: z.literal("get-serp-status"), keyword: validators.keyword }),
+]);
+
+type Action = z.infer<typeof ciActionSchema>;
 
 export const Route = createFileRoute("/api/competitive-intelligence")({
 	server: {
 		handlers: {
 			POST: async ({ request, context }) => {
-				const body = (await request.json()) as Action;
+				// SECURITY: Require authentication for all CI operations
+				const authContext = getRequestAuthContext(request);
+				if (!authContext?.userId) {
+					return Response.json(
+						{ error: "Authentication required" },
+						{ status: 401 }
+					);
+				}
+
+				// SECURITY: Validate input against schema
+				let body: Action;
+				try {
+					const rawBody = (await request.json()) as unknown;
+					const validation = validate(ciActionSchema, rawBody);
+					if (!validation.success) {
+						return validationErrorResponse(validation.errors);
+					}
+					body = validation.data;
+				} catch (parseError) {
+					return Response.json(
+						{ error: "Invalid JSON in request body" },
+						{ status: 400 }
+					);
+				}
 
 				try {
 					switch (body.action) {
@@ -254,12 +283,13 @@ async function getSerpStatus(
 		const db = context.env.DB;
 		const authContext = context.auth;
 
-		if (!keyword || typeof keyword !== "string") {
-			return Response.json(
-				{ error: "Keyword is required and must be a string" },
-				{ status: 400 }
-			);
+		// SECURITY: Validate keyword input
+		const keywordValidation = validate(validators.keyword, keyword);
+		if (!keywordValidation.success) {
+			return validationErrorResponse(keywordValidation.errors);
 		}
+
+		const validatedKeyword = keywordValidation.data;
 
 		// Add org/brand filtering if auth context available
 		const whereClause = authContext?.brandId
@@ -269,10 +299,10 @@ async function getSerpStatus(
 				: "";
 
 		const bindings = authContext?.brandId
-			? [keyword, authContext.brandId]
+			? [validatedKeyword, authContext.brandId]
 			: authContext?.orgId
-				? [keyword, authContext.orgId]
-				: [keyword];
+				? [validatedKeyword, authContext.orgId]
+				: [validatedKeyword];
 
 		// Get latest SERP rankings for this keyword
 		const results = await db
@@ -293,7 +323,7 @@ async function getSerpStatus(
 
 		return Response.json({
 			success: true,
-			keyword,
+			keyword: validatedKeyword,
 			results: (results.results || []).map((r: any) => ({
 				id: r.id,
 				competitorId: r.competitorId,
