@@ -1,6 +1,7 @@
 /**
  * Configuration loader for dashboard.yaml files
- * Loads and caches dashboard configurations for brands
+ * Hybrid approach: tries fs first (Phase 1-3), falls back to Brand System API (Phase 4+)
+ * Caches in memory for performance
  */
 
 import { createServerFn } from "@tanstack/react-start";
@@ -26,11 +27,6 @@ const configCache = new Map<string, DashboardYaml>();
 async function loadDashboardYamlFromDisk(
 	brandSlug: string
 ): Promise<DashboardYaml | null> {
-	// Check cache first
-	if (configCache.has(brandSlug)) {
-		return configCache.get(brandSlug)!;
-	}
-
 	try {
 		// Read YAML file from disk
 		// Path relative to project root: configs/{brandSlug}.yaml
@@ -50,35 +46,98 @@ async function loadDashboardYamlFromDisk(
 			return null;
 		}
 
-		// Cache and return
-		configCache.set(brandSlug, result.data);
 		return result.data;
 	} catch (err) {
 		if (err instanceof Error && "code" in err && err.code === "ENOENT") {
-			console.warn(`No config found for brand: ${brandSlug}`);
+			// File not found is normal, will try API fallback
+			return null;
 		} else {
 			console.error(`Failed to load config for brand '${brandSlug}':`, err);
+			return null;
 		}
+	}
+}
+
+/**
+ * Load a dashboard config from Brand System API
+ * Fallback when fs config is not available
+ */
+async function loadDashboardYamlFromApi(
+	brandSlug: string,
+	apiUrl: string | undefined
+): Promise<DashboardYaml | null> {
+	if (!apiUrl) {
+		return null;
+	}
+
+	try {
+		const url = new URL(`/api/dashboards/${brandSlug}`, apiUrl);
+		const res = await fetch(url.toString());
+
+		if (!res.ok) {
+			console.warn(`Brand System API error for ${brandSlug}: ${res.status}`);
+			return null;
+		}
+
+		const config = await res.json();
+
+		// Validate against schema
+		const result = validateDashboardYaml(config);
+		if (!result.success) {
+			console.error(
+				`Invalid config from Brand System for '${brandSlug}':`,
+				result.errors
+			);
+			return null;
+		}
+
+		return result.data;
+	} catch (err) {
+		console.error(
+			`Failed to load config from Brand System for '${brandSlug}':`,
+			err
+		);
 		return null;
 	}
 }
 
 /**
  * Server function: Load dashboard config for a brand
- * Can be called from client via TanStack Start
+ * Tries fs first, then Brand System API, then returns null
  */
 export const loadDashboardConfig = createServerFn()
 	.input<{ brandSlug: string }>()
 	.handler(async ({ data }) => {
-		const config = await loadDashboardYamlFromDisk(data.brandSlug);
+		// Check cache first
+		if (configCache.has(data.brandSlug)) {
+			return configCache.get(data.brandSlug)!;
+		}
+
+		// Try filesystem first (Phase 1-3 local development)
+		let config = await loadDashboardYamlFromDisk(data.brandSlug);
+
+		// Fall back to Brand System API (Phase 4+)
+		if (!config) {
+			const apiUrl = process.env.BRAND_SYSTEM_API_URL;
+			config = await loadDashboardYamlFromApi(data.brandSlug, apiUrl);
+		}
+
+		// Cache if found
+		if (config) {
+			configCache.set(data.brandSlug, config);
+		}
+
 		return config;
 	});
 
 /**
  * Server function: List all available dashboard configs
- * Scans the configs/ directory
+ * Tries fs first, falls back to Brand System API
  */
 export const listAvailableDashboards = createServerFn().handler(async () => {
+	const dashboards: DashboardYaml[] = [];
+
+	// Try filesystem first
 	try {
 		const { readdirSync } = await import("fs");
 		const configDir = resolve(process.cwd(), "configs");
@@ -86,18 +145,55 @@ export const listAvailableDashboards = createServerFn().handler(async () => {
 
 		const slugs = files.map((f) => f.replace(".yaml", ""));
 
-		// Preload all configs into cache
-		const dashboards: DashboardYaml[] = [];
+		// Load all configs from disk
 		for (const slug of slugs) {
 			const config = await loadDashboardYamlFromDisk(slug);
 			if (config) {
 				dashboards.push(config);
+				configCache.set(slug, config);
+			}
+		}
+
+		// If we found configs on disk, return them
+		if (dashboards.length > 0) {
+			return dashboards;
+		}
+	} catch (err) {
+		console.warn("Failed to read configs from disk:", err);
+	}
+
+	// Fall back to Brand System API
+	const apiUrl = process.env.BRAND_SYSTEM_API_URL;
+	if (!apiUrl) {
+		console.warn("BRAND_SYSTEM_API_URL not set, cannot load dashboards from API");
+		return [];
+	}
+
+	try {
+		const url = new URL("/api/dashboards", apiUrl);
+		const res = await fetch(url.toString());
+
+		if (!res.ok) {
+			console.warn(`Brand System API error: ${res.status}`);
+			return [];
+		}
+
+		const configs = await res.json();
+
+		// Validate and cache each config
+		if (Array.isArray(configs)) {
+			for (const config of configs) {
+				const result = validateDashboardYaml(config);
+				if (result.success) {
+					dashboards.push(result.data);
+					configCache.set(config.brand, result.data);
+				}
 			}
 		}
 
 		return dashboards;
 	} catch (err) {
-		console.error("Failed to list available dashboards:", err);
+		console.error("Failed to list dashboards from Brand System API:", err);
 		return [];
 	}
 });
