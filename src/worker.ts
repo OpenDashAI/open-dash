@@ -20,9 +20,11 @@ import { metricsTracker } from "./lib/monitoring";
 
 // Export Durable Object classes for Cloudflare bindings
 export { HudSocket } from "./server/hud-socket";
+export { CompetitiveIntelligenceCoordinator } from "./server/competitive-intelligence-coordinator";
 
 interface Env {
 	HUD_SOCKET: DurableObjectNamespace;
+	COMPETITIVE_INTEL: DurableObjectNamespace;
 	CLERK_SECRET_KEY: string;
 	CLERK_PUBLISHABLE_KEY: string;
 	ALLOWED_IPS: string; // Comma-separated IPs that bypass auth

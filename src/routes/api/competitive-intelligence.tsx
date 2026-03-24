@@ -55,65 +55,69 @@ export const Route = createFileRoute("/api/competitive-intelligence")({
 async function seedCompetitors(context: any): Promise<Response> {
 	try {
 		const db = context.env.DB;
+		const authContext = context.auth;
 
-		// Use hardcoded list for Week 2
+		if (!authContext?.brandId) {
+			return Response.json(
+				{ error: "Brand context required" },
+				{ status: 400 }
+			);
+		}
+
+		// Sample competitors with keywords for demo
 		const competitors = [
 			{
-				id: "metabase",
+				domain: "metabase.com",
 				name: "Metabase",
-				websiteUrl: "https://www.metabase.com",
-				dataSource: "manual",
-				confidenceScore: 0.8,
+				keywords: JSON.stringify([
+					"business intelligence",
+					"analytics dashboard",
+					"data visualization",
+				]),
 			},
 			{
-				id: "grafana",
+				domain: "grafana.com",
 				name: "Grafana",
-				websiteUrl: "https://grafana.com",
-				dataSource: "manual",
-				confidenceScore: 0.8,
+				keywords: JSON.stringify([
+					"monitoring dashboard",
+					"time series database",
+					"metrics visualization",
+				]),
 			},
 			{
-				id: "tableau",
+				domain: "tableau.com",
 				name: "Tableau",
-				websiteUrl: "https://www.tableau.com",
-				dataSource: "manual",
-				confidenceScore: 0.8,
-			},
-			{
-				id: "looker",
-				name: "Looker",
-				websiteUrl: "https://www.looker.com",
-				dataSource: "manual",
-				confidenceScore: 0.8,
-			},
-			{
-				id: "power-bi",
-				name: "Power BI",
-				websiteUrl: "https://powerbi.microsoft.com",
-				dataSource: "manual",
-				confidenceScore: 0.8,
+				keywords: JSON.stringify([
+					"business intelligence tool",
+					"data analytics",
+					"enterprise reporting",
+				]),
 			},
 		];
 
 		const seeded = [];
 		for (const competitor of competitors) {
 			try {
-				// Insert via SQL since we may not have Drizzle in API context
-				await db.prepare(
-					`
-          INSERT OR IGNORE INTO competitor_domains
-          (id, name, website_url, data_source, confidence_score, created_at, updated_at)
-          VALUES (?, ?, ?, ?, ?, ?, ?)
+				// Insert via SQL with new schema
+				await db
+					.prepare(
+						`
+          INSERT OR IGNORE INTO competitors
+          (id, brandId, orgId, domain, name, keywords, active, createdAt, updatedAt)
+          VALUES (?, ?, ?, ?, ?, ?, 1, ?, ?)
         `
-				).bind(
-					competitor.id,
-					competitor.name,
-					competitor.websiteUrl,
-					competitor.dataSource,
-					competitor.confidenceScore,
-					Date.now(),
-					Date.now()
-				).first();
+					)
+					.bind(
+						crypto.randomUUID(),
+						authContext.brandId,
+						authContext.orgId,
+						competitor.domain,
+						competitor.name,
+						competitor.keywords,
+						Date.now(),
+						Date.now()
+					)
+					.run();
 
 				seeded.push(competitor.name);
 			} catch (error) {
@@ -124,7 +128,7 @@ async function seedCompetitors(context: any): Promise<Response> {
 		return Response.json({
 			success: true,
 			seeded,
-			message: `Initialized ${seeded.length} competitors`,
+			message: `Initialized ${seeded.length} competitors for brand`,
 		});
 	} catch (error) {
 		throw error;
@@ -157,9 +161,13 @@ async function listCompetitors(context: any): Promise<Response> {
 }
 
 async function runDailyJobs(context: any): Promise<Response> {
-	// Invoke the Durable Object coordinator
+	// Get org ID from auth context (if available) or use default
+	const authContext = context.auth;
+	const orgId = authContext?.orgId || "default";
+
+	// Invoke the Durable Object coordinator for this org
 	const coordinatorId = context.env.COMPETITIVE_INTEL?.idFromName(
-		"default"
+		`ci:${orgId}`
 	);
 	const coordinator = context.env.COMPETITIVE_INTEL?.get(coordinatorId);
 
@@ -170,11 +178,20 @@ async function runDailyJobs(context: any): Promise<Response> {
 		);
 	}
 
-	const response = await coordinator.fetch(
-		new Request("https://coordinator/run-daily", { method: "POST" })
-	);
-
-	return response;
+	try {
+		const response = await coordinator.fetch(
+			new Request("https://coordinator/schedule", { method: "POST" })
+		);
+		return response;
+	} catch (error) {
+		return Response.json(
+			{
+				error:
+					error instanceof Error ? error.message : "Unknown error",
+			},
+			{ status: 500 }
+		);
+	}
 }
 
 async function runWeeklyJobs(context: any): Promise<Response> {
@@ -205,16 +222,18 @@ async function getSerpStatus(
 	try {
 		const db = context.env.DB;
 
-		// Get latest SERP data for this keyword
+		// Get latest SERP rankings for this keyword
 		const results = await db
 			.prepare(
 				`
-      SELECT competitor_id, rank_position, rank_change, trend,
-             rank_date, created_at
-      FROM competitor_serp
-      WHERE keyword = ?
-      ORDER BY rank_date DESC, created_at DESC
-      LIMIT 20
+      SELECT sr.id, sr.competitorId, sr.keyword, sr.rank, sr.url,
+             sr.title, sr.snapshotDate, sr.createdAt,
+             c.domain, c.name
+      FROM serp_rankings sr
+      LEFT JOIN competitors c ON sr.competitorId = c.id
+      WHERE sr.keyword = ?
+      ORDER BY sr.snapshotDate DESC, sr.rank ASC
+      LIMIT 50
     `
 			)
 			.bind(keyword)

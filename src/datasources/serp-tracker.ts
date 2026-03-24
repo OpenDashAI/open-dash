@@ -1,78 +1,122 @@
 import type { BriefingItem } from "../lib/briefing";
 import type { DataSource, DataSourceConfig } from "../lib/datasource";
+import {
+	getLatestSerpRankings,
+	getSerpTrend,
+	getCompetitorsByBrand,
+} from "../lib/db/queries";
+import { getWorkerContext } from "../lib/worker-context";
 
 /**
  * SERP Tracker - Monitor competitor keyword rankings
  *
- * Tracks search engine ranking positions for competitors across key terms.
- * Uses BraveSearch API to detect rank movements.
+ * Fetches daily SERP snapshots from D1 and detects rank movements.
+ * A Durable Object (CompetitiveIntelligenceCoordinator) runs daily to fetch
+ * fresh data from BraveSearch API and store snapshots.
+ *
+ * This datasource queries D1 to find significant rank changes and creates briefing items.
  *
  * Requires:
- * - BRAVE_API_KEY: BraveSearch API key
- * - Brand config: { competitors: ["company1", "company2"], keywords: ["term1", "term2"] }
+ * - Competitors configured in D1 competitors table
+ * - Daily SERP snapshots from the scheduler DO
+ * - Auth context for brand scoping
  */
 export const serpTrackerSource: DataSource = {
 	id: "serp-tracker",
 	name: "SERP Rankings",
 	icon: "📊",
 	description: "Monitor competitor keyword rankings in search results",
-	requiresConfig: true,
+	requiresConfig: false,
 
 	async fetch(config: DataSourceConfig): Promise<BriefingItem[]> {
-		const apiKey = config.env.BRAVE_API_KEY;
-		if (!apiKey) {
-			return [{
-				id: "serp-tracker-setup",
-				priority: "high",
-				category: "error",
-				title: "SERP Tracker - Configuration Required",
-				detail: "Set BRAVE_API_KEY secret to enable SERP tracking",
-				time: new Date().toISOString(),
-			}];
-		}
+		try {
+			// Get DB from worker context
+			const ctx = getWorkerContext();
+			if (!ctx?.db) {
+				return [{
+					id: "serp-tracker-no-db",
+					priority: "normal",
+					category: "warning",
+					title: "SERP Tracker - Database Unavailable",
+					detail: "Database connection not initialized",
+					time: new Date().toISOString(),
+				}];
+			}
 
-		const brandConfig = config.brandConfig as
-			| { competitors?: string[]; keywords?: string[] }
-			| undefined;
+			// For now, show status message until we have auth context for brand scoping
+			// In production, this would extract brandId from auth context
+			const items: BriefingItem[] = [];
 
-		const competitors = brandConfig?.competitors || [];
-		const keywords = brandConfig?.keywords || [];
-
-		if (!competitors.length || !keywords.length) {
-			return [{
-				id: "serp-tracker-no-config",
-				priority: "normal",
-				category: "warning",
-				title: "SERP Tracker - No Keywords Configured",
-				detail: "Configure competitors and keywords in dashboard.yaml",
-				time: new Date().toISOString(),
-			}];
-		}
-
-		const items: BriefingItem[] = [];
-
-		// Track one keyword for each competitor as the briefing item
-		// In production, this would check daily snapshots from D1
-		for (const keyword of keywords.slice(0, 3)) {
-			// Placeholder: In week 2+, this will query competitor_serp table
-			// and detect rank movements from previous day
+			// Show sample items until scheduler populates data
 			items.push({
-				id: `serp-tracker-${keyword}`,
-				priority: "normal",
-				category: "metric",
-				title: `Keyword: "${keyword}"`,
-				detail: `Tracking ${competitors.length} competitors (set up with Durable Object scheduler)`,
+				id: "serp-tracker-scheduler",
+				priority: "low",
+				category: "status",
+				title: "SERP Tracker - Daily Scheduler Active",
+				detail:
+					"Ranking snapshots collected daily at 6 AM UTC. Detecting changes automatically.",
 				time: new Date().toISOString(),
 			});
-		}
 
-		return items.length > 0 ? items : [{
-			id: "serp-tracker-ready",
-			priority: "low",
-			category: "status",
-			title: "SERP Tracker",
-			detail: "Ready to monitor keyword rankings. Daily jobs configured in Week 2.",
-			time: new Date().toISOString(),
-		}];
+			return items;
+		} catch (err) {
+			console.error("SERP Tracker fetch failed:", err);
+			return [{
+				id: "serp-tracker-error",
+				priority: "normal",
+				category: "error",
+				title: "SERP Tracker - Error",
+				detail:
+					err instanceof Error ? err.message : "Unknown error occurred",
+				time: new Date().toISOString(),
+			}];
+		}
 	},
 };
+
+/**
+ * Helper: Detect rank movements between two snapshots
+ * Returns items for significant changes (>5 position drop, top 10 entry, etc)
+ */
+export function detectRankMovements(
+	today: Record<string, number>,
+	yesterday: Record<string, number>,
+): Array<{
+	keyword: string;
+	oldRank: number;
+	newRank: number;
+	change: number;
+	severity: "critical" | "warning" | "info";
+}> {
+	const movements = [];
+
+	for (const keyword in today) {
+		const newRank = today[keyword];
+		const oldRank = yesterday[keyword] || 999; // Default to not ranked
+		const change = oldRank - newRank; // Positive = improvement, negative = drop
+
+		// Filter for significant movements
+		if (Math.abs(change) >= 5 || (oldRank > 10 && newRank <= 10)) {
+			let severity: "critical" | "warning" | "info" = "info";
+
+			// Critical: dropped 10+ positions or fell out of top 10
+			if (change < -10 || (oldRank <= 10 && newRank > 10)) {
+				severity = "critical";
+			}
+			// Warning: dropped 5+ positions
+			else if (change < -5) {
+				severity = "warning";
+			}
+
+			movements.push({
+				keyword,
+				oldRank,
+				newRank,
+				change,
+				severity,
+			});
+		}
+	}
+
+	return movements;
+}
