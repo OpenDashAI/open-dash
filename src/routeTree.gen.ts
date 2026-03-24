@@ -17,6 +17,7 @@ import { Route as BrandsSlugRouteImport } from './routes/brands/$slug'
 import { Route as ApiWsRouteImport } from './routes/api/ws'
 import { Route as ApiOrchestrateRouteImport } from './routes/api/orchestrate'
 import { Route as ApiOnboardingRouteImport } from './routes/api/onboarding'
+import { Route as ApiCompetitiveIntelligenceRouteImport } from './routes/api/competitive-intelligence'
 import { Route as ApiChatRouteImport } from './routes/api/chat'
 
 const OnboardingRoute = OnboardingRouteImport.update({
@@ -59,6 +60,12 @@ const ApiOnboardingRoute = ApiOnboardingRouteImport.update({
   path: '/api/onboarding',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiCompetitiveIntelligenceRoute =
+  ApiCompetitiveIntelligenceRouteImport.update({
+    id: '/api/competitive-intelligence',
+    path: '/api/competitive-intelligence',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiChatRoute = ApiChatRouteImport.update({
   id: '/api/chat',
   path: '/api/chat',
@@ -71,6 +78,7 @@ export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
   '/onboarding': typeof OnboardingRoute
   '/api/chat': typeof ApiChatRoute
+  '/api/competitive-intelligence': typeof ApiCompetitiveIntelligenceRoute
   '/api/onboarding': typeof ApiOnboardingRoute
   '/api/orchestrate': typeof ApiOrchestrateRoute
   '/api/ws': typeof ApiWsRoute
@@ -82,6 +90,7 @@ export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/onboarding': typeof OnboardingRoute
   '/api/chat': typeof ApiChatRoute
+  '/api/competitive-intelligence': typeof ApiCompetitiveIntelligenceRoute
   '/api/onboarding': typeof ApiOnboardingRoute
   '/api/orchestrate': typeof ApiOrchestrateRoute
   '/api/ws': typeof ApiWsRoute
@@ -94,6 +103,7 @@ export interface FileRoutesById {
   '/login': typeof LoginRoute
   '/onboarding': typeof OnboardingRoute
   '/api/chat': typeof ApiChatRoute
+  '/api/competitive-intelligence': typeof ApiCompetitiveIntelligenceRoute
   '/api/onboarding': typeof ApiOnboardingRoute
   '/api/orchestrate': typeof ApiOrchestrateRoute
   '/api/ws': typeof ApiWsRoute
@@ -107,6 +117,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/onboarding'
     | '/api/chat'
+    | '/api/competitive-intelligence'
     | '/api/onboarding'
     | '/api/orchestrate'
     | '/api/ws'
@@ -118,6 +129,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/onboarding'
     | '/api/chat'
+    | '/api/competitive-intelligence'
     | '/api/onboarding'
     | '/api/orchestrate'
     | '/api/ws'
@@ -129,6 +141,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/onboarding'
     | '/api/chat'
+    | '/api/competitive-intelligence'
     | '/api/onboarding'
     | '/api/orchestrate'
     | '/api/ws'
@@ -141,6 +154,7 @@ export interface RootRouteChildren {
   LoginRoute: typeof LoginRoute
   OnboardingRoute: typeof OnboardingRoute
   ApiChatRoute: typeof ApiChatRoute
+  ApiCompetitiveIntelligenceRoute: typeof ApiCompetitiveIntelligenceRoute
   ApiOnboardingRoute: typeof ApiOnboardingRoute
   ApiOrchestrateRoute: typeof ApiOrchestrateRoute
   ApiWsRoute: typeof ApiWsRoute
@@ -204,6 +218,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiOnboardingRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/competitive-intelligence': {
+      id: '/api/competitive-intelligence'
+      path: '/api/competitive-intelligence'
+      fullPath: '/api/competitive-intelligence'
+      preLoaderRoute: typeof ApiCompetitiveIntelligenceRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/chat': {
       id: '/api/chat'
       path: '/api/chat'
@@ -231,6 +252,7 @@ const rootRouteChildren: RootRouteChildren = {
   LoginRoute: LoginRoute,
   OnboardingRoute: OnboardingRoute,
   ApiChatRoute: ApiChatRoute,
+  ApiCompetitiveIntelligenceRoute: ApiCompetitiveIntelligenceRoute,
   ApiOnboardingRoute: ApiOnboardingRoute,
   ApiOrchestrateRoute: ApiOrchestrateRoute,
   ApiWsRoute: ApiWsRoute,

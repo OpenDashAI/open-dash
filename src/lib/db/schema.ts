@@ -646,3 +646,13 @@ export type MarketInsightInsert = typeof marketInsightsTable.$inferInsert;
 
 export type CompetitiveAlert = typeof competitiveAlertsTable.$inferSelect;
 export type CompetitiveAlertInsert = typeof competitiveAlertsTable.$inferInsert;
+
+// Organization & Team types
+export type Organization = typeof organizationsTable.$inferSelect;
+export type OrganizationInsert = typeof organizationsTable.$inferInsert;
+
+export type TeamMember = typeof teamMembersTable.$inferSelect;
+export type TeamMemberInsert = typeof teamMembersTable.$inferInsert;
+
+export type Brand = typeof brandsTable.$inferSelect;
+export type BrandInsert = typeof brandsTable.$inferInsert;

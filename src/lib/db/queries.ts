@@ -11,7 +11,6 @@ import {
 	or,
 	desc,
 	asc,
-	limit,
 	count,
 	avg,
 	max,
@@ -24,13 +23,33 @@ import {
 	datasourceStatusTable,
 	alertRulesTable,
 	alertHistoryTable,
+	organizationsTable,
+	teamMembersTable,
+	brandsTable,
 	type DatasourceMetric,
 	type DatasourceStatus,
 	type AlertRule,
 	type AlertHistory,
+	type Organization,
+	type OrganizationInsert,
+	type TeamMember,
+	type TeamMemberInsert,
+	type Brand,
+	type BrandInsert,
 } from "./schema";
 
-export type { DatasourceMetric, DatasourceStatus, AlertRule, AlertHistory };
+export type {
+	DatasourceMetric,
+	DatasourceStatus,
+	AlertRule,
+	AlertHistory,
+	Organization,
+	OrganizationInsert,
+	TeamMember,
+	TeamMemberInsert,
+	Brand,
+	BrandInsert,
+};
 
 /**
  * Initialize Drizzle client for D1
@@ -336,4 +355,204 @@ export function calculateMtbf(
 	}
 
 	return Math.round(totalTime / (failures.length - 1) / 1000); // Convert to seconds
+}
+
+/**
+ * ORGANIZATION QUERIES
+ */
+
+export async function createOrganization(
+	db: ReturnType<typeof initDb>,
+	org: OrganizationInsert
+) {
+	return db.insert(organizationsTable).values(org);
+}
+
+export async function getOrganization(
+	db: ReturnType<typeof initDb>,
+	orgId: string
+) {
+	return db
+		.select()
+		.from(organizationsTable)
+		.where(eq(organizationsTable.id, orgId))
+		.limit(1);
+}
+
+export async function getOrganizationBySlug(
+	db: ReturnType<typeof initDb>,
+	slug: string
+) {
+	return db
+		.select()
+		.from(organizationsTable)
+		.where(eq(organizationsTable.slug, slug))
+		.limit(1);
+}
+
+export async function getOrganizationByClerkId(
+	db: ReturnType<typeof initDb>,
+	clerkId: string
+) {
+	return db
+		.select()
+		.from(organizationsTable)
+		.where(eq(organizationsTable.clerkId, clerkId))
+		.limit(1);
+}
+
+export async function updateOrganization(
+	db: ReturnType<typeof initDb>,
+	orgId: string,
+	updates: Partial<Organization>
+) {
+	return db
+		.update(organizationsTable)
+		.set(updates)
+		.where(eq(organizationsTable.id, orgId));
+}
+
+/**
+ * TEAM MEMBER QUERIES
+ */
+
+export async function addTeamMember(
+	db: ReturnType<typeof initDb>,
+	member: TeamMemberInsert
+) {
+	return db.insert(teamMembersTable).values(member);
+}
+
+export async function getTeamMember(
+	db: ReturnType<typeof initDb>,
+	orgId: string,
+	userId: string
+) {
+	return db
+		.select()
+		.from(teamMembersTable)
+		.where(
+			and(
+				eq(teamMembersTable.orgId, orgId),
+				eq(teamMembersTable.userId, userId)
+			)
+		)
+		.limit(1);
+}
+
+export async function getTeamMembers(
+	db: ReturnType<typeof initDb>,
+	orgId: string
+) {
+	return db
+		.select()
+		.from(teamMembersTable)
+		.where(
+			and(
+				eq(teamMembersTable.orgId, orgId),
+				eq(teamMembersTable.active, true)
+			)
+		)
+		.orderBy(asc(teamMembersTable.createdAt));
+}
+
+export async function getPendingInvites(
+	db: ReturnType<typeof initDb>,
+	orgId: string
+) {
+	return db
+		.select()
+		.from(teamMembersTable)
+		.where(
+			and(
+				eq(teamMembersTable.orgId, orgId),
+				eq(teamMembersTable.acceptedAt, null)
+			)
+		);
+}
+
+export async function acceptInvite(
+	db: ReturnType<typeof initDb>,
+	memberId: string
+) {
+	const now = Date.now();
+	return db
+		.update(teamMembersTable)
+		.set({ acceptedAt: now })
+		.where(eq(teamMembersTable.id, memberId));
+}
+
+export async function removeTeamMember(
+	db: ReturnType<typeof initDb>,
+	memberId: string
+) {
+	return db
+		.update(teamMembersTable)
+		.set({ active: false })
+		.where(eq(teamMembersTable.id, memberId));
+}
+
+/**
+ * BRAND QUERIES
+ */
+
+export async function createBrand(
+	db: ReturnType<typeof initDb>,
+	brand: BrandInsert
+) {
+	return db.insert(brandsTable).values(brand);
+}
+
+export async function getBrand(db: ReturnType<typeof initDb>, brandId: string) {
+	return db
+		.select()
+		.from(brandsTable)
+		.where(eq(brandsTable.id, brandId))
+		.limit(1);
+}
+
+export async function getBrandsByOrg(
+	db: ReturnType<typeof initDb>,
+	orgId: string
+) {
+	return db
+		.select()
+		.from(brandsTable)
+		.where(
+			and(eq(brandsTable.orgId, orgId), eq(brandsTable.active, true))
+		)
+		.orderBy(asc(brandsTable.createdAt));
+}
+
+export async function getBrandByDomain(
+	db: ReturnType<typeof initDb>,
+	domain: string
+) {
+	return db
+		.select()
+		.from(brandsTable)
+		.where(eq(brandsTable.domain, domain))
+		.limit(1);
+}
+
+export async function updateBrand(
+	db: ReturnType<typeof initDb>,
+	brandId: string,
+	updates: Partial<Brand>
+) {
+	return db
+		.update(brandsTable)
+		.set(updates)
+		.where(eq(brandsTable.id, brandId));
+}
+
+export async function archiveBrand(
+	db: ReturnType<typeof initDb>,
+	brandId: string
+) {
+	const now = Date.now();
+	return db
+		.update(brandsTable)
+		.set({ archived: true, archivedAt: now })
+		.where(eq(brandsTable.id, brandId));
 }
