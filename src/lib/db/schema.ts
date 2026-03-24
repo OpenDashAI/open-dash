@@ -206,6 +206,261 @@ export const alertHistoryTable = sqliteTable(
 	]
 );
 
+/**
+ * Competitive Intelligence Tables — monitor competitor strategies
+ *
+ * Tracks competitor domains, keyword rankings, content, and market insights.
+ * Supports daily/weekly automated collection via datasources.
+ */
+
+/**
+ * Competitor Domains — domain metrics tracking
+ *
+ * Weekly snapshots of domain authority, traffic, keywords, and backlinks.
+ * Data sources: Ahrefs, SimilarWeb, Semrush (or manual updates).
+ */
+export const competitorDomainsTable = sqliteTable(
+	"competitor_domains",
+	{
+		id: text("id").primaryKey(), // competitor-slug
+		name: text("name").notNull(),
+		websiteUrl: text("website_url"),
+
+		// Metrics (refreshed weekly)
+		domainAuthority: integer("domain_authority"), // 0-100
+		trafficEstimate: integer("traffic_estimate"), // monthly visitors
+		organicKeywords: integer("organic_keywords"),
+		backlinksCount: integer("backlinks_count"),
+		referringDomains: integer("referring_domains"),
+
+		// Status
+		lastChecked: integer("last_checked"),
+		dataSource: text("data_source"), // 'ahrefs', 'similarweb', 'semrush', 'manual'
+		confidenceScore: real("confidence_score"),
+
+		createdAt: integer("created_at")
+			.notNull()
+			.default(sql`(cast(strftime('%s', 'now') * 1000 as integer))`),
+		updatedAt: integer("updated_at")
+			.notNull()
+			.default(sql`(cast(strftime('%s', 'now') * 1000 as integer))`),
+	},
+	(table) => [
+		index("idx_competitor_domains_name").on(table.name),
+		index("idx_competitor_domains_updated").on(table.updatedAt),
+	]
+);
+
+/**
+ * Competitor SERP — keyword ranking snapshots
+ *
+ * Daily SERP position tracking for competitors across target keywords.
+ * Enables rank movement detection and trend analysis.
+ */
+export const competitorSerpTable = sqliteTable(
+	"competitor_serp",
+	{
+		id: text("id").primaryKey(), // uuid
+		competitorId: text("competitor_id")
+			.notNull()
+			.references(() => competitorDomainsTable.id),
+
+		keyword: text("keyword").notNull(),
+		rankPosition: integer("rank_position"), // 1-100+
+		searchVolume: integer("search_volume"),
+		keywordDifficulty: integer("keyword_difficulty"), // 0-100 (KD)
+
+		rankDate: text("rank_date").notNull(), // YYYY-MM-DD format for range queries
+		rankChange: integer("rank_change"), // position change from prev day
+		trend: text("trend", { enum: ["U", "D", "S"] }), // Up, Down, Same
+
+		indexedAt: integer("indexed_at")
+			.notNull()
+			.default(sql`(cast(strftime('%s', 'now') * 1000 as integer))`),
+		createdAt: integer("created_at")
+			.notNull()
+			.default(sql`(cast(strftime('%s', 'now') * 1000 as integer))`),
+	},
+	(table) => [
+		index("idx_competitor_serp_date").on(table.rankDate),
+		index("idx_competitor_serp_competitor").on(table.competitorId),
+		index("idx_competitor_serp_keyword").on(table.keyword),
+		index("idx_competitor_serp_compound").on(
+			table.competitorId,
+			table.rankDate
+		),
+	]
+);
+
+/**
+ * Competitor Content — articles, blog posts, case studies
+ *
+ * Track published content, topics covered, and estimated reach.
+ * Used for content gap analysis and positioning research.
+ */
+export const competitorContentTable = sqliteTable(
+	"competitor_content",
+	{
+		id: text("id").primaryKey(), // uuid
+		competitorId: text("competitor_id")
+			.notNull()
+			.references(() => competitorDomainsTable.id),
+
+		url: text("url").notNull().unique(),
+		title: text("title"),
+		contentType: text("content_type", {
+			enum: ["blog", "case_study", "tutorial", "announcement", "guide"],
+		}),
+
+		publishDate: integer("publish_date"),
+		crawlDate: integer("crawl_date")
+			.notNull()
+			.default(sql`(cast(strftime('%s', 'now') * 1000 as integer))`),
+
+		// Content metrics
+		wordCount: integer("word_count"),
+		estimatedReach: integer("estimated_reach"), // based on shares, views
+		sentiment: text("sentiment", {
+			enum: ["positive", "neutral", "promotional"],
+		}),
+
+		// Topics and keywords (JSON arrays)
+		topics: text("topics"), // e.g. '["AI", "Analytics"]'
+		keywords: text("keywords"), // e.g. '["free BI tool", "no-code"]'
+
+		createdAt: integer("created_at")
+			.notNull()
+			.default(sql`(cast(strftime('%s', 'now') * 1000 as integer))`),
+	},
+	(table) => [
+		index("idx_competitor_content_date").on(table.publishDate),
+		index("idx_competitor_content_type").on(table.contentType),
+		index("idx_competitor_content_competitor").on(table.competitorId),
+	]
+);
+
+/**
+ * Competitor Pricing — pricing tiers and features
+ *
+ * Daily/weekly snapshots of competitor pricing pages.
+ * Enables pricing strategy analysis and feature comparison.
+ */
+export const competitorPricingTable = sqliteTable(
+	"competitor_pricing",
+	{
+		id: text("id").primaryKey(),
+		competitorId: text("competitor_id")
+			.notNull()
+			.references(() => competitorDomainsTable.id),
+
+		tierName: text("tier_name"), // "Free", "Pro", "Enterprise"
+		priceUsd: real("price_usd"), // null for free tiers
+		billingPeriod: text("billing_period", {
+			enum: ["month", "year", "one_time"],
+		}),
+
+		// Features as JSON array
+		features: text("features"), // e.g. '["API", "Custom branding"]'
+
+		snapshotDate: text("snapshot_date").notNull(), // YYYY-MM-DD for range queries
+		extractedAt: integer("extracted_at")
+			.notNull()
+			.default(sql`(cast(strftime('%s', 'now') * 1000 as integer))`),
+
+		createdAt: integer("created_at")
+			.notNull()
+			.default(sql`(cast(strftime('%s', 'now') * 1000 as integer))`),
+	},
+	(table) => [
+		index("idx_competitor_pricing_date").on(table.snapshotDate),
+		index("idx_competitor_pricing_competitor").on(table.competitorId),
+	]
+);
+
+/**
+ * Market Insights — AI-detected gaps and opportunities
+ *
+ * Aggregated findings from competitive intelligence analysis.
+ * Generated by Claude API during weekly/monthly analysis jobs.
+ */
+export const marketInsightsTable = sqliteTable(
+	"market_insights",
+	{
+		id: text("id").primaryKey(),
+
+		insightType: text("insight_type", {
+			enum: ["gap", "threat", "opportunity", "trend"],
+		}).notNull(),
+		title: text("title").notNull(),
+		description: text("description"),
+
+		// Related competitors (JSON array of IDs)
+		relatedCompetitors: text("related_competitors"), // e.g. '["comp-1", "comp-2"]'
+		confidenceScore: real("confidence_score"), // 0-1
+
+		generatedBy: text("generated_by", {
+			enum: ["claude", "heuristic", "manual"],
+		}).notNull(),
+
+		discoveredAt: integer("discovered_at")
+			.notNull()
+			.default(sql`(cast(strftime('%s', 'now') * 1000 as integer))`),
+		addressedAt: integer("addressed_at"), // NULL until addressed
+
+		createdAt: integer("created_at")
+			.notNull()
+			.default(sql`(cast(strftime('%s', 'now') * 1000 as integer))`),
+	},
+	(table) => [
+		index("idx_market_insights_type").on(table.insightType),
+		index("idx_market_insights_date").on(table.discoveredAt),
+		index("idx_market_insights_unaddressed").on(table.addressedAt),
+	]
+);
+
+/**
+ * Competitive Alerts — alerting rules for CI system
+ *
+ * Define conditions for rank movements, content changes, pricing updates, threats.
+ * Extends existing alert_rules pattern for competitive intelligence.
+ */
+export const competitiveAlertsTable = sqliteTable(
+	"competitive_alerts",
+	{
+		id: text("id").primaryKey(),
+
+		alertType: text("alert_type", {
+			enum: ["rank_movement", "content_published", "pricing_change", "threat"],
+		}).notNull(),
+		competitorId: text("competitor_id")
+			.notNull()
+			.references(() => competitorDomainsTable.id),
+
+		// Alert condition (e.g. "rank > 50", "traffic +30%")
+		condition: text("condition"),
+		threshold: real("threshold"),
+
+		// Rule state
+		enabled: integer("enabled", { mode: "boolean" }).default(1),
+		triggerCount: integer("trigger_count").default(0),
+		lastTriggered: integer("last_triggered"),
+
+		// Notification channels (JSON array)
+		channels: text("channels"), // e.g. '["slack", "email"]'
+
+		createdAt: integer("created_at")
+			.notNull()
+			.default(sql`(cast(strftime('%s', 'now') * 1000 as integer))`),
+		updatedAt: integer("updated_at")
+			.notNull()
+			.default(sql`(cast(strftime('%s', 'now') * 1000 as integer))`),
+	},
+	(table) => [
+		index("idx_competitive_alerts_competitor").on(table.competitorId),
+		index("idx_competitive_alerts_enabled").on(table.enabled),
+	]
+);
+
 // Type exports for use in query functions
 export type DatasourceMetric = typeof datasourceMetricsTable.$inferSelect;
 export type DatasourceMetricInsert = typeof datasourceMetricsTable.$inferInsert;
@@ -218,3 +473,21 @@ export type AlertRuleInsert = typeof alertRulesTable.$inferInsert;
 
 export type AlertHistory = typeof alertHistoryTable.$inferSelect;
 export type AlertHistoryInsert = typeof alertHistoryTable.$inferInsert;
+
+export type CompetitorDomain = typeof competitorDomainsTable.$inferSelect;
+export type CompetitorDomainInsert = typeof competitorDomainsTable.$inferInsert;
+
+export type CompetitorSerp = typeof competitorSerpTable.$inferSelect;
+export type CompetitorSerpInsert = typeof competitorSerpTable.$inferInsert;
+
+export type CompetitorContent = typeof competitorContentTable.$inferSelect;
+export type CompetitorContentInsert = typeof competitorContentTable.$inferInsert;
+
+export type CompetitorPricing = typeof competitorPricingTable.$inferSelect;
+export type CompetitorPricingInsert = typeof competitorPricingTable.$inferInsert;
+
+export type MarketInsight = typeof marketInsightsTable.$inferSelect;
+export type MarketInsightInsert = typeof marketInsightsTable.$inferInsert;
+
+export type CompetitiveAlert = typeof competitiveAlertsTable.$inferSelect;
+export type CompetitiveAlertInsert = typeof competitiveAlertsTable.$inferInsert;

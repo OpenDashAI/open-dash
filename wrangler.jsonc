@@ -33,4 +33,10 @@
   // - GITHUB_TOKEN: GitHub PAT for issues/activity data
   // - SM_API_URL: Scalable Media API URL (L2 orchestrator)
   // - SM_SERVICE_KEY: Scalable Media X-Service-Key (L2 orchestrator)
+  //
+  // Competitive Intelligence Secrets (Week 1+):
+  // - BRAVE_API_KEY: BraveSearch API key for SERP tracking
+  // - SIMILARWEB_API_KEY: SimilarWeb API key for domain metrics (optional)
+  // - SEMRUSH_API_KEY: Semrush API key for SEO data (optional)
+  // - TWITTER_API_KEY: Twitter/X API key for social monitoring (optional)
 }

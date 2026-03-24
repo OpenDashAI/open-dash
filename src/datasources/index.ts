@@ -10,6 +10,11 @@ import { scalableMediaSource } from "./scalable-media";
 import { stripeRevenueSource } from "./stripe-revenue";
 import { tailscaleSource } from "./tailscale";
 
+// Competitive intelligence sources
+import { serpTrackerSource } from "./serp-tracker";
+import { competitorDomainsSource } from "./competitor-domains";
+import { marketInsightsSource } from "./market-insights";
+
 // Register all built-in sources
 registry.register(githubIssuesSource);
 registry.register(githubActivitySource);
@@ -17,5 +22,10 @@ registry.register(tailscaleSource);
 registry.register(stripeRevenueSource);
 registry.register(cloudflareDeploysSource);
 registry.register(scalableMediaSource);
+
+// Register competitive intelligence sources (Week 1+)
+registry.register(serpTrackerSource);
+registry.register(competitorDomainsSource);
+registry.register(marketInsightsSource);
 
 export { registry };
