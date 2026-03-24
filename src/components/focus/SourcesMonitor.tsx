@@ -29,6 +29,7 @@ export function SourcesMonitor({ sources }: SourcesMonitorProps) {
 				const metric = metricsTracker.getMetric(source.id)
 				const health = metricsTracker.getHealthStatus(source.id)
 				const lastFetch = lastFetchTimes.get(source.id) || 'never'
+				const statusText = source.status.connected ? 'Connected' : 'Offline'
 
 				return (
 					<div key={source.id} className="source-monitor-item">
@@ -38,6 +39,7 @@ export function SourcesMonitor({ sources }: SourcesMonitorProps) {
 						</div>
 						<div className="source-health">
 							<div className={`health-indicator health-${health}`} />
+							<span className="status-text">{statusText}</span>
 							{metric && (
 								<span className="latency">{metric.fetchLatency}ms</span>
 							)}
