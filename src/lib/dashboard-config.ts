@@ -36,13 +36,11 @@ export type Widget = z.infer<typeof WidgetSchema>;
  * Top-level configuration for a brand's dashboard
  */
 export const DashboardYamlSchema = z.object({
-	brand: z.string().describe("Brand slug (e.g., 'llc-tax')"),
-	domain: z.string().describe("Primary domain for this brand"),
+	brand: z.string(),
+	domain: z.string(),
 	description: z.string().optional(),
-	sources: z
-		.array(DataSourceYamlConfigSchema)
-		.describe("Data sources to fetch from"),
-	widgets: z.array(WidgetSchema).describe("Widgets to render"),
+	sources: z.array(DataSourceYamlConfigSchema),
+	widgets: z.array(WidgetSchema),
 });
 
 export type DashboardYaml = z.infer<typeof DashboardYamlSchema>;

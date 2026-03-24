@@ -65,7 +65,8 @@ export function validateInput<T>(
   const result = schema.safeParse(data);
 
   if (!result.success) {
-    const messages = result.error.errors
+    const errors = result.error.errors || [];
+    const messages = errors
       .map((e) => `${e.path.join(".")}: ${e.message}`)
       .join("; ");
     throw new Error(`Invalid ${context}: ${messages}`);

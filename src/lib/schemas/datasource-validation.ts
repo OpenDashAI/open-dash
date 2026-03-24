@@ -25,7 +25,8 @@ export function validateDatasourceEnv<T extends z.ZodType>(
 	const result = envSchema.safeParse(config.env);
 
 	if (!result.success) {
-		const missing = result.error.errors
+		const errors = result.error.errors || [];
+		const missing = errors
 			.filter((e) => e.code === "invalid_type")
 			.map((e) => String(e.path[0]))
 			.join(", ");
@@ -49,7 +50,8 @@ export function validateDatasourceBrandConfig<T extends z.ZodType>(
 	const result = configSchema.safeParse(config.brandConfig || {});
 
 	if (!result.success) {
-		const issues = result.error.errors
+		const errors = result.error.errors || [];
+		const issues = errors
 			.map((e) => `${e.path.join(".")}: ${e.message}`)
 			.join("; ");
 		throw new Error(`${datasourceName} brand config: ${issues}`);

@@ -13,12 +13,10 @@ export const DataSourceStatusSchema = z.object({
     .string()
     .datetime("Invalid ISO timestamp")
     .optional()
-    .describe("ISO 8601 timestamp of last successful fetch"),
   error: z
     .string()
     .max(1000, "Error message too long")
     .optional()
-    .describe("Error message if connection failed"),
   itemCount: z
     .number()
     .nonnegative("Item count cannot be negative")
@@ -31,20 +29,17 @@ export type DataSourceStatus = z.infer<typeof DataSourceStatusSchema>;
  * Base datasource configuration.
  * Individual datasources may extend this with per-source env var schemas.
  */
-export const DataSourceConfigSchema = z.object({
-  env: z
-    .record(z.string().optional())
-    .describe("Environment variables / secrets available to datasource"),
-  lastVisited: z
-    .string()
-    .datetime("Invalid ISO timestamp")
-    .nullable()
-    .describe("Last user visit time for computing isNew flag"),
-  brandConfig: z
-    .record(z.unknown())
-    .optional()
-    .describe("Brand-specific configuration from dashboard.yaml"),
-});
+export const DataSourceConfigSchema = z
+  .object({
+    env: z.record(z.string()),
+    lastVisited: z
+      .string()
+      .datetime("Invalid ISO timestamp")
+      .nullable(),
+  })
+  .extend({
+    brandConfig: z.record(z.unknown()).optional(),
+  });
 
 export type DataSourceConfig = z.infer<typeof DataSourceConfigSchema>;
 
@@ -64,7 +59,7 @@ export function defineEnvSchema<T extends Record<string, z.ZodType>>(
   name: string,
   fields: T,
 ) {
-  return z.object(fields).strict().describe(`Environment variables for ${name}`);
+  return z.object(fields).strict();
 }
 
 /**
@@ -74,7 +69,7 @@ export function defineBrandConfigSchema<T extends Record<string, z.ZodType>>(
   name: string,
   fields: T,
 ) {
-  return z.object(fields).partial().describe(`Brand configuration for ${name}`);
+  return z.object(fields).partial();
 }
 
 /**
