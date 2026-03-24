@@ -1,0 +1,41 @@
+brand: llc-tax
+domain: llctax.com
+description: LLC tax education & tools platform
+
+sources:
+  - id: github-issues
+    config:
+      repo: garywu/llc-tax
+      labels: []
+  - id: github-activity
+    config:
+      repo: garywu/llc-tax
+  - id: cloudflare
+    config:
+      worker: llc-tax-worker
+  - id: stripe
+    config:
+      label: llc-tax
+  - id: plausible
+    config:
+      site: llctax.com
+
+widgets:
+  - type: issue_list
+    source: github-issues
+    title: "Open Issues"
+    config:
+      limit: 10
+  - type: deploy_status
+    source: cloudflare
+    title: "Deploy Status"
+  - type: revenue
+    source: stripe
+    title: "Revenue (24h)"
+    config:
+      rollup: daily
+  - type: traffic_chart
+    source: plausible
+    title: "Traffic (7d)"
+    config:
+      period: 7d

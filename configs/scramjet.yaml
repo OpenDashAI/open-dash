@@ -1,0 +1,27 @@
+brand: scramjet
+domain: scramjet.dev
+description: Pipeline execution engine
+
+sources:
+  - id: github-issues
+    config:
+      repo: garywu/scram-jet
+  - id: cloudflare
+    config:
+      worker: scramjet-worker
+  - id: stripe
+    config:
+      label: scramjet
+  - id: plausible
+    config:
+      site: scramjet.dev
+
+widgets:
+  - type: issue_list
+    source: github-issues
+  - type: deploy_status
+    source: cloudflare
+  - type: revenue
+    source: stripe
+  - type: traffic_chart
+    source: plausible

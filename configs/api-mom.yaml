@@ -1,0 +1,32 @@
+brand: api-mom
+domain: apimom.com
+description: API cost management & research platform
+
+sources:
+  - id: github-issues
+    config:
+      repo: garywu/api-mom
+  - id: cloudflare
+    config:
+      worker: api-mom-worker
+  - id: stripe
+    config:
+      label: api-mom
+  - id: plausible
+    config:
+      site: apimom.com
+
+widgets:
+  - type: issue_list
+    source: github-issues
+    title: "Open Issues"
+    config:
+      limit: 5
+  - type: deploy_status
+    source: cloudflare
+  - type: revenue
+    source: stripe
+    title: "Revenue"
+  - type: traffic_chart
+    source: plausible
+    title: "Website Traffic"

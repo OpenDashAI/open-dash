@@ -1,0 +1,34 @@
+brand: pages-plus
+domain: pages-plus.com
+description: Multi-site SSR platform
+
+sources:
+  - id: github-issues
+    config:
+      repo: garywu/pages-plus
+  - id: github-activity
+    config:
+      repo: garywu/pages-plus
+  - id: cloudflare
+    config:
+      worker: pages-plus-worker
+  - id: stripe
+    config:
+      label: pages-plus
+  - id: plausible
+    config:
+      site: pages-plus.com
+
+widgets:
+  - type: issue_list
+    source: github-issues
+    title: "Open Issues"
+  - type: deploy_status
+    source: cloudflare
+    title: "Deploy Status"
+  - type: revenue
+    source: stripe
+    title: "MRR"
+  - type: traffic_chart
+    source: plausible
+    title: "Traffic"

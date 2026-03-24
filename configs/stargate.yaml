@@ -1,0 +1,33 @@
+brand: stargate
+domain: stargate-app.com
+description: YouTube finance channels platform
+
+sources:
+  - id: github-issues
+    config:
+      repo: garywu/stargate
+  - id: cloudflare
+    config:
+      worker: stargate-worker
+  - id: stripe
+    config:
+      label: stargate
+  - id: plausible
+    config:
+      site: stargate-app.com
+
+widgets:
+  - type: issue_list
+    source: github-issues
+    title: "App Issues"
+  - type: deploy_status
+    source: cloudflare
+    title: "Platform Status"
+  - type: revenue
+    source: stripe
+    title: "Channel Revenue (24h)"
+    config:
+      rollup: daily
+  - type: traffic_chart
+    source: plausible
+    title: "App Traffic"
