@@ -22,6 +22,7 @@ import { marketInsightsSource } from "./market-insights";
 import { googleAdsSource } from "./google-ads";
 import { metaAdsSource } from "./meta-ads";
 import { ga4Source } from "./ga4";
+import { emailMetricsSource } from "./email-metrics";
 
 // Register all built-in sources
 registry.register(githubIssuesSource);
@@ -43,5 +44,6 @@ registry.register(marketInsightsSource);
 registry.register(googleAdsSource);
 registry.register(metaAdsSource);
 registry.register(ga4Source);
+registry.register(emailMetricsSource);
 
 export { registry };
