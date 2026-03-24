@@ -73,6 +73,10 @@ export interface Competitor {
 	domain: string;
 	website: string;
 	dataSource: "manual" | "ahrefs" | "similarweb" | "semrush";
+	domainAuthority?: number;
+	trafficEstimate?: number;
+	organicKeywords?: number;
+	backlinksCount?: number;
 	lastChecked?: number;
 }
 
