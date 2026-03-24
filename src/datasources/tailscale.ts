@@ -16,6 +16,10 @@ export const tailscaleSource: DataSource = {
 		const apiKey = config.env.TAILSCALE_API_KEY;
 		if (!apiKey) return [];
 
+		// Get brand-specific tag filter (optional)
+		const brandConfig = config.brandConfig as { tags?: string[] } | undefined;
+		const tags = brandConfig?.tags;
+
 		const res = await fetch(
 			"https://api.tailscale.com/api/v2/tailnet/-/devices",
 			{ headers: { Authorization: `Bearer ${apiKey}` } },
@@ -31,10 +35,18 @@ export const tailscaleSource: DataSource = {
 				online: boolean;
 				lastSeen: string;
 				isExternal?: boolean;
+				tags?: string[];
 			}>;
 		};
 
-		const devices = data.devices.filter((d) => !d.isExternal);
+		let devices = data.devices.filter((d) => !d.isExternal);
+
+		// Filter by tags if specified
+		if (tags && tags.length > 0) {
+			devices = devices.filter((d) =>
+				d.tags?.some((t) => tags.includes(t))
+			);
+		}
 		const offline = devices.filter((d) => !d.online);
 
 		if (offline.length === 0) return [];

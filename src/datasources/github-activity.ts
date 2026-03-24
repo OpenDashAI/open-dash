@@ -16,8 +16,12 @@ export const githubActivitySource: DataSource = {
 		const token = config.env.GITHUB_TOKEN;
 		if (!token) return [];
 
+		// Get brand-specific repo from config, fallback to vault
+		const brandConfig = config.brandConfig as { repo?: string } | undefined;
+		const repo = brandConfig?.repo || "garywu/garywu-vault";
+
 		const res = await fetch(
-			"https://api.github.com/repos/garywu/garywu-vault/issues/12/comments?per_page=10&direction=desc",
+			`https://api.github.com/repos/${repo}/issues/12/comments?per_page=10&direction=desc`,
 			{
 				headers: {
 					Authorization: `token ${token}`,

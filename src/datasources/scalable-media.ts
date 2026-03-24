@@ -18,6 +18,10 @@ export const scalableMediaSource: DataSource = {
 		if (!smUrl || !smKey) return [];
 
 		try {
+			// Get brand-specific slug filter
+			const brandConfig = config.brandConfig as { brand_slug?: string } | undefined;
+			const brandSlug = brandConfig?.brand_slug;
+
 			const res = await fetch(`${smUrl}/v1/brands`, {
 				headers: { "X-Service-Key": smKey },
 			});
@@ -36,7 +40,12 @@ export const scalableMediaSource: DataSource = {
 
 			const items: BriefingItem[] = [];
 
-			for (const brand of data.brands) {
+			// Filter by brand slug if specified
+			const brandsToCheck = brandSlug
+				? data.brands.filter((b) => b.slug === brandSlug)
+				: data.brands;
+
+			for (const brand of brandsToCheck) {
 				if (brand.status === "blocked") {
 					items.push({
 						id: `sm-blocked-${brand.slug}`,

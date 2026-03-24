@@ -31,6 +31,10 @@ export const stripeRevenueSource: DataSource = {
 		}
 
 		try {
+			// Get brand-specific label filter
+			const brandConfig = config.brandConfig as { label?: string } | undefined;
+			const label = brandConfig?.label;
+
 			// Fetch today's balance transactions
 			const now = new Date();
 			const todayStart = new Date(
@@ -67,12 +71,16 @@ export const stripeRevenueSource: DataSource = {
 			const target = 333;
 			const pct = Math.round((totalDollars / target) * 100);
 
+			const title = label
+				? `[${label}] Daily revenue: $${totalDollars.toFixed(0)}`
+				: `Daily revenue: $${totalDollars.toFixed(0)}`;
+
 			return [
 				{
 					id: "stripe-daily-revenue",
 					priority: totalDollars > 0 ? "normal" : "low",
 					category: "revenue",
-					title: `Daily revenue: $${totalDollars.toFixed(0)}`,
+					title,
 					detail: `${pct}% of $${target}/day target`,
 					time: new Date().toISOString(),
 					isNew: totalDollars > 0,

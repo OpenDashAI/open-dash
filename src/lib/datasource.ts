@@ -38,6 +38,8 @@ export interface DataSourceConfig {
 	env: Record<string, string | undefined>;
 	/** Last visited timestamp for isNew calculation */
 	lastVisited: string | null;
+	/** Brand-specific configuration from dashboard.yaml */
+	brandConfig?: Record<string, unknown>;
 }
 
 export interface RegisteredSource {

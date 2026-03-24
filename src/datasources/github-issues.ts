@@ -16,8 +16,19 @@ export const githubIssuesSource: DataSource = {
 		const token = config.env.GITHUB_TOKEN;
 		if (!token) return [];
 
+		// Get brand-specific repo from config, fallback to vault
+		const brandConfig = config.brandConfig as
+			| { repo?: string; labels?: string[] }
+			| undefined;
+		const repo = brandConfig?.repo || "garywu/garywu-vault";
+		const labels = brandConfig?.labels || [];
+
+		// Build query with optional labels filter
+		const labelQuery =
+			labels.length > 0 ? `&labels=${labels.join(",")}` : "";
+
 		const res = await fetch(
-			"https://api.github.com/repos/garywu/garywu-vault/issues?state=open&per_page=100&sort=updated",
+			`https://api.github.com/repos/${repo}/issues?state=open&per_page=100&sort=updated${labelQuery}`,
 			{
 				headers: {
 					Authorization: `token ${token}`,
@@ -57,7 +68,7 @@ export const githubIssuesSource: DataSource = {
 				detail: teamLabel || undefined,
 				time: issue.updated_at,
 				action: "View",
-				actionUrl: `https://github.com/garywu/garywu-vault/issues/${issue.number}`,
+				actionUrl: `https://github.com/${repo}/issues/${issue.number}`,
 				isNew:
 					lastVisitedMs > 0 &&
 					new Date(issue.updated_at).getTime() > lastVisitedMs,

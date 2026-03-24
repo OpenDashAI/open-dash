@@ -19,6 +19,10 @@ export const cloudflareDeploysSource: DataSource = {
 		if (!cfToken || !cfAccountId) return [];
 
 		try {
+			// Get brand-specific worker name filter
+			const brandConfig = config.brandConfig as { worker?: string } | undefined;
+			const workerFilter = brandConfig?.worker;
+
 			const res = await fetch(
 				`https://api.cloudflare.com/client/v4/accounts/${cfAccountId}/workers/scripts`,
 				{
@@ -42,7 +46,13 @@ export const cloudflareDeploysSource: DataSource = {
 				? new Date(config.lastVisited).getTime()
 				: 0;
 
-			const recentDeploys = data.result.filter(
+			// Filter by worker name if specified
+			let workers = data.result;
+			if (workerFilter) {
+				workers = workers.filter((w) => w.id.includes(workerFilter));
+			}
+
+			const recentDeploys = workers.filter(
 				(w) =>
 					lastVisitedMs > 0 &&
 					new Date(w.modified_on).getTime() > lastVisitedMs,
