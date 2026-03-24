@@ -265,23 +265,22 @@ export default {
 		} catch (err) {
 			const errorMsg = err instanceof Error ? err.message : String(err);
 			const errorStack = err instanceof Error ? err.stack : '';
+			const requestId = crypto.randomUUID();
 			console.error("Worker error:", {
+				requestId,
 				message: errorMsg,
 				stack: errorStack,
 				url: request.url,
 				method: request.method,
 				timestamp: new Date().toISOString()
 			});
-			// In dev mode, return error details for debugging
-			const isDev = !env.CLERK_SECRET_KEY;
-			if (isDev) {
-				return Response.json({
-					error: errorMsg,
-					stack: errorStack,
-					timestamp: new Date().toISOString()
-				}, { status: 500 });
-			}
-			return new Response("Internal Server Error", { status: 500 });
+			// SECURITY: Never return stack traces to clients
+			// Only return generic error with request ID for debugging
+			return Response.json({
+				error: "Internal Server Error",
+				requestId: requestId,
+				timestamp: new Date().toISOString()
+			}, { status: 500 });
 		}
 	},
 };
