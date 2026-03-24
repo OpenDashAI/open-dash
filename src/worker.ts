@@ -167,6 +167,27 @@ export default {
 				clerkUserId = "dev_user";
 			}
 
+			// SECURITY: Require authentication for all non-public routes
+			// Whitelist of routes that don't require authentication
+			const publicRoutes = ["/health", "/login", "/sign-up", "/sign-in", "/landing", "/logout"];
+			const isPublicRoute = publicRoutes.some((route) => url.pathname === route || url.pathname.startsWith(route));
+			const isSpecialRoute = url.pathname === "/api/ws" || url.pathname === "/api/events";
+
+			if (!isPublicRoute && !isSpecialRoute && !clerkUserId) {
+				// No authenticated user and route is not public
+				const accept = request.headers.get("Accept") ?? "";
+				if (accept.includes("text/html") && request.method === "GET") {
+					return addSecurityHeaders(new Response(null, {
+						status: 302,
+						headers: { Location: "/login" },
+					}));
+				}
+				return addSecurityHeaders(Response.json(
+					{ error: "Authentication required" },
+					{ status: 401 }
+				));
+			}
+
 			// RBAC middleware — load org context for multi-tenant routes
 			if (clerkUserId && env.DB) {
 				const orgSlug = extractOrgFromPath(url.pathname);
