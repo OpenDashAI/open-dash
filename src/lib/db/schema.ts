@@ -647,6 +647,96 @@ export type MarketInsightInsert = typeof marketInsightsTable.$inferInsert;
 export type CompetitiveAlert = typeof competitiveAlertsTable.$inferSelect;
 export type CompetitiveAlertInsert = typeof competitiveAlertsTable.$inferInsert;
 
+/**
+ * SERP Tracker Tables (Issue #27.4 - Competitive Intelligence)
+ * Org and brand-scoped competitor tracking
+ */
+
+/**
+ * Competitors — Tracked competitor domains per brand
+ * Links back to specific brand in an org for isolated competitor intelligence
+ */
+export const competitorsTable = sqliteTable(
+	"competitors",
+	{
+		id: text("id").primaryKey(),
+		brandId: text("brand_id").notNull(),
+		orgId: text("org_id").notNull(),
+		domain: text("domain").notNull(),
+		name: text("name").notNull(),
+
+		// Keywords to track for this competitor (JSON array)
+		keywords: text("keywords").default("[]"),
+
+		// Status
+		active: integer("active", { mode: "boolean" })
+			.notNull()
+			.default(1),
+		archived: integer("archived", { mode: "boolean" })
+			.notNull()
+			.default(0),
+		archivedAt: integer("archived_at"),
+
+		// Timestamps
+		createdAt: integer("created_at")
+			.notNull()
+			.default(sql`(cast(strftime('%s', 'now') * 1000 as integer))`),
+		updatedAt: integer("updated_at")
+			.notNull()
+			.default(sql`(cast(strftime('%s', 'now') * 1000 as integer))`),
+	},
+	(table) => [
+		index("idx_competitors_brandId").on(table.brandId),
+		index("idx_competitors_orgId").on(table.orgId),
+		index("idx_competitors_domain").on(table.domain),
+		index("idx_competitors_active").on(table.active),
+	]
+);
+
+/**
+ * SERP Rankings — Daily snapshots of search result positions
+ * Tracks competitor rankings across keywords for trend analysis
+ */
+export const serpRankingsTable = sqliteTable(
+	"serp_rankings",
+	{
+		id: text("id").primaryKey(),
+		competitorId: text("competitor_id").notNull(),
+		brandId: text("brand_id").notNull(),
+		orgId: text("org_id").notNull(),
+
+		// Search term and result
+		keyword: text("keyword").notNull(),
+		rank: integer("rank").notNull(), // 1-100+
+		url: text("url").notNull(),
+		title: text("title"),
+		snippet: text("snippet"),
+
+		// Search engine (google, bing, duckduckgo, etc)
+		searchEngine: text("search_engine").default("google"),
+
+		// Snapshot date (for daily comparison)
+		snapshotDate: integer("snapshot_date").notNull(), // Date in milliseconds (start of day UTC)
+
+		// Timestamps
+		createdAt: integer("created_at")
+			.notNull()
+			.default(sql`(cast(strftime('%s', 'now') * 1000 as integer))`),
+	},
+	(table) => [
+		index("idx_serp_rankings_competitorId").on(table.competitorId),
+		index("idx_serp_rankings_brandId").on(table.brandId),
+		index("idx_serp_rankings_orgId").on(table.orgId),
+		index("idx_serp_rankings_keyword").on(table.keyword),
+		index("idx_serp_rankings_snapshotDate").on(table.snapshotDate),
+		index("idx_serp_rankings_competitive").on(
+			table.competitorId,
+			table.keyword,
+			table.snapshotDate
+		),
+	]
+);
+
 // Organization & Team types
 export type Organization = typeof organizationsTable.$inferSelect;
 export type OrganizationInsert = typeof organizationsTable.$inferInsert;
@@ -656,3 +746,10 @@ export type TeamMemberInsert = typeof teamMembersTable.$inferInsert;
 
 export type Brand = typeof brandsTable.$inferSelect;
 export type BrandInsert = typeof brandsTable.$inferInsert;
+
+// SERP Tracker types
+export type Competitor = typeof competitorsTable.$inferSelect;
+export type CompetitorInsert = typeof competitorsTable.$inferInsert;
+
+export type SerpRanking = typeof serpRankingsTable.$inferSelect;
+export type SerpRankingInsert = typeof serpRankingsTable.$inferInsert;

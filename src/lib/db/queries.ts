@@ -26,6 +26,8 @@ import {
 	organizationsTable,
 	teamMembersTable,
 	brandsTable,
+	competitorsTable,
+	serpRankingsTable,
 	type DatasourceMetric,
 	type DatasourceStatus,
 	type AlertRule,
@@ -36,6 +38,10 @@ import {
 	type TeamMemberInsert,
 	type Brand,
 	type BrandInsert,
+	type Competitor,
+	type CompetitorInsert,
+	type SerpRanking,
+	type SerpRankingInsert,
 } from "./schema";
 
 export type {
@@ -48,6 +54,10 @@ export type {
 	TeamMember,
 	TeamMemberInsert,
 	Brand,
+	Competitor,
+	CompetitorInsert,
+	SerpRanking,
+	SerpRankingInsert,
 	BrandInsert,
 };
 
@@ -555,4 +565,132 @@ export async function archiveBrand(
 		.update(brandsTable)
 		.set({ archived: true, archivedAt: now })
 		.where(eq(brandsTable.id, brandId));
+}
+
+// ============================================================================
+// SERP Tracker Queries (Issue #27.4 - Competitive Intelligence)
+// ============================================================================
+
+/**
+ * Add a competitor to track for a brand
+ */
+export async function addCompetitor(
+	db: ReturnType<typeof initDb>,
+	competitor: CompetitorInsert
+) {
+	return db.insert(competitorsTable).values(competitor);
+}
+
+/**
+ * Get all active competitors for a brand
+ */
+export async function getCompetitorsByBrand(
+	db: ReturnType<typeof initDb>,
+	brandId: string
+) {
+	return db
+		.select()
+		.from(competitorsTable)
+		.where(and(eq(competitorsTable.brandId, brandId), eq(competitorsTable.active, true)));
+}
+
+/**
+ * Get competitors for an org (all brands)
+ */
+export async function getCompetitorsByOrg(
+	db: ReturnType<typeof initDb>,
+	orgId: string
+) {
+	return db
+		.select()
+		.from(competitorsTable)
+		.where(and(eq(competitorsTable.orgId, orgId), eq(competitorsTable.active, true)));
+}
+
+/**
+ * Get a specific competitor
+ */
+export async function getCompetitor(
+	db: ReturnType<typeof initDb>,
+	competitorId: string
+) {
+	return db
+		.select()
+		.from(competitorsTable)
+		.where(eq(competitorsTable.id, competitorId))
+		.limit(1);
+}
+
+/**
+ * Record SERP rankings for a competitor (daily snapshot)
+ */
+export async function recordSerpRankings(
+	db: ReturnType<typeof initDb>,
+	rankings: SerpRankingInsert[]
+) {
+	if (rankings.length === 0) return null;
+	return db.insert(serpRankingsTable).values(rankings);
+}
+
+/**
+ * Get latest SERP rankings for a competitor
+ */
+export async function getLatestSerpRankings(
+	db: ReturnType<typeof initDb>,
+	competitorId: string
+) {
+	const today = new Date();
+	today.setUTCHours(0, 0, 0, 0);
+	const todayMs = today.getTime();
+
+	return db
+		.select()
+		.from(serpRankingsTable)
+		.where(
+			and(
+				eq(serpRankingsTable.competitorId, competitorId),
+				eq(serpRankingsTable.snapshotDate, todayMs)
+			)
+		);
+}
+
+/**
+ * Get SERP ranking history for a keyword (trend analysis)
+ */
+export async function getSerpTrend(
+	db: ReturnType<typeof initDb>,
+	competitorId: string,
+	keyword: string,
+	days: number = 30
+) {
+	const pastDate = new Date();
+	pastDate.setUTCDate(pastDate.getUTCDate() - days);
+	pastDate.setUTCHours(0, 0, 0, 0);
+	const pastDateMs = pastDate.getTime();
+
+	return db
+		.select()
+		.from(serpRankingsTable)
+		.where(
+			and(
+				eq(serpRankingsTable.competitorId, competitorId),
+				eq(serpRankingsTable.keyword, keyword),
+				gte(serpRankingsTable.snapshotDate, pastDateMs)
+			)
+		)
+		.orderBy(asc(serpRankingsTable.snapshotDate));
+}
+
+/**
+ * Remove a competitor (soft delete)
+ */
+export async function archiveCompetitor(
+	db: ReturnType<typeof initDb>,
+	competitorId: string
+) {
+	const now = Date.now();
+	return db
+		.update(competitorsTable)
+		.set({ archived: true, archivedAt: now })
+		.where(eq(competitorsTable.id, competitorId));
 }
