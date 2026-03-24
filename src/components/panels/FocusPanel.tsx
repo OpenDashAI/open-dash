@@ -14,6 +14,7 @@ import { BriefingCard } from "../cards/BriefingCard";
 import { IssueCard } from "../cards/IssueCard";
 import { StatusCard } from "../cards/StatusCard";
 import { AnalyticsDashboard } from "../analytics/AnalyticsDashboard";
+import { SerpTrendingPanel } from "./SerpTrendingPanel";
 
 function handleAction(item: BriefingItem) {
 	// If this is an escalation with an approval action, approve it
@@ -252,7 +253,15 @@ function AnalyticsView() {
 		);
 	}
 
-	return <AnalyticsDashboard datasources={dataSources} />;
+	return (
+		<div className="space-y-4">
+			{/* SERP Trending Panel */}
+			<SerpTrendingPanel title="Competitive SERP Tracking" />
+
+			{/* Analytics Dashboard */}
+			<AnalyticsDashboard datasources={dataSources} />
+		</div>
+	);
 }
 
 export function FocusPanel() {
