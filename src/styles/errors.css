@@ -1,0 +1,57 @@
+/* Error Fallback */
+.error-fallback {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	min-height: 300px;
+	padding: 2rem;
+	color: var(--hud-text-muted);
+	background: var(--hud-bg);
+	border: 1px solid var(--hud-border);
+	border-radius: 4px;
+	text-align: center;
+}
+
+.error-icon {
+	font-size: 3rem;
+	margin-bottom: 1rem;
+	opacity: 0.7;
+}
+
+.error-title {
+	font-size: 1.25rem;
+	font-weight: bold;
+	color: var(--hud-text-bright);
+	margin-bottom: 0.5rem;
+}
+
+.error-message {
+	font-size: 0.875rem;
+	color: var(--hud-text-muted);
+	margin-bottom: 1.5rem;
+	max-width: 400px;
+	word-break: break-word;
+}
+
+.error-reset-button {
+	padding: 0.5rem 1.5rem;
+	background: var(--hud-accent);
+	color: var(--hud-bg);
+	border: none;
+	border-radius: 3px;
+	cursor: pointer;
+	font-family: var(--font-mono);
+	font-size: 0.875rem;
+	font-weight: 500;
+	transition: all 0.2s;
+}
+
+.error-reset-button:hover {
+	opacity: 0.9;
+	transform: translateY(-1px);
+}
+
+.error-reset-button:active {
+	transform: translateY(0);
+}
