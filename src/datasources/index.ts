@@ -14,6 +14,7 @@ import { tailscaleSource } from "./tailscale";
 import { serpTrackerSource } from "./serp-tracker";
 import { competitorDomainsSource } from "./competitor-domains";
 import { competitorContentSource } from "./competitor-content";
+import { competitorDomainMetricsSource } from "./competitor-domain-metrics";
 import { marketInsightsSource } from "./market-insights";
 
 // Register all built-in sources
@@ -28,6 +29,7 @@ registry.register(scalableMediaSource);
 registry.register(serpTrackerSource);
 registry.register(competitorDomainsSource);
 registry.register(competitorContentSource);
+registry.register(competitorDomainMetricsSource);
 registry.register(marketInsightsSource);
 
 export { registry };
