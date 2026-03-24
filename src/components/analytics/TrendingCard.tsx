@@ -90,7 +90,11 @@ export function TrendingCard({
 
       {/* Trend Indicator */}
       <div className="mt-3 flex items-center gap-2">
-        <span className={`text-xl ${trendIndicator?.color}`}>
+        <span
+          className={`text-xl ${trendIndicator?.color}`}
+          aria-label={`Trend ${trendIndicator?.label?.toLowerCase()}: ${trendIndicator?.arrow}`}
+          role="img"
+        >
           {trendIndicator?.arrow}
         </span>
         <span className={`text-sm font-semibold ${trendIndicator?.color}`}>

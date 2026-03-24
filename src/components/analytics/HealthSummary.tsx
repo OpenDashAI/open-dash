@@ -91,7 +91,14 @@ export function HealthSummary({
             {healthPercentage}%
           </span>
         </div>
-        <div className="h-2 bg-[var(--hud-bg-secondary)] rounded overflow-hidden">
+        <div
+          className="h-2 bg-[var(--hud-bg-secondary)] rounded overflow-hidden"
+          role="progressbar"
+          aria-valuenow={healthPercentage}
+          aria-valuemin={0}
+          aria-valuemax={100}
+          aria-label={`Overall health status: ${healthPercentage}% of datasources healthy`}
+        >
           <div
             className="h-full bg-[var(--hud-success)] transition-all"
             style={{ width: `${healthPercentage}%` }}

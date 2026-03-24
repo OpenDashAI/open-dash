@@ -28,7 +28,7 @@ export function AnomalyBadge({
       case "medium":
         return "bg-yellow-600 text-white";
       case "low":
-        return "bg-blue-600 text-white";
+        return "bg-blue-700 text-white";
     }
   };
 

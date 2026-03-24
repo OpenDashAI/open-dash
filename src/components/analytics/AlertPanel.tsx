@@ -33,7 +33,7 @@ export function AlertPanel({
       case "medium":
         return "bg-yellow-600 text-white";
       case "low":
-        return "bg-blue-600 text-white";
+        return "bg-blue-700 text-white";
       default:
         return "bg-gray-600 text-white";
     }
@@ -85,7 +85,12 @@ export function AlertPanel({
           No active alerts
         </div>
       ) : (
-        <div className="mt-3 space-y-2 max-h-48 overflow-y-auto">
+        <div
+          className="mt-3 space-y-2 max-h-48 overflow-y-auto focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--hud-text-bright)] rounded"
+          role="region"
+          aria-label={`Active alerts for ${datasourceId}: ${sortedAlerts.length} item${sortedAlerts.length !== 1 ? 's' : ''}`}
+          tabIndex={0}
+        >
           {sortedAlerts.map((alert) => (
             <div
               key={alert.id}
