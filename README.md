@@ -86,6 +86,8 @@ Phase 8 adds production deployment, error monitoring, and operational documentat
 **For Operations**:
 - 📖 [**DEPLOYMENT.md**](./DEPLOYMENT.md) — Step-by-step deploy guide (local → staging → prod)
 - 🚨 [**ALERT_RULES.md**](./ALERT_RULES.md) — Configure monitoring alerts for your brands
+- 🔍 [**SENTRY_SETUP.md**](./SENTRY_SETUP.md) — Error tracking integration (30 min setup)
+- 🚀 [**CI_CD_SETUP.md**](./CI_CD_SETUP.md) — GitHub Actions auto-deploy pipeline
 
 **For Users**:
 - 👤 [**USER_GUIDE.md**](./USER_GUIDE.md) — Morning Briefing, Focus Mode, Portfolio explained
