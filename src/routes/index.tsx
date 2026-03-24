@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { MorningFlow } from "../components/MorningFlow";
 import { PanelResizer } from "../components/PanelResizer";
@@ -97,6 +97,7 @@ function shouldShowMorningFlow(lastVisited: string | null): boolean {
 function HUD() {
 	const loaderData = Route.useLoaderData();
 	const { experience } = useHudState();
+	const navigate = useNavigate({ from: "/" });
 	useKeyboardShortcuts();
 	useLiveData();
 
@@ -230,7 +231,13 @@ function HUD() {
 						</span>
 					</span>
 					<span className="text-[var(--hud-border)]">|</span>
-					<span>{loaderData.brands.length} brands</span>
+					<button
+						type="button"
+						onClick={() => navigate({ to: "/brands" })}
+						className="text-[var(--hud-text-muted)] hover:text-[var(--hud-accent)] cursor-pointer transition-colors"
+					>
+						{loaderData.brands.length} brands
+					</button>
 					<span className="text-[var(--hud-border)]">|</span>
 					<span>{loaderData.issues.length} issues</span>
 				</div>

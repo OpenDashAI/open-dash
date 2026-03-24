@@ -9,15 +9,27 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as BrandsRouteImport } from './routes/brands'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as BrandsSlugRouteImport } from './routes/brands/$slug'
 import { Route as ApiWsRouteImport } from './routes/api/ws'
 import { Route as ApiOrchestrateRouteImport } from './routes/api/orchestrate'
 import { Route as ApiChatRouteImport } from './routes/api/chat'
 
+const BrandsRoute = BrandsRouteImport.update({
+  id: '/brands',
+  path: '/brands',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
+} as any)
+const BrandsSlugRoute = BrandsSlugRouteImport.update({
+  id: '/$slug',
+  path: '/$slug',
+  getParentRoute: () => BrandsRoute,
 } as any)
 const ApiWsRoute = ApiWsRouteImport.update({
   id: '/api/ws',
@@ -37,33 +49,59 @@ const ApiChatRoute = ApiChatRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/brands': typeof BrandsRouteWithChildren
   '/api/chat': typeof ApiChatRoute
   '/api/orchestrate': typeof ApiOrchestrateRoute
   '/api/ws': typeof ApiWsRoute
+  '/brands/$slug': typeof BrandsSlugRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/brands': typeof BrandsRouteWithChildren
   '/api/chat': typeof ApiChatRoute
   '/api/orchestrate': typeof ApiOrchestrateRoute
   '/api/ws': typeof ApiWsRoute
+  '/brands/$slug': typeof BrandsSlugRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/brands': typeof BrandsRouteWithChildren
   '/api/chat': typeof ApiChatRoute
   '/api/orchestrate': typeof ApiOrchestrateRoute
   '/api/ws': typeof ApiWsRoute
+  '/brands/$slug': typeof BrandsSlugRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/api/chat' | '/api/orchestrate' | '/api/ws'
+  fullPaths:
+    | '/'
+    | '/brands'
+    | '/api/chat'
+    | '/api/orchestrate'
+    | '/api/ws'
+    | '/brands/$slug'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/api/chat' | '/api/orchestrate' | '/api/ws'
-  id: '__root__' | '/' | '/api/chat' | '/api/orchestrate' | '/api/ws'
+  to:
+    | '/'
+    | '/brands'
+    | '/api/chat'
+    | '/api/orchestrate'
+    | '/api/ws'
+    | '/brands/$slug'
+  id:
+    | '__root__'
+    | '/'
+    | '/brands'
+    | '/api/chat'
+    | '/api/orchestrate'
+    | '/api/ws'
+    | '/brands/$slug'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  BrandsRoute: typeof BrandsRouteWithChildren
   ApiChatRoute: typeof ApiChatRoute
   ApiOrchestrateRoute: typeof ApiOrchestrateRoute
   ApiWsRoute: typeof ApiWsRoute
@@ -71,12 +109,26 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/brands': {
+      id: '/brands'
+      path: '/brands'
+      fullPath: '/brands'
+      preLoaderRoute: typeof BrandsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/brands/$slug': {
+      id: '/brands/$slug'
+      path: '/$slug'
+      fullPath: '/brands/$slug'
+      preLoaderRoute: typeof BrandsSlugRouteImport
+      parentRoute: typeof BrandsRoute
     }
     '/api/ws': {
       id: '/api/ws'
@@ -102,8 +154,20 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface BrandsRouteChildren {
+  BrandsSlugRoute: typeof BrandsSlugRoute
+}
+
+const BrandsRouteChildren: BrandsRouteChildren = {
+  BrandsSlugRoute: BrandsSlugRoute,
+}
+
+const BrandsRouteWithChildren =
+  BrandsRoute._addFileChildren(BrandsRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  BrandsRoute: BrandsRouteWithChildren,
   ApiChatRoute: ApiChatRoute,
   ApiOrchestrateRoute: ApiOrchestrateRoute,
   ApiWsRoute: ApiWsRoute,
