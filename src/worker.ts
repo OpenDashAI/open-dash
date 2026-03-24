@@ -126,6 +126,11 @@ export default {
 				}
 			}
 
+			// Development mode: set default user if Clerk not configured
+			if (!clerkUserId && !env.CLERK_SECRET_KEY) {
+				clerkUserId = "dev_user";
+			}
+
 			// RBAC middleware — load org context for multi-tenant routes
 			if (clerkUserId && env.DB) {
 				const orgSlug = extractOrgFromPath(url.pathname);

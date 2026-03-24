@@ -28,6 +28,7 @@ import {
 	brandsTable,
 	competitorsTable,
 	serpRankingsTable,
+	competitorContentTable,
 	type DatasourceMetric,
 	type DatasourceStatus,
 	type AlertRule,
@@ -42,6 +43,8 @@ import {
 	type CompetitorInsert,
 	type SerpRanking,
 	type SerpRankingInsert,
+	type CompetitorContent,
+	type CompetitorContentInsert,
 } from "./schema";
 
 export type {
@@ -59,6 +62,8 @@ export type {
 	SerpRanking,
 	SerpRankingInsert,
 	BrandInsert,
+	CompetitorContent,
+	CompetitorContentInsert,
 };
 
 /**
@@ -693,4 +698,88 @@ export async function archiveCompetitor(
 		.update(competitorsTable)
 		.set({ archived: true, archivedAt: now })
 		.where(eq(competitorsTable.id, competitorId));
+}
+
+/**
+ * COMPETITOR CONTENT QUERIES
+ */
+
+/**
+ * Insert competitor content snapshot
+ */
+export async function insertCompetitorContent(
+	db: ReturnType<typeof initDb>,
+	content: CompetitorContentInsert
+) {
+	return db.insert(competitorContentTable).values(content);
+}
+
+/**
+ * Get competitor content by publish date range
+ */
+export async function getCompetitorContentByDate(
+	db: ReturnType<typeof initDb>,
+	competitorId: string,
+	sinceDate: number,
+	daysBack: number = 1
+) {
+	const startDate = sinceDate - daysBack * 24 * 60 * 60 * 1000;
+
+	return db
+		.select()
+		.from(competitorContentTable)
+		.where(
+			and(
+				eq(competitorContentTable.competitorId, competitorId),
+				gte(competitorContentTable.publishDate, startDate),
+				lte(competitorContentTable.publishDate, sinceDate)
+			)
+		)
+		.orderBy(desc(competitorContentTable.publishDate));
+}
+
+/**
+ * Get all competitor content for a date
+ */
+export async function getCompetitorContentByExactDate(
+	db: ReturnType<typeof initDb>,
+	competitorId: string,
+	exactDate: number
+) {
+	const dayStart = new Date(exactDate);
+	dayStart.setUTCHours(0, 0, 0, 0);
+	const dayEnd = new Date(exactDate);
+	dayEnd.setUTCHours(23, 59, 59, 999);
+
+	return db
+		.select()
+		.from(competitorContentTable)
+		.where(
+			and(
+				eq(competitorContentTable.competitorId, competitorId),
+				gte(competitorContentTable.publishDate, dayStart.getTime()),
+				lte(competitorContentTable.publishDate, dayEnd.getTime())
+			)
+		)
+		.orderBy(desc(competitorContentTable.publishDate));
+}
+
+/**
+ * Get competitor content by type
+ */
+export async function getCompetitorContentByType(
+	db: ReturnType<typeof initDb>,
+	competitorId: string,
+	contentType: "blog" | "case_study" | "tutorial" | "announcement" | "guide"
+) {
+	return db
+		.select()
+		.from(competitorContentTable)
+		.where(
+			and(
+				eq(competitorContentTable.competitorId, competitorId),
+				eq(competitorContentTable.contentType, contentType)
+			)
+		)
+		.orderBy(desc(competitorContentTable.publishDate));
 }
