@@ -157,11 +157,11 @@ function AlertRulesTab({ rules }: any) {
 			<div className="bg-blue-50 border border-blue-200 rounded-lg p-6">
 				<h3 className="font-semibold text-blue-900 mb-2">Common Alert Rules</h3>
 				<ul className="space-y-2 text-sm text-blue-900">
-					<li>• SERP ranking drop > 5 positions for key terms</li>
-					<li>• Domain Authority increase > 2 points</li>
+					<li>• SERP ranking drop &gt; 5 positions for key terms</li>
+					<li>• Domain Authority increase &gt; 2 points</li>
 					<li>• Pricing change detected (any tier)</li>
-					<li>• New content published (> 3 articles/week)</li>
-					<li>• Backlink growth > 100/month</li>
+					<li>• New content published (&gt; 3 articles/week)</li>
+					<li>• Backlink growth &gt; 100/month</li>
 				</ul>
 			</div>
 		</div>

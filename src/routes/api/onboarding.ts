@@ -1,5 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { getSessionCookie } from "../../server/auth";
+import { createOrgForUser } from "../../server/organizations";
+import type { EventContext } from "@cloudflare/workers-types";
 
 /**
  * POST /api/onboarding
@@ -14,7 +16,7 @@ import { getSessionCookie } from "../../server/auth";
 export const Route = createFileRoute("/api/onboarding")({
 	server: {
 		handlers: {
-			POST: async ({ request }) => {
+			POST: async ({ request, context }) => {
 				try {
 					// Get Clerk session cookie
 					const sessionCookie = getSessionCookie(request);
@@ -25,26 +27,42 @@ export const Route = createFileRoute("/api/onboarding")({
 						);
 					}
 
-					// TODO: Decode Clerk JWT token from session to get:
-					// - clerkId
-					// - email
-					// - firstName
-					// - lastName
-					// - avatar
-					//
-					// Then call upsertUser() and markEmailSent()
-					//
-					// For MVP, we're returning success here.
-					// Full implementation requires:
-					// 1. Clerk's public key for JWT verification
-					// 2. Or using Clerk's backend API to get user info
-					// 3. Resend SDK to send welcome email
+					// Parse request body to get user info
+					// In production, you'd decode the Clerk JWT token
+					const body = await request.json().catch(() => ({}));
+					const { clerkId, email, firstName, lastName } = body;
+
+					if (!clerkId || !email) {
+						return new Response(
+							JSON.stringify({ error: "Missing required fields" }),
+							{ status: 400, headers: { "Content-Type": "application/json" } },
+						);
+					}
+
+					// Create default organization for user
+					// Org slug will be derived from email (before @)
+					const defaultOrgName = email.split("@")[0];
+					const db = (context as EventContext).env.DB;
+
+					const { orgId, slug } = await createOrgForUser(
+						db,
+						clerkId,
+						defaultOrgName,
+						clerkId
+					);
+
+					// TODO: In next phase:
+					// 1. Create/update user in users table
+					// 2. Send welcome email via Resend
+					// 3. Log onboarding event
 
 					return new Response(
 						JSON.stringify({
 							success: true,
-							message:
-								"Onboarding initiated. Clerk session verified.",
+							message: "Organization created successfully",
+							orgId,
+							slug,
+							role: "owner",
 						}),
 						{
 							status: 200,
@@ -56,7 +74,7 @@ export const Route = createFileRoute("/api/onboarding")({
 					return new Response(
 						JSON.stringify({
 							success: false,
-							error: "Onboarding failed",
+							error: err instanceof Error ? err.message : "Onboarding failed",
 						}),
 						{
 							status: 500,
