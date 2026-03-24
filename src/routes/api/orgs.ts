@@ -28,6 +28,8 @@ import {
 	canModifyOrg,
 } from "@/server/rbac";
 import { getRequestAuthContext } from "@/lib/worker-context";
+import { verifyInviteToken } from "@/server/email-service";
+import { acceptInvite, initDb } from "@/lib/db/queries";
 import type { EventContext } from "@cloudflare/workers-types";
 
 /**
@@ -185,6 +187,54 @@ export const inviteTeamMember = createServerFn(
 			emailSent: result.emailSent,
 			message,
 		};
+	}
+);
+
+/**
+ * Accept team member invitation
+ * Public endpoint (no auth required) — token is the authorization
+ */
+export const acceptInviteLink = createServerFn(
+	{ method: "POST" },
+	async (request: Request, context: EventContext) => {
+		const url = new URL(request.url);
+
+		// Extract token from path: /api/orgs/invite/{token}/accept
+		const pathParts = url.pathname.split("/").filter(Boolean);
+		const tokenIndex = pathParts.indexOf("invite");
+
+		if (tokenIndex === -1 || !pathParts[tokenIndex + 1]) {
+			throw new Response("Missing invite token", { status: 400 });
+		}
+
+		const token = pathParts[tokenIndex + 1];
+
+		// Verify token and extract memberId
+		const memberId = verifyInviteToken(token);
+		if (!memberId) {
+			throw new Response("Invalid or expired invite link", { status: 400 });
+		}
+
+		const db = context.env.DB;
+		if (!db) {
+			throw new Response("Database not available", { status: 503 });
+		}
+
+		try {
+			const drizzleDb = initDb(db);
+
+			// Accept the invitation (sets acceptedAt to now)
+			await acceptInvite(drizzleDb, memberId);
+
+			return {
+				success: true,
+				message: "Invitation accepted! You now have access to the organization.",
+				memberId,
+			};
+		} catch (err) {
+			console.error("Failed to accept invite:", err);
+			throw new Response("Failed to process invitation", { status: 500 });
+		}
 	}
 );
 
