@@ -20,6 +20,7 @@ import { marketInsightsSource } from "./market-insights";
 
 // Campaign performance sources
 import { googleAdsSource } from "./google-ads";
+import { metaAdsSource } from "./meta-ads";
 
 // Register all built-in sources
 registry.register(githubIssuesSource);
@@ -39,5 +40,6 @@ registry.register(marketInsightsSource);
 
 // Register campaign performance sources (Week 2+)
 registry.register(googleAdsSource);
+registry.register(metaAdsSource);
 
 export { registry };
