@@ -11,7 +11,11 @@ import {
 	loadAuthContext,
 	getPermissions,
 } from "./server/rbac";
-import { initWorkerContext } from "./lib/worker-context";
+import {
+	initWorkerContext,
+	setRequestAuthContext,
+	clearRequestAuthContext,
+} from "./lib/worker-context";
 import { metricsTracker } from "./lib/monitoring";
 
 // Export Durable Object classes for Cloudflare bindings
@@ -125,13 +129,24 @@ export default {
 				const orgSlug = extractOrgFromPath(url.pathname);
 				if (orgSlug) {
 					try {
-						// In production, load from DB:
-						// const authContext = await loadAuthContext(request, env.DB, clerkUserId);
-						// Store on context for handlers (requires request wrapper pattern)
-						// For MVP, handlers extract org directly and verify permissions
+						const authContext = await loadAuthContext(request, env.DB, clerkUserId);
+						if (authContext) {
+							// Store auth context on request for handlers to access
+							setRequestAuthContext(request, authContext);
+							// Clean up after response completes
+							ctx.waitUntil(
+								(async () => {
+									await new Promise((resolve) => setTimeout(resolve, 50));
+									clearRequestAuthContext(request);
+								})()
+							);
+						}
 					} catch (err) {
+						if (err instanceof Response) {
+							return err;
+						}
 						console.error("RBAC context load failed:", err);
-						// Non-fatal — handlers verify permissions individually
+						// Non-fatal for public/API routes
 					}
 				}
 			}

@@ -142,6 +142,9 @@ export function extractOrgFromPath(pathname: string): string | null {
  * 2. Org exists and is accessible
  * 3. User is member of org (active)
  * 4. Computes permissions
+ *
+ * Returns null if route doesn't require org context (public routes)
+ * Throws 403 if user lacks permission
  */
 export async function loadAuthContext(
 	request: Request,
@@ -153,27 +156,64 @@ export async function loadAuthContext(
 	const orgSlug = extractOrgFromPath(url.pathname);
 
 	if (!orgSlug) {
-		// Public routes don't require org context
+		// Public/API routes don't require org context
 		return null;
 	}
 
 	try {
-		// Query team member
-		// NOTE: This is simplified - in production, you'd:
-		// 1. Load org by slug
-		// 2. Verify user is member of that org
-		// 3. Load team_member record
-		// For now, we'll use a placeholder pattern
+		const drizzleDb = drizzle(db);
 
-		// In actual implementation, would do:
-		// const org = await getOrganizationBySlug(db, orgSlug);
-		// const teamMember = await getTeamMember(db, org.id, clerkUserId);
+		// Load org by slug
+		const { getOrganizationBySlug, getTeamMember: getTeamMemberByIds } =
+			await import("@/lib/db/queries");
 
-		// Placeholder return to show structure
-		return null;
+		const orgs = await getOrganizationBySlug(drizzleDb, orgSlug);
+		if (!orgs || orgs.length === 0) {
+			throw new Response("Organization not found", { status: 404 });
+		}
+
+		const org = orgs[0];
+		const orgId = org.id;
+
+		// Load team member
+		const teamMembers = await drizzleDb
+			.select()
+			.from(teamMembersTable)
+			.where(and(eq(teamMembersTable.orgId, orgId), eq(teamMembersTable.userId, clerkUserId)))
+			.limit(1);
+
+		if (!teamMembers || teamMembers.length === 0) {
+			throw new Response("Not a member of this organization", { status: 403 });
+		}
+
+		const teamMember = teamMembers[0];
+
+		// Verify membership is active
+		if (!teamMember.active || teamMember.acceptedAt === null) {
+			throw new Response("Membership not active", { status: 403 });
+		}
+
+		const role = teamMember.role as "owner" | "editor" | "viewer";
+
+		return {
+			userId: clerkUserId,
+			orgId,
+			role,
+			permissions: getPermissions(role),
+			teamMember: {
+				id: teamMember.id,
+				orgId: teamMember.orgId,
+				userId: teamMember.userId,
+				role: teamMember.role,
+				active: teamMember.active,
+			},
+		};
 	} catch (error) {
+		if (error instanceof Response) {
+			throw error;
+		}
 		console.error("[RBAC] Failed to load auth context:", error);
-		return null;
+		throw new Response("Internal server error", { status: 500 });
 	}
 }
 

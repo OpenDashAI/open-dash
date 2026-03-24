@@ -22,11 +22,17 @@ import {
 	getTeamMembers,
 	getPendingInvites,
 } from "@/lib/db/queries";
-import { requirePermission, getAuth } from "@/server/rbac";
+import {
+	requirePermission,
+	canManageTeam,
+	canModifyOrg,
+} from "@/server/rbac";
+import { getRequestAuthContext } from "@/lib/worker-context";
 import type { EventContext } from "@cloudflare/workers-types";
 
 /**
  * Get organization details
+ * Requires: canRead permission for the org
  */
 export const getOrgDetails = createServerFn(
 	{ method: "GET" },
@@ -34,16 +40,18 @@ export const getOrgDetails = createServerFn(
 		const session = await verifyClerkSession(request, context.env);
 		if (!session) throw new Response("Unauthorized", { status: 401 });
 
-		const url = new URL(request.url);
-		const orgId = url.searchParams.get("orgId");
-		if (!orgId) throw new Response("Missing orgId", { status: 400 });
+		// Load auth context from middleware (org context is in path)
+		const auth = getRequestAuthContext(request);
 
 		const db = context.env.DB;
-		const org = await getOrganization(db, orgId);
+		const org = await getOrganization(db, auth.orgId);
 
 		if (!org || org.length === 0) {
 			throw new Response("Org not found", { status: 404 });
 		}
+
+		// Verify user can view this org
+		requirePermission(auth.permissions, "canRead", "view org details");
 
 		return {
 			success: true,
@@ -90,8 +98,7 @@ export const createOrg = createServerFn(
 
 /**
  * List team members in organization
- *
- * GET /api/orgs/{orgId}/members
+ * Requires: canRead permission for the org
  */
 export const listTeamMembers = createServerFn(
 	{ method: "GET" },
@@ -99,13 +106,14 @@ export const listTeamMembers = createServerFn(
 		const session = await verifyClerkSession(request, context.env);
 		if (!session) throw new Response("Unauthorized", { status: 401 });
 
-		const url = new URL(request.url);
-		const orgId = url.searchParams.get("orgId");
-		if (!orgId) throw new Response("Missing orgId", { status: 400 });
+		const auth = getRequestAuthContext(request);
+
+		// Verify user can view this org
+		requirePermission(auth.permissions, "canRead", "list team members");
 
 		const db = context.env.DB;
-		const members = await getTeamMembers(db, orgId);
-		const pendingInvites = await getPendingInvites(db, orgId);
+		const members = await getTeamMembers(db, auth.orgId);
+		const pendingInvites = await getPendingInvites(db, auth.orgId);
 
 		return {
 			success: true,
@@ -133,9 +141,7 @@ export const inviteTeamMember = createServerFn(
 		const session = await verifyClerkSession(request, context.env);
 		if (!session) throw new Response("Unauthorized", { status: 401 });
 
-		const url = new URL(request.url);
-		const orgId = url.searchParams.get("orgId");
-		if (!orgId) throw new Response("Missing orgId", { status: 400 });
+		const auth = getRequestAuthContext(request);
 
 		const body = await request.json();
 		const { email, role } = body;
@@ -149,18 +155,21 @@ export const inviteTeamMember = createServerFn(
 			throw new Response("Invalid role", { status: 400 });
 		}
 
-		const db = context.env.DB;
+		// Check permission: only owners can invite
+		requirePermission(
+			auth.permissions,
+			"canManageTeam",
+			"invite team members"
+		);
 
-		// Check user permission (must be owner)
-		// In production, would verify auth context
-		// For now, simplified validation
+		const db = context.env.DB;
 
 		const result = await inviteUserToOrg(
 			db,
-			orgId,
+			auth.orgId,
 			email,
 			role as "editor" | "viewer",
-			session.userId
+			auth.userId
 		);
 
 		// Email sending handled in organizations.ts
