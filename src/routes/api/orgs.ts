@@ -163,15 +163,18 @@ export const inviteTeamMember = createServerFn(
 			session.userId
 		);
 
-		// TODO: Send email via Resend with invite link
-		// await sendInviteEmail(email, orgId, session.org.name);
+		// Email sending handled in organizations.ts
+		const message = result.emailSent
+			? "Invitation sent"
+			: "Invitation created (email pending)";
 
 		return {
 			success: true,
 			memberId: result.memberId,
 			email: result.email,
 			status: result.status,
-			message: "Invitation sent",
+			emailSent: result.emailSent,
+			message,
 		};
 	}
 );

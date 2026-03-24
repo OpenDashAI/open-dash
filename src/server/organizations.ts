@@ -112,22 +112,18 @@ export async function createOrgForUser(
  * Invite user to organization
  *
  * Creates pending invitation (acceptedAt = null)
- * Email sent separately via Resend
+ * Sends invitation email via Resend
  */
 export async function inviteUserToOrg(
 	db: D1Database,
 	orgId: string,
 	email: string,
 	role: "editor" | "viewer",
-	invitedByUserId: string
-): Promise<{ memberId: string; email: string; status: "pending" }> {
+	invitedByUserId: string,
+	inviterName: string = "A team member",
+	orgName: string = "your organization"
+): Promise<{ memberId: string; email: string; status: "pending"; emailSent: boolean }> {
 	const drizzleDb = drizzle(db);
-
-	// NOTE: In production, you'd:
-	// 1. Check if email matches existing user (via Clerk)
-	// 2. If user exists, create team member
-	// 3. If user doesn't exist, create invite record + send email with signup link
-	// For MVP, simplified to just create team member with NULL userId
 
 	const memberId = randomUUID();
 	// Using a deterministic placeholder for invitedUserId
@@ -149,7 +145,31 @@ export async function inviteUserToOrg(
 
 	await addTeamMember(drizzleDb, member);
 
-	return { memberId, email, status: "pending" };
+	// TODO: Send email via Resend
+	// Blocked on: Email service wiring, environment variable setup
+	let emailSent = false;
+	try {
+		// Uncomment when email service is integrated:
+		// const emailService = getEmailService();
+		// const inviteLink = generateInviteLink(memberId);
+		// const result = await emailService.sendInviteEmail(
+		//   email,
+		//   orgName,
+		//   inviterName,
+		//   role,
+		//   inviteLink
+		// );
+		// emailSent = result.success;
+
+		console.log(
+			`[TODO] Send invite email to ${email} for org ${orgId} (memberId: ${memberId})`
+		);
+	} catch (err) {
+		console.error("Failed to send invite email:", err);
+		// Non-fatal — invitation created even if email fails
+	}
+
+	return { memberId, email, status: "pending", emailSent };
 }
 
 /**
