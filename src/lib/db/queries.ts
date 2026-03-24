@@ -960,3 +960,84 @@ export async function getUnacknowledgedAnomalies(
 		)
 		.orderBy(desc(campaignAnomaliesTable.detectedAt));
 }
+
+/**
+ * Get alert rules for organization
+ */
+export async function getAlertRules(
+	db: ReturnType<typeof initDb>,
+	orgId: string
+) {
+	return db
+		.select()
+		.from(alertRulesTable)
+		.where(eq(alertRulesTable.orgId, orgId))
+		.orderBy(desc(alertRulesTable.updatedAt));
+}
+
+/**
+ * Create alert rule
+ */
+export async function createAlertRule(
+	db: ReturnType<typeof initDb>,
+	data: Partial<typeof alertRulesTable.$inferInsert>
+) {
+	const rule = {
+		id: `rule-${Date.now()}`,
+		datasourceId: data.datasourceId || "",
+		ruleType: data.ruleType || "latency",
+		threshold: data.threshold || 0,
+		alertChannels: data.alertChannels || "[]",
+		enabled: data.enabled !== false,
+		cooldownSeconds: data.cooldownSeconds || 3600,
+		orgId: data.orgId,
+		createdAt: Date.now(),
+		updatedAt: Date.now(),
+	};
+
+	return db.insert(alertRulesTable).values(rule).returning();
+}
+
+/**
+ * Update alert rule
+ */
+export async function updateAlertRule(
+	db: ReturnType<typeof initDb>,
+	ruleId: string,
+	updates: Partial<typeof alertRulesTable.$inferUpdate>
+) {
+	return db
+		.update(alertRulesTable)
+		.set({
+			...updates,
+			updatedAt: Date.now(),
+		})
+		.where(eq(alertRulesTable.id, ruleId))
+		.returning();
+}
+
+/**
+ * Delete alert rule
+ */
+export async function deleteAlertRule(
+	db: ReturnType<typeof initDb>,
+	ruleId: string
+) {
+	return db.delete(alertRulesTable).where(eq(alertRulesTable.id, ruleId));
+}
+
+/**
+ * Get alert history for organization
+ */
+export async function getAlertHistoryForOrg(
+	db: ReturnType<typeof initDb>,
+	orgId: string,
+	limit: number = 100
+) {
+	return db
+		.select()
+		.from(alertHistoryTable)
+		.where(eq(alertHistoryTable.orgId, orgId))
+		.orderBy(desc(alertHistoryTable.triggeredAt))
+		.limit(limit);
+}

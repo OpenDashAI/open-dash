@@ -112,6 +112,98 @@ class EmailServiceImpl {
 	}
 
 	/**
+	 * Send alert notification email
+	 */
+	async sendAlertEmail(
+		recipientEmail: string,
+		severity: "critical" | "high" | "medium" | "low",
+		datasource: string,
+		message: string,
+		value: number
+	): Promise<{ success: boolean; error?: string }> {
+		try {
+			const severityColor =
+				severity === "critical"
+					? "#dc2626"
+					: severity === "high"
+						? "#ea580c"
+						: severity === "medium"
+							? "#f59e0b"
+							: "#10b981";
+
+			const html = `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; color: #333; }
+    .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+    .alert-header { padding: 16px; border-left: 4px solid ${severityColor}; background-color: #f3f4f6; margin-bottom: 20px; border-radius: 4px; }
+    .severity { color: ${severityColor}; font-weight: bold; text-transform: uppercase; font-size: 14px; }
+    .message { font-size: 18px; margin: 12px 0 0 0; }
+    .details { margin: 20px 0; padding: 16px; background: #f9fafb; border-radius: 4px; }
+    .detail-row { margin: 8px 0; }
+    .label { color: #6b7280; font-weight: 500; }
+    .button { background-color: #3b82f6; color: white; padding: 12px 24px; border-radius: 6px; text-decoration: none; display: inline-block; font-weight: 500; margin-top: 16px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="alert-header">
+      <div class="severity">${severity.toUpperCase()} Alert</div>
+      <div class="message">${escapeHtml(message)}</div>
+    </div>
+
+    <div class="details">
+      <div class="detail-row">
+        <div class="label">Datasource</div>
+        <div>${escapeHtml(datasource)}</div>
+      </div>
+      <div class="detail-row">
+        <div class="label">Value</div>
+        <div>${value.toFixed(2)}</div>
+      </div>
+      <div class="detail-row">
+        <div class="label">Time</div>
+        <div>${new Date().toLocaleString()}</div>
+      </div>
+    </div>
+
+    <p>
+      <a href="https://opendash.ai/dashboard" class="button">View in Dashboard</a>
+    </p>
+
+    <p style="color: #6b7280; font-size: 12px; margin-top: 30px;">
+      This is an automated alert from OpenDash. You can manage your alert settings in the dashboard.
+    </p>
+  </div>
+</body>
+</html>
+			`;
+
+			const { error } = await this.resend.emails.send({
+				from: `${this.config.fromName} <${this.config.fromEmail}>`,
+				to: recipientEmail,
+				subject: `[${severity.toUpperCase()}] ${datasource} — ${message}`,
+				html,
+			});
+
+			if (error) {
+				console.error("Resend error:", error);
+				return { success: false, error: error.message };
+			}
+
+			return { success: true };
+		} catch (err) {
+			const message =
+				err instanceof Error ? err.message : "Unknown error";
+			console.error("Email service error:", message);
+			return { success: false, error: message };
+		}
+	}
+
+	/**
 	 * Send welcome email on signup
 	 */
 	async sendWelcomeEmail(
