@@ -9,6 +9,10 @@
       {
         "name": "HUD_SOCKET",
         "class_name": "HudSocket"
+      },
+      {
+        "name": "COMPETITIVE_INTEL",
+        "class_name": "CompetitiveIntelligenceCoordinator"
       }
     ]
   },
@@ -16,6 +20,10 @@
     {
       "tag": "v1",
       "new_classes": ["HudSocket"]
+    },
+    {
+      "tag": "v2",
+      "new_classes": ["CompetitiveIntelligenceCoordinator"]
     }
   ],
   "d1_databases": [
