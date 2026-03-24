@@ -251,7 +251,7 @@ function CompetitorsTab({ dashboard }: any) {
       {competitors.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {competitors.map((comp) => (
-            <div key={comp.id} className="bg-white rounded-lg border border-gray-200 p-6 hover:shadow-lg transition">
+            <a key={comp.id} href={`/competitive-intelligence/competitors/${comp.id}`} className="bg-white rounded-lg border border-gray-200 p-6 hover:shadow-lg transition block">
               <h3 className="text-lg font-semibold text-gray-900">{comp.name}</h3>
               <p className="text-gray-600 text-sm mt-1">{comp.domain}</p>
 
@@ -281,7 +281,7 @@ function CompetitorsTab({ dashboard }: any) {
                   Last updated: {new Date(comp.lastChecked).toLocaleDateString()}
                 </p>
               )}
-            </div>
+            </a>
           ))}
         </div>
       ) : (
@@ -346,14 +346,14 @@ function AlertsTab({ alerts }: any) {
 
 function AlertCard({ alert }: any) {
   const colorMap = {
-    critical: 'bg-red-50 border-red-200',
-    high: 'bg-orange-50 border-orange-200',
-    medium: 'bg-yellow-50 border-yellow-200',
-    low: 'bg-blue-50 border-blue-200',
+    critical: 'bg-red-50 border-red-200 hover:bg-red-100',
+    high: 'bg-orange-50 border-orange-200 hover:bg-orange-100',
+    medium: 'bg-yellow-50 border-yellow-200 hover:bg-yellow-100',
+    low: 'bg-blue-50 border-blue-200 hover:bg-blue-100',
   }
 
   return (
-    <div className={`border rounded-lg p-4 ${colorMap[alert.severity as keyof typeof colorMap] || colorMap.medium}`}>
+    <a href={`/competitive-intelligence/alerts/${alert.id}`} className={`border rounded-lg p-4 block transition ${colorMap[alert.severity as keyof typeof colorMap] || colorMap.medium}`}>
       <div className="flex items-start justify-between">
         <div className="flex-1">
           <h3 className="font-semibold text-gray-900">{alert.competitor}</h3>
@@ -371,7 +371,7 @@ function AlertCard({ alert }: any) {
           {alert.severity.toUpperCase()}
         </span>
       </div>
-    </div>
+    </a>
   )
 }
 
