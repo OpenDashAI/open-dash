@@ -114,14 +114,52 @@ WHERE ah.state = 'triggered'
 ORDER BY ah.triggeredAt DESC;
 
 -- ============================================================================
+-- Table 5: users (Clerk authentication)
+-- ============================================================================
+CREATE TABLE IF NOT EXISTS users (
+  id TEXT PRIMARY KEY,
+  clerkId TEXT UNIQUE NOT NULL,
+  email TEXT UNIQUE NOT NULL,
+  firstName TEXT,
+  lastName TEXT,
+  avatar TEXT,
+  lastLogin INTEGER,
+  createdAt INTEGER NOT NULL DEFAULT (CAST(strftime('%s', 'now') * 1000 AS INTEGER)),
+  updatedAt INTEGER NOT NULL DEFAULT (CAST(strftime('%s', 'now') * 1000 AS INTEGER))
+);
+
+CREATE INDEX IF NOT EXISTS idx_users_email
+  ON users(email);
+
+CREATE INDEX IF NOT EXISTS idx_users_clerkId
+  ON users(clerkId);
+
+-- ============================================================================
+-- Table 6: emails_sent (Onboarding tracking)
+-- ============================================================================
+CREATE TABLE IF NOT EXISTS emails_sent (
+  id TEXT PRIMARY KEY,
+  userId TEXT NOT NULL,
+  emailType TEXT NOT NULL CHECK (emailType IN ('welcome', 'setup_reminder', 'feature_discovery')),
+  sentAt INTEGER NOT NULL DEFAULT (CAST(strftime('%s', 'now') * 1000 AS INTEGER)),
+  FOREIGN KEY(userId) REFERENCES users(id) ON DELETE CASCADE,
+  UNIQUE(userId, emailType)
+);
+
+CREATE INDEX IF NOT EXISTS idx_emails_userId
+  ON emails_sent(userId);
+
+-- ============================================================================
 -- Summary
 -- ============================================================================
--- Initialized 4 tables:
+-- Initialized 6 tables:
 -- ✅ datasource_metrics - Time-series (30-day retention)
 -- ✅ datasource_status - Current state (real-time)
 -- ✅ alert_rules - Configuration
 -- ✅ alert_history - Audit log (90-day retention)
+-- ✅ users - Clerk authentication (linked via clerkId)
+-- ✅ emails_sent - Onboarding email tracking (prevent duplicates)
 --
--- With 10 indices for performance optimization
+-- With 14 indices for performance optimization
 -- All timestamp columns use milliseconds (unix epoch)
 -- All constraints checked at insert/update time

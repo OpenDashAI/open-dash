@@ -2,11 +2,9 @@
 import startEntry from "@tanstack/react-start/server-entry";
 import {
 	buildClearCookie,
-	buildSessionCookie,
-	createSessionToken,
 	getSessionCookie,
 	loginPage,
-	verifySessionToken,
+	verifyClerkSession,
 } from "./server/auth";
 import { initWorkerContext } from "./lib/worker-context";
 import { metricsTracker } from "./lib/monitoring";
@@ -16,7 +14,8 @@ export { HudSocket } from "./server/hud-socket";
 
 interface Env {
 	HUD_SOCKET: DurableObjectNamespace;
-	AUTH_SECRET: string;
+	CLERK_SECRET_KEY: string;
+	CLERK_PUBLISHABLE_KEY: string;
 	ALLOWED_IPS: string; // Comma-separated IPs that bypass auth
 	SM_SERVICE_KEY: string; // Service key for SM webhook auth
 	DB: D1Database;
@@ -63,8 +62,20 @@ export default {
 				: new Set<string>();
 			const ipAllowed = clientIp !== "" && allowedIps.has(clientIp);
 
-			// Auth gate — skip if AUTH_SECRET not configured (dev mode) or IP allowed
-			if (env.AUTH_SECRET && !ipAllowed) {
+			// Auth gate — Clerk session verification
+			if (env.CLERK_SECRET_KEY && !ipAllowed) {
+				// Public routes that don't require auth
+				const publicRoutes = [
+					"/login",
+					"/sign-up",
+					"/sign-in",
+					"/landing",
+					"/health",
+				];
+				const isPublicRoute = publicRoutes.some((route) =>
+					url.pathname.startsWith(route),
+				);
+
 				// Login page (GET)
 				if (url.pathname === "/login" && request.method === "GET") {
 					return new Response(loginPage(), {
@@ -72,54 +83,31 @@ export default {
 					});
 				}
 
-				// Login form submission (POST)
-				if (url.pathname === "/login" && request.method === "POST") {
-					const form = await request.formData();
-					const password = form.get("password") as string;
-
-					if (password !== env.AUTH_SECRET) {
-						return new Response(loginPage("Invalid access key"), {
-							status: 401,
-							headers: { "Content-Type": "text/html" },
-						});
-					}
-
-					const token = await createSessionToken(env.AUTH_SECRET);
-					return new Response(null, {
-						status: 302,
-						headers: {
-							Location: "/",
-							"Set-Cookie": buildSessionCookie(token, isSecure),
-						},
-					});
-				}
-
 				// Logout
-				if (url.pathname === "/logout") {
+				if (url.pathname === "/logout" && request.method === "GET") {
 					return new Response(null, {
 						status: 302,
 						headers: {
 							Location: "/login",
-							"Set-Cookie": buildClearCookie(isSecure),
+							"Set-Cookie": buildClearCookie(),
 						},
 					});
 				}
 
-				// Verify session for all other requests
-				const sessionToken = getSessionCookie(request);
-				if (
-					!sessionToken ||
-					!(await verifySessionToken(sessionToken, env.AUTH_SECRET))
-				) {
-					// WebSocket and API requests get 401, browser requests redirect
-					const accept = request.headers.get("Accept") ?? "";
-					if (accept.includes("text/html") && request.method === "GET") {
-						return new Response(null, {
-							status: 302,
-							headers: { Location: "/login" },
-						});
+				// Verify Clerk session for protected routes
+				if (!isPublicRoute) {
+					const sessionVerification = verifyClerkSession(request, env);
+					if (!sessionVerification.valid) {
+						// WebSocket and API requests get 401, browser requests redirect
+						const accept = request.headers.get("Accept") ?? "";
+						if (accept.includes("text/html") && request.method === "GET") {
+							return new Response(null, {
+								status: 302,
+								headers: { Location: "/login" },
+							});
+						}
+						return new Response("Unauthorized", { status: 401 });
 					}
-					return new Response("Unauthorized", { status: 401 });
 				}
 			}
 

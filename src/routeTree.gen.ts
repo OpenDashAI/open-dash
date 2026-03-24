@@ -9,13 +9,26 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as OnboardingRouteImport } from './routes/onboarding'
+import { Route as LoginRouteImport } from './routes/login'
 import { Route as BrandsRouteImport } from './routes/brands'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as BrandsSlugRouteImport } from './routes/brands/$slug'
 import { Route as ApiWsRouteImport } from './routes/api/ws'
 import { Route as ApiOrchestrateRouteImport } from './routes/api/orchestrate'
+import { Route as ApiOnboardingRouteImport } from './routes/api/onboarding'
 import { Route as ApiChatRouteImport } from './routes/api/chat'
 
+const OnboardingRoute = OnboardingRouteImport.update({
+  id: '/onboarding',
+  path: '/onboarding',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const BrandsRoute = BrandsRouteImport.update({
   id: '/brands',
   path: '/brands',
@@ -41,6 +54,11 @@ const ApiOrchestrateRoute = ApiOrchestrateRouteImport.update({
   path: '/api/orchestrate',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiOnboardingRoute = ApiOnboardingRouteImport.update({
+  id: '/api/onboarding',
+  path: '/api/onboarding',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiChatRoute = ApiChatRouteImport.update({
   id: '/api/chat',
   path: '/api/chat',
@@ -50,7 +68,10 @@ const ApiChatRoute = ApiChatRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/brands': typeof BrandsRouteWithChildren
+  '/login': typeof LoginRoute
+  '/onboarding': typeof OnboardingRoute
   '/api/chat': typeof ApiChatRoute
+  '/api/onboarding': typeof ApiOnboardingRoute
   '/api/orchestrate': typeof ApiOrchestrateRoute
   '/api/ws': typeof ApiWsRoute
   '/brands/$slug': typeof BrandsSlugRoute
@@ -58,7 +79,10 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/brands': typeof BrandsRouteWithChildren
+  '/login': typeof LoginRoute
+  '/onboarding': typeof OnboardingRoute
   '/api/chat': typeof ApiChatRoute
+  '/api/onboarding': typeof ApiOnboardingRoute
   '/api/orchestrate': typeof ApiOrchestrateRoute
   '/api/ws': typeof ApiWsRoute
   '/brands/$slug': typeof BrandsSlugRoute
@@ -67,7 +91,10 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/brands': typeof BrandsRouteWithChildren
+  '/login': typeof LoginRoute
+  '/onboarding': typeof OnboardingRoute
   '/api/chat': typeof ApiChatRoute
+  '/api/onboarding': typeof ApiOnboardingRoute
   '/api/orchestrate': typeof ApiOrchestrateRoute
   '/api/ws': typeof ApiWsRoute
   '/brands/$slug': typeof BrandsSlugRoute
@@ -77,7 +104,10 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/brands'
+    | '/login'
+    | '/onboarding'
     | '/api/chat'
+    | '/api/onboarding'
     | '/api/orchestrate'
     | '/api/ws'
     | '/brands/$slug'
@@ -85,7 +115,10 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/brands'
+    | '/login'
+    | '/onboarding'
     | '/api/chat'
+    | '/api/onboarding'
     | '/api/orchestrate'
     | '/api/ws'
     | '/brands/$slug'
@@ -93,7 +126,10 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/brands'
+    | '/login'
+    | '/onboarding'
     | '/api/chat'
+    | '/api/onboarding'
     | '/api/orchestrate'
     | '/api/ws'
     | '/brands/$slug'
@@ -102,13 +138,30 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   BrandsRoute: typeof BrandsRouteWithChildren
+  LoginRoute: typeof LoginRoute
+  OnboardingRoute: typeof OnboardingRoute
   ApiChatRoute: typeof ApiChatRoute
+  ApiOnboardingRoute: typeof ApiOnboardingRoute
   ApiOrchestrateRoute: typeof ApiOrchestrateRoute
   ApiWsRoute: typeof ApiWsRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/onboarding': {
+      id: '/onboarding'
+      path: '/onboarding'
+      fullPath: '/onboarding'
+      preLoaderRoute: typeof OnboardingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/brands': {
       id: '/brands'
       path: '/brands'
@@ -144,6 +197,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiOrchestrateRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/onboarding': {
+      id: '/api/onboarding'
+      path: '/api/onboarding'
+      fullPath: '/api/onboarding'
+      preLoaderRoute: typeof ApiOnboardingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/chat': {
       id: '/api/chat'
       path: '/api/chat'
@@ -168,7 +228,10 @@ const BrandsRouteWithChildren =
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   BrandsRoute: BrandsRouteWithChildren,
+  LoginRoute: LoginRoute,
+  OnboardingRoute: OnboardingRoute,
   ApiChatRoute: ApiChatRoute,
+  ApiOnboardingRoute: ApiOnboardingRoute,
   ApiOrchestrateRoute: ApiOrchestrateRoute,
   ApiWsRoute: ApiWsRoute,
 }
