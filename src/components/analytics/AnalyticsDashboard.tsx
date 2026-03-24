@@ -2,7 +2,7 @@
  * Analytics Dashboard — Composite component for all analytics
  */
 
-import { useEffect, useState, useTransition } from "react";
+import { useEffect, useState, useTransition, useRef } from "react";
 import { getTrendingData, getAnomalyData, evaluateAlerts, getHealthSummary } from "../../server/analytics";
 import { TrendingCard } from "./TrendingCard";
 import { AnomalyBadge } from "./AnomalyBadge";
@@ -100,12 +100,18 @@ function TrendingCardLoader({ datasourceId, datasourceName }: CardLoaderProps) {
   const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const isMountedRef = useRef(true);
+  const requestRef = useRef<Promise<any> | null>(null);
 
   useEffect(() => {
+    isMountedRef.current = true;
+
     const fetchData = async () => {
       try {
         setLoading(true);
         const result = await getTrendingData({ data: { datasourceId } });
+        // Only update state if component is still mounted
+        if (!isMountedRef.current) return;
         if (result.error) {
           setError(result.error);
           setData(null);
@@ -114,14 +120,24 @@ function TrendingCardLoader({ datasourceId, datasourceName }: CardLoaderProps) {
           setError(null);
         }
       } catch (err) {
+        if (!isMountedRef.current) return;
         setError(err instanceof Error ? err.message : "Failed to load trending data");
         setData(null);
       } finally {
-        setLoading(false);
+        if (isMountedRef.current) setLoading(false);
       }
     };
 
-    fetchData();
+    // Deduplicate in-flight requests
+    if (!requestRef.current) {
+      requestRef.current = fetchData().finally(() => {
+        requestRef.current = null;
+      });
+    }
+
+    return () => {
+      isMountedRef.current = false;
+    };
   }, [datasourceId]);
 
   return (
@@ -138,12 +154,18 @@ function AnomalyCardLoader({ datasourceId, datasourceName }: CardLoaderProps) {
   const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const isMountedRef = useRef(true);
+  const requestRef = useRef<Promise<any> | null>(null);
 
   useEffect(() => {
+    isMountedRef.current = true;
+
     const fetchData = async () => {
       try {
         setLoading(true);
         const result = await getAnomalyData({ data: { datasourceId } });
+        // Only update state if component is still mounted
+        if (!isMountedRef.current) return;
         if (result.error) {
           setError(result.error);
           setData(null);
@@ -152,14 +174,24 @@ function AnomalyCardLoader({ datasourceId, datasourceName }: CardLoaderProps) {
           setError(null);
         }
       } catch (err) {
+        if (!isMountedRef.current) return;
         setError(err instanceof Error ? err.message : "Failed to load anomalies");
         setData(null);
       } finally {
-        setLoading(false);
+        if (isMountedRef.current) setLoading(false);
       }
     };
 
-    fetchData();
+    // Deduplicate in-flight requests
+    if (!requestRef.current) {
+      requestRef.current = fetchData().finally(() => {
+        requestRef.current = null;
+      });
+    }
+
+    return () => {
+      isMountedRef.current = false;
+    };
   }, [datasourceId]);
 
   return (
@@ -176,12 +208,18 @@ function AlertCardLoader({ datasourceId, datasourceName }: CardLoaderProps) {
   const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const isMountedRef = useRef(true);
+  const requestRef = useRef<Promise<any> | null>(null);
 
   useEffect(() => {
+    isMountedRef.current = true;
+
     const fetchData = async () => {
       try {
         setLoading(true);
         const result = await evaluateAlerts({ data: { datasourceId } });
+        // Only update state if component is still mounted
+        if (!isMountedRef.current) return;
         if (result.error) {
           setError(result.error);
           setData(null);
@@ -190,14 +228,24 @@ function AlertCardLoader({ datasourceId, datasourceName }: CardLoaderProps) {
           setError(null);
         }
       } catch (err) {
+        if (!isMountedRef.current) return;
         setError(err instanceof Error ? err.message : "Failed to load alerts");
         setData(null);
       } finally {
-        setLoading(false);
+        if (isMountedRef.current) setLoading(false);
       }
     };
 
-    fetchData();
+    // Deduplicate in-flight requests
+    if (!requestRef.current) {
+      requestRef.current = fetchData().finally(() => {
+        requestRef.current = null;
+      });
+    }
+
+    return () => {
+      isMountedRef.current = false;
+    };
   }, [datasourceId]);
 
   return (
@@ -214,12 +262,18 @@ function HealthSummaryLoader() {
   const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const isMountedRef = useRef(true);
+  const requestRef = useRef<Promise<any> | null>(null);
 
   useEffect(() => {
+    isMountedRef.current = true;
+
     const fetchData = async () => {
       try {
         setLoading(true);
         const result = await getHealthSummary();
+        // Only update state if component is still mounted
+        if (!isMountedRef.current) return;
         if (result.error) {
           setError(result.error);
           setData(null);
@@ -228,14 +282,24 @@ function HealthSummaryLoader() {
           setError(null);
         }
       } catch (err) {
+        if (!isMountedRef.current) return;
         setError(err instanceof Error ? err.message : "Failed to load health summary");
         setData(null);
       } finally {
-        setLoading(false);
+        if (isMountedRef.current) setLoading(false);
       }
     };
 
-    fetchData();
+    // Deduplicate in-flight requests
+    if (!requestRef.current) {
+      requestRef.current = fetchData().finally(() => {
+        requestRef.current = null;
+      });
+    }
+
+    return () => {
+      isMountedRef.current = false;
+    };
   }, []);
 
   return (
