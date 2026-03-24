@@ -1,18 +1,18 @@
 #!/usr/bin/env node
 
 /**
- * Competitive Intelligence CLI
+ * ODA — Competitive Intelligence CLI
  *
  * Comprehensive command-line interface for managing competitive intelligence.
  * Designed to be driven by Claude Code and other AI systems via shell commands.
  *
  * Usage:
- *   ci-cli competitors list
- *   ci-cli serp check "business intelligence"
- *   ci-cli insights opportunities
- *   ci-cli jobs run daily
- *   ci-cli dashboard
- *   ci-cli costs breakdown
+ *   oda competitors list
+ *   oda serp check "business intelligence"
+ *   oda insights opportunities
+ *   oda jobs run daily
+ *   oda dashboard
+ *   oda costs breakdown
  *
  * Environment:
  *   - API_MOM_URL: API Mom proxy URL
@@ -556,37 +556,37 @@ async function dashboard() {
 
 function showHelp() {
 	log("Competitive Intelligence CLI\n", "bright");
-	log("USAGE: ci-cli <command> [options]\n");
+	log("USAGE: oda <command> [options]\n");
 
 	log("COMMANDS:", "cyan");
 	log("\n  Competitors:");
-	log("    ci-cli competitors list           List all competitors");
-	log("    ci-cli competitors add <name> <domain>");
-	log("    ci-cli competitors metrics <id>   Get competitor metrics");
+	log("    oda competitors list           List all competitors");
+	log("    oda competitors add <name> <domain>");
+	log("    oda competitors metrics <id>   Get competitor metrics");
 
 	log("\n  SERP Tracking:");
-	log('    ci-cli serp check "<keyword>"     Check SERP rankings');
-	log("    ci-cli serp rankings <id> [days]  Get ranking history");
+	log('    oda serp check "<keyword>"     Check SERP rankings');
+	log("    oda serp rankings <id> [days]  Get ranking history");
 
 	log("\n  Insights:");
-	log("    ci-cli insights opportunities     Market opportunities");
-	log("    ci-cli insights threats          Competitive threats");
-	log("    ci-cli insights gaps             Content gaps");
+	log("    oda insights opportunities     Market opportunities");
+	log("    oda insights threats          Competitive threats");
+	log("    oda insights gaps             Content gaps");
 
 	log("\n  Jobs:");
-	log("    ci-cli jobs status               Job status & quota");
-	log("    ci-cli jobs run <type>           Trigger job (daily|weekly|monthly)");
+	log("    oda jobs status               Job status & quota");
+	log("    oda jobs run <type>           Trigger job (daily|weekly|monthly)");
 
 	log("\n  General:");
-	log("    ci-cli dashboard                 Show dashboard");
-	log("    ci-cli costs breakdown           Cost breakdown");
-	log("    ci-cli help                      Show this help");
+	log("    oda dashboard                 Show dashboard");
+	log("    oda costs breakdown           Cost breakdown");
+	log("    oda help                      Show this help");
 
 	log("\nEXAMPLES:", "cyan");
-	log('  ci-cli serp check "business intelligence"\n');
-	log("  ci-cli competitors list\n");
-	log("  ci-cli insights opportunities\n");
-	log("  ci-cli jobs run daily\n");
+	log('  oda serp check "business intelligence"\n');
+	log("  oda competitors list\n");
+	log("  oda insights opportunities\n");
+	log("  oda jobs run daily\n");
 }
 
 // --- Main CLI Router ---

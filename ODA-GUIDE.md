@@ -2,7 +2,7 @@
 
 **Comprehensive command-line interface for managing competitive intelligence in OpenDash.**
 
-The CI CLI can be driven by Claude Code, shell scripts, or directly via terminal. All operations are cost-controlled through API Mom proxy with built-in quota management and rate limiting.
+The ODA can be driven by Claude Code, shell scripts, or directly via terminal. All operations are cost-controlled through API Mom proxy with built-in quota management and rate limiting.
 
 ---
 
@@ -10,19 +10,19 @@ The CI CLI can be driven by Claude Code, shell scripts, or directly via terminal
 
 ```bash
 # List all competitors
-ci-cli competitors list
+oda competitors list
 
 # Check SERP for a keyword
-ci-cli serp check "business intelligence"
+oda serp check "business intelligence"
 
 # Get market opportunities
-ci-cli insights opportunities
+oda insights opportunities
 
 # View dashboard
-ci-cli dashboard
+oda dashboard
 
 # Run daily collection job
-ci-cli jobs run daily
+oda jobs run daily
 ```
 
 ---
@@ -46,7 +46,7 @@ wrangler deploy
 
 # The CLI is available as both:
 # 1. TypeScript module: import { ciTools } from './routes/api/ci-tools'
-# 2. CLI binary: ci-cli <command> [options]
+# 2. CLI binary: oda <command> [options]
 ```
 
 ---
@@ -55,11 +55,11 @@ wrangler deploy
 
 ### Competitors
 
-#### `ci-cli competitors list`
+#### `oda competitors list`
 List all monitored competitors with metrics.
 
 ```bash
-ci-cli competitors list
+oda competitors list
 ```
 
 **Output:**
@@ -80,11 +80,11 @@ Total: 5
 
 ---
 
-#### `ci-cli competitors add <name> <domain>`
+#### `oda competitors add <name> <domain>`
 Add a new competitor to monitor.
 
 ```bash
-ci-cli competitors add "Metabase" "metabase.com"
+oda competitors add "Metabase" "metabase.com"
 ```
 
 **Arguments:**
@@ -99,11 +99,11 @@ ID: metabase
 
 ---
 
-#### `ci-cli competitors metrics <id>`
+#### `oda competitors metrics <id>`
 Get detailed metrics for a competitor.
 
 ```bash
-ci-cli competitors metrics metabase
+oda competitors metrics metabase
 ```
 
 **Output:**
@@ -124,11 +124,11 @@ Trends:
 
 ### SERP & Rankings
 
-#### `ci-cli serp check "<keyword>"`
+#### `oda serp check "<keyword>"`
 Check current SERP rankings for a keyword.
 
 ```bash
-ci-cli serp check "business intelligence tool"
+oda serp check "business intelligence tool"
 ```
 
 **Output:**
@@ -150,11 +150,11 @@ Colors indicate ranking quality:
 
 ---
 
-#### `ci-cli serp rankings <competitor> [days]`
+#### `oda serp rankings <competitor> [days]`
 Get SERP ranking history for a competitor.
 
 ```bash
-ci-cli serp rankings metabase 30
+oda serp rankings metabase 30
 ```
 
 **Arguments:**
@@ -181,11 +181,11 @@ Declining (2):
 
 ### Market Intelligence
 
-#### `ci-cli insights opportunities`
+#### `oda insights opportunities`
 Get unaddressed market opportunities.
 
 ```bash
-ci-cli insights opportunities
+oda insights opportunities
 ```
 
 **Output:**
@@ -207,11 +207,11 @@ Total: 8 | High Confidence: 3
 
 ---
 
-#### `ci-cli insights threats`
+#### `oda insights threats`
 Get active competitive threats.
 
 ```bash
-ci-cli insights threats
+oda insights threats
 ```
 
 **Output:**
@@ -231,11 +231,11 @@ Total: 5 | Critical: 1
 
 ---
 
-#### `ci-cli insights gaps`
+#### `oda insights gaps`
 Analyze content gaps vs competitors.
 
 ```bash
-ci-cli insights gaps
+oda insights gaps
 ```
 
 **Output:**
@@ -267,11 +267,11 @@ Recommendations:
 
 ### Scheduled Jobs
 
-#### `ci-cli jobs status`
+#### `oda jobs status`
 Check status of all scheduled collection jobs.
 
 ```bash
-ci-cli jobs status
+oda jobs status
 ```
 
 **Output:**
@@ -297,12 +297,12 @@ API Quota:
 
 ---
 
-#### `ci-cli jobs run <type>`
+#### `oda jobs run <type>`
 Manually trigger a collection job.
 
 ```bash
-ci-cli jobs run daily
-ci-cli jobs run weekly
+oda jobs run daily
+oda jobs run weekly
 ```
 
 **Arguments:**
@@ -320,11 +320,11 @@ Estimated Duration: 45s
 
 ### Dashboard & Analytics
 
-#### `ci-cli dashboard`
+#### `oda dashboard`
 Show comprehensive CI dashboard.
 
 ```bash
-ci-cli dashboard
+oda dashboard
 ```
 
 **Output:**
@@ -358,11 +358,11 @@ API USAGE & COSTS
 
 ---
 
-#### `ci-cli costs breakdown`
+#### `oda costs breakdown`
 Show API cost breakdown and quota usage.
 
 ```bash
-ci-cli costs breakdown
+oda costs breakdown
 ```
 
 **Output:**
@@ -426,7 +426,7 @@ AI: Based on current rankings, Tableau is #1, Metabase is #3...
 All API calls route through **API Mom** managed proxy:
 
 ```
-CI CLI → API Mom → External APIs (BraveSearch, Ahrefs, Claude, etc.)
+ODA → API Mom → External APIs (BraveSearch, Ahrefs, Claude, etc.)
          ↓
       Cost Tracking
       Rate Limiting
@@ -489,8 +489,8 @@ Monthly Job: 1st of month 00:00 UTC
 
 ```bash
 # Trigger immediately
-ci-cli jobs run daily
-ci-cli jobs run weekly
+oda jobs run daily
+oda jobs run weekly
 
 # Via chat
 User: Run daily competitive intelligence job now
@@ -521,7 +521,7 @@ export API_MOM_KEY="your-key"
 ### Quota Exceeded
 ```bash
 # Check quota status
-ci-cli costs breakdown
+oda costs breakdown
 
 # Wait for reset or:
 # 1. Reduce monitoring scope
@@ -532,14 +532,14 @@ ci-cli costs breakdown
 ### No Competitors Showing Up
 ```bash
 # Seed default competitors
-ci-cli competitors add "Metabase" "metabase.com"
-ci-cli competitors add "Grafana" "grafana.com"
+oda competitors add "Metabase" "metabase.com"
+oda competitors add "Grafana" "grafana.com"
 ```
 
 ### Job Stuck / Not Running
 ```bash
 # Check job status
-ci-cli jobs status
+oda jobs status
 
 # Check D1 database
 # Verify Durable Object binding in wrangler.jsonc
@@ -554,32 +554,32 @@ ci-cli jobs status
 
 ```bash
 # Morning: Check overnight changes
-ci-cli dashboard
-ci-cli serp check "my target keyword"
-ci-cli insights threats
+oda dashboard
+oda serp check "my target keyword"
+oda insights threats
 
 # Take action
-ci-cli insights opportunities  # Plan content
-ci-cli insights gaps          # Identify gaps
+oda insights opportunities  # Plan content
+oda insights gaps          # Identify gaps
 ```
 
 ### Weekly Analysis
 
 ```bash
 # Get insights from week of data
-ci-cli serp rankings metabase 7
-ci-cli getRecentCompetitorContent
-ci-cli analyzeCompetitiveChanges weekly
+oda serp rankings metabase 7
+oda getRecentCompetitorContent
+oda analyzeCompetitiveChanges weekly
 ```
 
 ### Monthly Strategy
 
 ```bash
 # Full portfolio review
-ci-cli competitors list
-ci-cli dashboard
-ci-cli costs breakdown
-ci-cli jobs run monthly  # Trigger deep analysis
+oda competitors list
+oda dashboard
+oda costs breakdown
+oda jobs run monthly  # Trigger deep analysis
 ```
 
 ---
@@ -597,19 +597,19 @@ echo "$(date)"
 echo ""
 
 echo "SERP Rankings:"
-ci-cli serp check "business intelligence"
+oda serp check "business intelligence"
 echo ""
 
 echo "Recent Threats:"
-ci-cli insights threats | head -3
+oda insights threats | head -3
 echo ""
 
 echo "Opportunities:"
-ci-cli insights opportunities | head -3
+oda insights opportunities | head -3
 echo ""
 
 echo "API Usage:"
-ci-cli costs breakdown | grep "Est. Cost"
+oda costs breakdown | grep "Est. Cost"
 ```
 
 Run with cron:
@@ -621,8 +621,8 @@ Run with cron:
 
 ```bash
 # Export to JSON for analysis
-ci-cli competitors list > competitors.json
-ci-cli dashboard > dashboard.json
+oda competitors list > competitors.json
+oda dashboard > dashboard.json
 
 # Parse and process
 jq '.competitors[] | select(.domain_authority > 60)' competitors.json
@@ -632,11 +632,11 @@ jq '.competitors[] | select(.domain_authority > 60)' competitors.json
 
 ## Next Steps
 
-1. **Seed competitors**: `ci-cli competitors add` for 5-10 key competitors
-2. **Check keywords**: `ci-cli serp check` for your top 10 terms
-3. **Review opportunities**: `ci-cli insights opportunities`
+1. **Seed competitors**: `oda competitors add` for 5-10 key competitors
+2. **Check keywords**: `oda serp check` for your top 10 terms
+3. **Review opportunities**: `oda insights opportunities`
 4. **Schedule jobs**: Ensure daily/weekly runs are enabled
-5. **Monitor costs**: Check `ci-cli costs breakdown` weekly
+5. **Monitor costs**: Check `oda costs breakdown` weekly
 6. **Iterate**: Use insights to inform marketing strategy
 
 ---
