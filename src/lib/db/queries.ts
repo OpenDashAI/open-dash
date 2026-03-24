@@ -29,6 +29,12 @@ import {
 	competitorsTable,
 	serpRankingsTable,
 	competitorContentTable,
+	googleAdsSnapshotsTable,
+	dailyBudgetsTable,
+	metaAdsSnapshotsTable,
+	ga4SnapshotsTable,
+	emailMetricsSnapshotsTable,
+	campaignAnomaliesTable,
 	type DatasourceMetric,
 	type DatasourceStatus,
 	type AlertRule,
@@ -45,6 +51,18 @@ import {
 	type SerpRankingInsert,
 	type CompetitorContent,
 	type CompetitorContentInsert,
+	type GoogleAdsSnapshot,
+	type GoogleAdsSnapshotInsert,
+	type DailyBudget,
+	type DailyBudgetInsert,
+	type MetaAdsSnapshot,
+	type MetaAdsSnapshotInsert,
+	type GA4Snapshot,
+	type GA4SnapshotInsert,
+	type EmailMetricsSnapshot,
+	type EmailMetricsSnapshotInsert,
+	type CampaignAnomaly,
+	type CampaignAnomalyInsert,
 } from "./schema";
 
 export type {
@@ -782,4 +800,163 @@ export async function getCompetitorContentByType(
 			)
 		)
 		.orderBy(desc(competitorContentTable.publishDate));
+}
+
+/**
+ * Campaign Metrics Query Helpers
+ */
+
+/**
+ * Store Google Ads snapshot
+ */
+export async function insertGoogleAdsSnapshot(
+	db: ReturnType<typeof initDb>,
+	snapshot: GoogleAdsSnapshotInsert
+) {
+	return db
+		.insert(googleAdsSnapshotsTable)
+		.values(snapshot)
+		.returning();
+}
+
+/**
+ * Get Google Ads snapshot by date
+ */
+export async function getGoogleAdsSnapshot(
+	db: ReturnType<typeof initDb>,
+	campaignId: string,
+	daysBack: number
+) {
+	const targetDate = new Date();
+	targetDate.setDate(targetDate.getDate() - daysBack);
+	const dateStr = targetDate.toISOString().split("T")[0];
+
+	return db
+		.select()
+		.from(googleAdsSnapshotsTable)
+		.where(
+			and(
+				eq(googleAdsSnapshotsTable.campaignId, campaignId),
+				eq(googleAdsSnapshotsTable.snapshotDate, dateStr)
+			)
+		)
+		.limit(1)
+		.then((results) => results[0] || null);
+}
+
+/**
+ * Get Google Ads snapshots for date range
+ */
+export async function getGoogleAdsSnapshotRange(
+	db: ReturnType<typeof initDb>,
+	orgId: string,
+	startDate: string,
+	endDate: string
+) {
+	return db
+		.select()
+		.from(googleAdsSnapshotsTable)
+		.where(
+			and(
+				eq(googleAdsSnapshotsTable.orgId, orgId),
+				gte(googleAdsSnapshotsTable.snapshotDate, startDate),
+				lte(googleAdsSnapshotsTable.snapshotDate, endDate)
+			)
+		)
+		.orderBy(desc(googleAdsSnapshotsTable.snapshotDate));
+}
+
+/**
+ * Get or create daily budget for campaign
+ */
+export async function setDailyBudget(
+	db: ReturnType<typeof initDb>,
+	orgId: string,
+	campaignId: string,
+	dailyBudgetDollars: number
+) {
+	const existing = await db
+		.select()
+		.from(dailyBudgetsTable)
+		.where(
+			and(
+				eq(dailyBudgetsTable.orgId, orgId),
+				eq(dailyBudgetsTable.campaignId, campaignId)
+			)
+		)
+		.limit(1)
+		.then((results) => results[0] || null);
+
+	if (existing) {
+		return db
+			.update(dailyBudgetsTable)
+			.set({ dailyBudgetDollars })
+			.where(eq(dailyBudgetsTable.id, existing.id))
+			.returning();
+	}
+
+	return db
+		.insert(dailyBudgetsTable)
+		.values({
+			id: `budget-${orgId}-${campaignId}-${Date.now()}`,
+			orgId,
+			campaignId,
+			dailyBudgetDollars,
+		})
+		.returning();
+}
+
+/**
+ * Get daily budget for campaign
+ */
+export async function getDailyBudget(
+	db: ReturnType<typeof initDb>,
+	orgId: string,
+	campaignId: string
+): Promise<number> {
+	const budget = await db
+		.select()
+		.from(dailyBudgetsTable)
+		.where(
+			and(
+				eq(dailyBudgetsTable.orgId, orgId),
+				eq(dailyBudgetsTable.campaignId, campaignId)
+			)
+		)
+		.limit(1)
+		.then((results) => results[0] || null);
+
+	return budget?.dailyBudgetDollars || 0;
+}
+
+/**
+ * Store campaign anomaly
+ */
+export async function insertCampaignAnomaly(
+	db: ReturnType<typeof initDb>,
+	anomaly: CampaignAnomalyInsert
+) {
+	return db
+		.insert(campaignAnomaliesTable)
+		.values(anomaly)
+		.returning();
+}
+
+/**
+ * Get unacknowledged anomalies for org
+ */
+export async function getUnacknowledgedAnomalies(
+	db: ReturnType<typeof initDb>,
+	orgId: string
+) {
+	return db
+		.select()
+		.from(campaignAnomaliesTable)
+		.where(
+			and(
+				eq(campaignAnomaliesTable.orgId, orgId),
+				eq(campaignAnomaliesTable.acknowledged, false)
+			)
+		)
+		.orderBy(desc(campaignAnomaliesTable.detectedAt));
 }

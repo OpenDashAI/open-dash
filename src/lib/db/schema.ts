@@ -737,6 +737,236 @@ export const serpRankingsTable = sqliteTable(
 	]
 );
 
+/**
+ * Campaign Metrics Tables — Ads, analytics, and email performance
+ *
+ * Tracks Google Ads, Meta Ads, GA4, and email campaign metrics.
+ * Org and brand-scoped for multi-tenant isolation.
+ */
+
+/**
+ * Google Ads Snapshots — daily campaign performance data
+ */
+export const googleAdsSnapshotsTable = sqliteTable(
+	"google_ads_snapshots",
+	{
+		id: text("id").primaryKey(),
+		orgId: text("org_id").notNull(),
+		campaignId: text("campaign_id").notNull(),
+		campaignName: text("campaign_name").notNull(),
+
+		// Spend metrics
+		spendDollars: real("spend_dollars"),
+		spendMicros: integer("spend_micros"), // Cost in micros (Google format)
+
+		// Performance metrics
+		impressions: integer("impressions"),
+		clicks: integer("clicks"),
+		conversions: integer("conversions"),
+		costPerConversion: real("cost_per_conversion"),
+
+		// Rates
+		clickThroughRate: real("click_through_rate"), // 0-1
+		conversionRate: real("conversion_rate"), // 0-1
+
+		// Snapshot metadata
+		snapshotDate: text("snapshot_date").notNull(), // YYYY-MM-DD format
+		snapshotTimestamp: integer("snapshot_timestamp"), // Unix timestamp (ms)
+
+		createdAt: integer("created_at")
+			.notNull()
+			.default(sql`(cast(strftime('%s', 'now') * 1000 as integer))`),
+	},
+	(table) => [
+		index("idx_gads_org_date").on(table.orgId, table.snapshotDate),
+		index("idx_gads_campaign").on(table.campaignId),
+		index("idx_gads_timestamp").on(table.snapshotTimestamp),
+	]
+);
+
+/**
+ * Daily Budgets — campaign budget tracking for Google Ads
+ */
+export const dailyBudgetsTable = sqliteTable(
+	"daily_budgets",
+	{
+		id: text("id").primaryKey(),
+		orgId: text("org_id").notNull(),
+		campaignId: text("campaign_id").notNull(),
+
+		dailyBudgetDollars: real("daily_budget_dollars").notNull(),
+
+		// Metadata
+		currency: text("currency").default("USD"),
+		updatedAt: integer("updated_at")
+			.notNull()
+			.default(sql`(cast(strftime('%s', 'now') * 1000 as integer))`),
+		createdAt: integer("created_at")
+			.notNull()
+			.default(sql`(cast(strftime('%s', 'now') * 1000 as integer))`),
+	},
+	(table) => [
+		index("idx_daily_budgets_campaign").on(table.campaignId),
+		index("idx_daily_budgets_org_campaign").on(table.orgId, table.campaignId),
+	]
+);
+
+/**
+ * Meta Ads Snapshots — daily campaign performance from Meta Ads
+ */
+export const metaAdsSnapshotsTable = sqliteTable(
+	"meta_ads_snapshots",
+	{
+		id: text("id").primaryKey(),
+		orgId: text("org_id").notNull(),
+		campaignId: text("campaign_id").notNull(),
+		campaignName: text("campaign_name").notNull(),
+		adAccountId: text("ad_account_id").notNull(),
+
+		// Spend and performance
+		spendDollars: real("spend_dollars"),
+		impressions: integer("impressions"),
+		clicks: integer("clicks"),
+		actions: integer("actions"), // Conversions in Meta
+		costPerAction: real("cost_per_action"),
+
+		// Rates
+		clickThroughRate: real("click_through_rate"),
+		actionRate: real("action_rate"), // Conversion rate in Meta
+
+		// Metadata
+		snapshotDate: text("snapshot_date").notNull(),
+		snapshotTimestamp: integer("snapshot_timestamp"),
+
+		createdAt: integer("created_at")
+			.notNull()
+			.default(sql`(cast(strftime('%s', 'now') * 1000 as integer))`),
+	},
+	(table) => [
+		index("idx_meta_ads_org_date").on(table.orgId, table.snapshotDate),
+		index("idx_meta_ads_campaign").on(table.campaignId),
+	]
+);
+
+/**
+ * GA4 Snapshots — organic traffic and conversion data
+ */
+export const ga4SnapshotsTable = sqliteTable(
+	"ga4_snapshots",
+	{
+		id: text("id").primaryKey(),
+		orgId: text("org_id").notNull(),
+		propertyId: text("property_id").notNull(),
+		propertyName: text("property_name"),
+
+		// Traffic metrics
+		organicSessions: integer("organic_sessions"),
+		organicUsers: integer("organic_users"),
+		organicBounceRate: real("organic_bounce_rate"), // 0-1
+
+		// Conversions
+		conversions: integer("conversions"),
+		conversionRate: real("conversion_rate"), // 0-1
+
+		// Traffic sources breakdown (JSON)
+		trafficBySource: text("traffic_by_source"), // e.g. '{"organic": 5000, "paid": 2000}'
+
+		// Metadata
+		snapshotDate: text("snapshot_date").notNull(),
+		snapshotTimestamp: integer("snapshot_timestamp"),
+
+		createdAt: integer("created_at")
+			.notNull()
+			.default(sql`(cast(strftime('%s', 'now') * 1000 as integer))`),
+	},
+	(table) => [
+		index("idx_ga4_org_date").on(table.orgId, table.snapshotDate),
+		index("idx_ga4_property").on(table.propertyId),
+	]
+);
+
+/**
+ * Email Metrics Snapshots — email campaign performance (Mailchimp/ConvertKit/Substack)
+ */
+export const emailMetricsSnapshotsTable = sqliteTable(
+	"email_metrics_snapshots",
+	{
+		id: text("id").primaryKey(),
+		orgId: text("org_id").notNull(),
+		campaignId: text("campaign_id").notNull(),
+		campaignName: text("campaign_name").notNull(),
+		provider: text("provider").notNull(), // 'mailchimp', 'convertkit', 'substack'
+
+		// List metrics
+		listSize: integer("list_size"),
+		subscribersAdded: integer("subscribers_added"),
+
+		// Campaign performance
+		sendCount: integer("send_count"),
+		openCount: integer("open_count"),
+		clickCount: integer("click_count"),
+		unsubscribeCount: integer("unsubscribe_count"),
+
+		// Rates
+		openRate: real("open_rate"), // 0-1
+		clickRate: real("click_rate"), // 0-1
+		unsubscribeRate: real("unsubscribe_rate"), // 0-1
+
+		// Metadata
+		snapshotDate: text("snapshot_date").notNull(),
+		snapshotTimestamp: integer("snapshot_timestamp"),
+
+		createdAt: integer("created_at")
+			.notNull()
+			.default(sql`(cast(strftime('%s', 'now') * 1000 as integer))`),
+	},
+	(table) => [
+		index("idx_email_metrics_org_date").on(table.orgId, table.snapshotDate),
+		index("idx_email_metrics_provider").on(table.provider),
+	]
+);
+
+/**
+ * Campaign Anomalies — performance issues and alerts
+ */
+export const campaignAnomaliesTable = sqliteTable(
+	"campaign_anomalies",
+	{
+		id: text("id").primaryKey(),
+		orgId: text("org_id").notNull(),
+
+		// Source
+		sourceType: text("source_type").notNull(), // 'google_ads', 'meta_ads', 'ga4', 'email'
+		sourceId: text("source_id").notNull(), // campaign_id or property_id
+		sourceName: text("source_name"),
+
+		// Anomaly details
+		anomalyType: text("anomaly_type").notNull(), // 'budget_overrun', 'low_roas', 'conversion_drop', etc
+		metricName: text("metric_name"),
+		metricValue: real("metric_value"),
+		expectedValue: real("expected_value"),
+		threshold: real("threshold"),
+
+		// Severity and status
+		severity: text("severity").default("warning"), // 'critical', 'warning', 'info'
+		acknowledged: integer("acknowledged", { mode: "boolean" }).default(0),
+		acknowledgedAt: integer("acknowledged_at"),
+		acknowledgedBy: text("acknowledged_by"),
+
+		detectedAt: integer("detected_at")
+			.notNull()
+			.default(sql`(cast(strftime('%s', 'now') * 1000 as integer))`),
+		createdAt: integer("created_at")
+			.notNull()
+			.default(sql`(cast(strftime('%s', 'now') * 1000 as integer))`),
+	},
+	(table) => [
+		index("idx_campaign_anomalies_org").on(table.orgId),
+		index("idx_campaign_anomalies_source").on(table.sourceType, table.sourceId),
+		index("idx_campaign_anomalies_unacknowledged").on(table.acknowledged),
+	]
+);
+
 // Organization & Team types
 export type Organization = typeof organizationsTable.$inferSelect;
 export type OrganizationInsert = typeof organizationsTable.$inferInsert;
@@ -753,3 +983,22 @@ export type CompetitorInsert = typeof competitorsTable.$inferInsert;
 
 export type SerpRanking = typeof serpRankingsTable.$inferSelect;
 export type SerpRankingInsert = typeof serpRankingsTable.$inferInsert;
+
+// Campaign Metrics types
+export type GoogleAdsSnapshot = typeof googleAdsSnapshotsTable.$inferSelect;
+export type GoogleAdsSnapshotInsert = typeof googleAdsSnapshotsTable.$inferInsert;
+
+export type DailyBudget = typeof dailyBudgetsTable.$inferSelect;
+export type DailyBudgetInsert = typeof dailyBudgetsTable.$inferInsert;
+
+export type MetaAdsSnapshot = typeof metaAdsSnapshotsTable.$inferSelect;
+export type MetaAdsSnapshotInsert = typeof metaAdsSnapshotsTable.$inferInsert;
+
+export type GA4Snapshot = typeof ga4SnapshotsTable.$inferSelect;
+export type GA4SnapshotInsert = typeof ga4SnapshotsTable.$inferInsert;
+
+export type EmailMetricsSnapshot = typeof emailMetricsSnapshotsTable.$inferSelect;
+export type EmailMetricsSnapshotInsert = typeof emailMetricsSnapshotsTable.$inferInsert;
+
+export type CampaignAnomaly = typeof campaignAnomaliesTable.$inferSelect;
+export type CampaignAnomalyInsert = typeof campaignAnomaliesTable.$inferInsert;

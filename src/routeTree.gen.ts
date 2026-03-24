@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as OnboardingRouteImport } from './routes/onboarding'
 import { Route as LoginRouteImport } from './routes/login'
+import { Route as CompetitiveIntelligenceRouteImport } from './routes/competitive-intelligence'
 import { Route as BrandsRouteImport } from './routes/brands'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as SettingsTeamRouteImport } from './routes/settings/team'
@@ -29,6 +30,11 @@ const OnboardingRoute = OnboardingRouteImport.update({
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CompetitiveIntelligenceRoute = CompetitiveIntelligenceRouteImport.update({
+  id: '/competitive-intelligence',
+  path: '/competitive-intelligence',
   getParentRoute: () => rootRouteImport,
 } as any)
 const BrandsRoute = BrandsRouteImport.update({
@@ -81,6 +87,7 @@ const ApiChatRoute = ApiChatRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/brands': typeof BrandsRouteWithChildren
+  '/competitive-intelligence': typeof CompetitiveIntelligenceRoute
   '/login': typeof LoginRoute
   '/onboarding': typeof OnboardingRoute
   '/api/chat': typeof ApiChatRoute
@@ -94,6 +101,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/brands': typeof BrandsRouteWithChildren
+  '/competitive-intelligence': typeof CompetitiveIntelligenceRoute
   '/login': typeof LoginRoute
   '/onboarding': typeof OnboardingRoute
   '/api/chat': typeof ApiChatRoute
@@ -108,6 +116,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/brands': typeof BrandsRouteWithChildren
+  '/competitive-intelligence': typeof CompetitiveIntelligenceRoute
   '/login': typeof LoginRoute
   '/onboarding': typeof OnboardingRoute
   '/api/chat': typeof ApiChatRoute
@@ -123,6 +132,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/brands'
+    | '/competitive-intelligence'
     | '/login'
     | '/onboarding'
     | '/api/chat'
@@ -136,6 +146,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/brands'
+    | '/competitive-intelligence'
     | '/login'
     | '/onboarding'
     | '/api/chat'
@@ -149,6 +160,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/brands'
+    | '/competitive-intelligence'
     | '/login'
     | '/onboarding'
     | '/api/chat'
@@ -163,6 +175,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   BrandsRoute: typeof BrandsRouteWithChildren
+  CompetitiveIntelligenceRoute: typeof CompetitiveIntelligenceRoute
   LoginRoute: typeof LoginRoute
   OnboardingRoute: typeof OnboardingRoute
   ApiChatRoute: typeof ApiChatRoute
@@ -187,6 +200,13 @@ declare module '@tanstack/react-router' {
       path: '/login'
       fullPath: '/login'
       preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/competitive-intelligence': {
+      id: '/competitive-intelligence'
+      path: '/competitive-intelligence'
+      fullPath: '/competitive-intelligence'
+      preLoaderRoute: typeof CompetitiveIntelligenceRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/brands': {
@@ -269,6 +289,7 @@ const BrandsRouteWithChildren =
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   BrandsRoute: BrandsRouteWithChildren,
+  CompetitiveIntelligenceRoute: CompetitiveIntelligenceRoute,
   LoginRoute: LoginRoute,
   OnboardingRoute: OnboardingRoute,
   ApiChatRoute: ApiChatRoute,
