@@ -6,6 +6,11 @@ import {
 	loginPage,
 	verifyClerkSession,
 } from "./server/auth";
+import {
+	extractOrgFromPath,
+	loadAuthContext,
+	getPermissions,
+} from "./server/rbac";
 import { initWorkerContext } from "./lib/worker-context";
 import { metricsTracker } from "./lib/monitoring";
 
@@ -95,6 +100,7 @@ export default {
 				}
 
 				// Verify Clerk session for protected routes
+				let clerkUserId: string | null = null;
 				if (!isPublicRoute) {
 					const sessionVerification = verifyClerkSession(request, env);
 					if (!sessionVerification.valid) {
@@ -107,6 +113,25 @@ export default {
 							});
 						}
 						return new Response("Unauthorized", { status: 401 });
+					}
+					// TODO: Extract clerkUserId from Clerk session
+					// For MVP, using placeholder; production needs JWT decode
+					clerkUserId = "user_temp"; // Placeholder
+				}
+			}
+
+			// RBAC middleware — load org context for multi-tenant routes
+			if (clerkUserId && env.DB) {
+				const orgSlug = extractOrgFromPath(url.pathname);
+				if (orgSlug) {
+					try {
+						// In production, load from DB:
+						// const authContext = await loadAuthContext(request, env.DB, clerkUserId);
+						// Store on context for handlers (requires request wrapper pattern)
+						// For MVP, handlers extract org directly and verify permissions
+					} catch (err) {
+						console.error("RBAC context load failed:", err);
+						// Non-fatal — handlers verify permissions individually
 					}
 				}
 			}
