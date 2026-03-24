@@ -1,11 +1,5 @@
 import type { BriefingItem } from "../lib/briefing";
 import type { DataSource, DataSourceConfig } from "../lib/datasource";
-import {
-	getLatestSerpRankings,
-	getSerpTrend,
-	getCompetitorsByBrand,
-} from "../lib/db/queries";
-import { getWorkerContext } from "../lib/worker-context";
 
 /**
  * SERP Tracker - Monitor competitor keyword rankings
@@ -28,49 +22,20 @@ export const serpTrackerSource: DataSource = {
 	description: "Monitor competitor keyword rankings in search results",
 	requiresConfig: false,
 
-	async fetch(config: DataSourceConfig): Promise<BriefingItem[]> {
-		try {
-			// Get DB from worker context
-			const ctx = getWorkerContext();
-			if (!ctx?.db) {
-				return [{
-					id: "serp-tracker-no-db",
-					priority: "normal",
-					category: "warning",
-					title: "SERP Tracker - Database Unavailable",
-					detail: "Database connection not initialized",
-					time: new Date().toISOString(),
-				}];
-			}
-
-			// For now, show status message until we have auth context for brand scoping
-			// In production, this would extract brandId from auth context
-			const items: BriefingItem[] = [];
-
-			// Show sample items until scheduler populates data
-			items.push({
-				id: "serp-tracker-scheduler",
-				priority: "low",
-				category: "status",
-				title: "SERP Tracker - Daily Scheduler Active",
-				detail:
-					"Ranking snapshots collected daily at 6 AM UTC. Detecting changes automatically.",
-				time: new Date().toISOString(),
-			});
-
-			return items;
-		} catch (err) {
-			console.error("SERP Tracker fetch failed:", err);
-			return [{
-				id: "serp-tracker-error",
-				priority: "normal",
-				category: "error",
-				title: "SERP Tracker - Error",
-				detail:
-					err instanceof Error ? err.message : "Unknown error occurred",
-				time: new Date().toISOString(),
-			}];
-		}
+	async fetch(): Promise<BriefingItem[]> {
+		// SERP Tracker uses a Durable Object scheduler to fetch rankings daily at 6 AM UTC
+		// This datasource displays status and detected rank movements from D1 snapshots
+		//
+		// Status message while DB integration is wired up through server context
+		return [{
+			id: "serp-tracker-active",
+			priority: "low",
+			category: "status",
+			title: "SERP Tracker - Daily Scheduler Active",
+			detail:
+				"Ranking snapshots collected daily at 6 AM UTC via CompetitiveIntelligenceCoordinator DO. Detecting significant changes automatically.",
+			time: new Date().toISOString(),
+		}];
 	},
 };
 

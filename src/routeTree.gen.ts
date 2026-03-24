@@ -11,19 +11,15 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as OnboardingRouteImport } from './routes/onboarding'
 import { Route as LoginRouteImport } from './routes/login'
-import { Route as CompetitiveIntelligenceRouteImport } from './routes/competitive-intelligence'
 import { Route as BrandsRouteImport } from './routes/brands'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as SettingsTeamRouteImport } from './routes/settings/team'
-import { Route as CompetitiveIntelligenceAdminRouteImport } from './routes/competitive-intelligence.admin'
 import { Route as BrandsSlugRouteImport } from './routes/brands/$slug'
 import { Route as ApiWsRouteImport } from './routes/api/ws'
 import { Route as ApiOrchestrateRouteImport } from './routes/api/orchestrate'
 import { Route as ApiOnboardingRouteImport } from './routes/api/onboarding'
 import { Route as ApiCompetitiveIntelligenceRouteImport } from './routes/api/competitive-intelligence'
 import { Route as ApiChatRouteImport } from './routes/api/chat'
-import { Route as CompetitiveIntelligenceCompetitorsCompetitorIdRouteImport } from './routes/competitive-intelligence.competitors.$competitorId'
-import { Route as CompetitiveIntelligenceAlertsAlertIdRouteImport } from './routes/competitive-intelligence.alerts.$alertId'
 
 const OnboardingRoute = OnboardingRouteImport.update({
   id: '/onboarding',
@@ -33,11 +29,6 @@ const OnboardingRoute = OnboardingRouteImport.update({
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const CompetitiveIntelligenceRoute = CompetitiveIntelligenceRouteImport.update({
-  id: '/competitive-intelligence',
-  path: '/competitive-intelligence',
   getParentRoute: () => rootRouteImport,
 } as any)
 const BrandsRoute = BrandsRouteImport.update({
@@ -55,12 +46,6 @@ const SettingsTeamRoute = SettingsTeamRouteImport.update({
   path: '/settings/team',
   getParentRoute: () => rootRouteImport,
 } as any)
-const CompetitiveIntelligenceAdminRoute =
-  CompetitiveIntelligenceAdminRouteImport.update({
-    id: '/admin',
-    path: '/admin',
-    getParentRoute: () => CompetitiveIntelligenceRoute,
-  } as any)
 const BrandsSlugRoute = BrandsSlugRouteImport.update({
   id: '/$slug',
   path: '/$slug',
@@ -92,23 +77,10 @@ const ApiChatRoute = ApiChatRouteImport.update({
   path: '/api/chat',
   getParentRoute: () => rootRouteImport,
 } as any)
-const CompetitiveIntelligenceCompetitorsCompetitorIdRoute =
-  CompetitiveIntelligenceCompetitorsCompetitorIdRouteImport.update({
-    id: '/competitors/$competitorId',
-    path: '/competitors/$competitorId',
-    getParentRoute: () => CompetitiveIntelligenceRoute,
-  } as any)
-const CompetitiveIntelligenceAlertsAlertIdRoute =
-  CompetitiveIntelligenceAlertsAlertIdRouteImport.update({
-    id: '/alerts/$alertId',
-    path: '/alerts/$alertId',
-    getParentRoute: () => CompetitiveIntelligenceRoute,
-  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/brands': typeof BrandsRouteWithChildren
-  '/competitive-intelligence': typeof CompetitiveIntelligenceRouteWithChildren
   '/login': typeof LoginRoute
   '/onboarding': typeof OnboardingRoute
   '/api/chat': typeof ApiChatRoute
@@ -117,15 +89,11 @@ export interface FileRoutesByFullPath {
   '/api/orchestrate': typeof ApiOrchestrateRoute
   '/api/ws': typeof ApiWsRoute
   '/brands/$slug': typeof BrandsSlugRoute
-  '/competitive-intelligence/admin': typeof CompetitiveIntelligenceAdminRoute
   '/settings/team': typeof SettingsTeamRoute
-  '/competitive-intelligence/alerts/$alertId': typeof CompetitiveIntelligenceAlertsAlertIdRoute
-  '/competitive-intelligence/competitors/$competitorId': typeof CompetitiveIntelligenceCompetitorsCompetitorIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/brands': typeof BrandsRouteWithChildren
-  '/competitive-intelligence': typeof CompetitiveIntelligenceRouteWithChildren
   '/login': typeof LoginRoute
   '/onboarding': typeof OnboardingRoute
   '/api/chat': typeof ApiChatRoute
@@ -134,16 +102,12 @@ export interface FileRoutesByTo {
   '/api/orchestrate': typeof ApiOrchestrateRoute
   '/api/ws': typeof ApiWsRoute
   '/brands/$slug': typeof BrandsSlugRoute
-  '/competitive-intelligence/admin': typeof CompetitiveIntelligenceAdminRoute
   '/settings/team': typeof SettingsTeamRoute
-  '/competitive-intelligence/alerts/$alertId': typeof CompetitiveIntelligenceAlertsAlertIdRoute
-  '/competitive-intelligence/competitors/$competitorId': typeof CompetitiveIntelligenceCompetitorsCompetitorIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/brands': typeof BrandsRouteWithChildren
-  '/competitive-intelligence': typeof CompetitiveIntelligenceRouteWithChildren
   '/login': typeof LoginRoute
   '/onboarding': typeof OnboardingRoute
   '/api/chat': typeof ApiChatRoute
@@ -152,17 +116,13 @@ export interface FileRoutesById {
   '/api/orchestrate': typeof ApiOrchestrateRoute
   '/api/ws': typeof ApiWsRoute
   '/brands/$slug': typeof BrandsSlugRoute
-  '/competitive-intelligence/admin': typeof CompetitiveIntelligenceAdminRoute
   '/settings/team': typeof SettingsTeamRoute
-  '/competitive-intelligence/alerts/$alertId': typeof CompetitiveIntelligenceAlertsAlertIdRoute
-  '/competitive-intelligence/competitors/$competitorId': typeof CompetitiveIntelligenceCompetitorsCompetitorIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
     | '/brands'
-    | '/competitive-intelligence'
     | '/login'
     | '/onboarding'
     | '/api/chat'
@@ -171,15 +131,11 @@ export interface FileRouteTypes {
     | '/api/orchestrate'
     | '/api/ws'
     | '/brands/$slug'
-    | '/competitive-intelligence/admin'
     | '/settings/team'
-    | '/competitive-intelligence/alerts/$alertId'
-    | '/competitive-intelligence/competitors/$competitorId'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/brands'
-    | '/competitive-intelligence'
     | '/login'
     | '/onboarding'
     | '/api/chat'
@@ -188,15 +144,11 @@ export interface FileRouteTypes {
     | '/api/orchestrate'
     | '/api/ws'
     | '/brands/$slug'
-    | '/competitive-intelligence/admin'
     | '/settings/team'
-    | '/competitive-intelligence/alerts/$alertId'
-    | '/competitive-intelligence/competitors/$competitorId'
   id:
     | '__root__'
     | '/'
     | '/brands'
-    | '/competitive-intelligence'
     | '/login'
     | '/onboarding'
     | '/api/chat'
@@ -205,16 +157,12 @@ export interface FileRouteTypes {
     | '/api/orchestrate'
     | '/api/ws'
     | '/brands/$slug'
-    | '/competitive-intelligence/admin'
     | '/settings/team'
-    | '/competitive-intelligence/alerts/$alertId'
-    | '/competitive-intelligence/competitors/$competitorId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   BrandsRoute: typeof BrandsRouteWithChildren
-  CompetitiveIntelligenceRoute: typeof CompetitiveIntelligenceRouteWithChildren
   LoginRoute: typeof LoginRoute
   OnboardingRoute: typeof OnboardingRoute
   ApiChatRoute: typeof ApiChatRoute
@@ -241,13 +189,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LoginRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/competitive-intelligence': {
-      id: '/competitive-intelligence'
-      path: '/competitive-intelligence'
-      fullPath: '/competitive-intelligence'
-      preLoaderRoute: typeof CompetitiveIntelligenceRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/brands': {
       id: '/brands'
       path: '/brands'
@@ -268,13 +209,6 @@ declare module '@tanstack/react-router' {
       fullPath: '/settings/team'
       preLoaderRoute: typeof SettingsTeamRouteImport
       parentRoute: typeof rootRouteImport
-    }
-    '/competitive-intelligence/admin': {
-      id: '/competitive-intelligence/admin'
-      path: '/admin'
-      fullPath: '/competitive-intelligence/admin'
-      preLoaderRoute: typeof CompetitiveIntelligenceAdminRouteImport
-      parentRoute: typeof CompetitiveIntelligenceRoute
     }
     '/brands/$slug': {
       id: '/brands/$slug'
@@ -318,20 +252,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiChatRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/competitive-intelligence/competitors/$competitorId': {
-      id: '/competitive-intelligence/competitors/$competitorId'
-      path: '/competitors/$competitorId'
-      fullPath: '/competitive-intelligence/competitors/$competitorId'
-      preLoaderRoute: typeof CompetitiveIntelligenceCompetitorsCompetitorIdRouteImport
-      parentRoute: typeof CompetitiveIntelligenceRoute
-    }
-    '/competitive-intelligence/alerts/$alertId': {
-      id: '/competitive-intelligence/alerts/$alertId'
-      path: '/alerts/$alertId'
-      fullPath: '/competitive-intelligence/alerts/$alertId'
-      preLoaderRoute: typeof CompetitiveIntelligenceAlertsAlertIdRouteImport
-      parentRoute: typeof CompetitiveIntelligenceRoute
-    }
   }
 }
 
@@ -346,30 +266,9 @@ const BrandsRouteChildren: BrandsRouteChildren = {
 const BrandsRouteWithChildren =
   BrandsRoute._addFileChildren(BrandsRouteChildren)
 
-interface CompetitiveIntelligenceRouteChildren {
-  CompetitiveIntelligenceAdminRoute: typeof CompetitiveIntelligenceAdminRoute
-  CompetitiveIntelligenceAlertsAlertIdRoute: typeof CompetitiveIntelligenceAlertsAlertIdRoute
-  CompetitiveIntelligenceCompetitorsCompetitorIdRoute: typeof CompetitiveIntelligenceCompetitorsCompetitorIdRoute
-}
-
-const CompetitiveIntelligenceRouteChildren: CompetitiveIntelligenceRouteChildren =
-  {
-    CompetitiveIntelligenceAdminRoute: CompetitiveIntelligenceAdminRoute,
-    CompetitiveIntelligenceAlertsAlertIdRoute:
-      CompetitiveIntelligenceAlertsAlertIdRoute,
-    CompetitiveIntelligenceCompetitorsCompetitorIdRoute:
-      CompetitiveIntelligenceCompetitorsCompetitorIdRoute,
-  }
-
-const CompetitiveIntelligenceRouteWithChildren =
-  CompetitiveIntelligenceRoute._addFileChildren(
-    CompetitiveIntelligenceRouteChildren,
-  )
-
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   BrandsRoute: BrandsRouteWithChildren,
-  CompetitiveIntelligenceRoute: CompetitiveIntelligenceRouteWithChildren,
   LoginRoute: LoginRoute,
   OnboardingRoute: OnboardingRoute,
   ApiChatRoute: ApiChatRoute,
