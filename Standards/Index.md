@@ -19,6 +19,20 @@ Standards for architecture, code quality, and operations patterns across OpenDas
   - JSON config fields (vs separate tables)
   - acceptedAt for invitation tracking
 
+**opendash-rbac-implementation-patterns.md**
+- Three-tier permission model (owner/editor/viewer)
+- Permission checking patterns (check, require, requireRole)
+- Auth context loading pattern
+- Tier limit enforcement before create
+- Org creation with auto-owner assignment
+- Team invitation with pending acceptance
+- API response sanitization (exclude sensitive fields)
+- Signup integration (auto-create org on signup)
+- Common validation patterns (email, domain, slug, role)
+- Middleware integration flow
+- Testing patterns (unit + integration)
+- Future considerations (custom roles, audit logging)
+
 ---
 
 ## Data Integrity (From Epic #14)
