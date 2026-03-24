@@ -57,6 +57,9 @@ export const datasourceMetricsTable = sqliteTable(
 		// Metadata: which dashboard/brand requested this
 		brandId: text("brand_id"),
 
+		// Organization scoping (for B2B multi-tenant)
+		orgId: text("org_id"),
+
 		// Creation timestamp (when record was inserted, not fetched)
 		createdAt: integer("created_at")
 			.notNull()
@@ -72,7 +75,10 @@ export const datasourceMetricsTable = sqliteTable(
 		// Secondary: brand-scoped queries
 		index("idx_brand_timestamp").on(table.brandId, table.timestamp),
 
-		// Tertiary: health status tracking
+		// Tertiary: org-scoped queries
+		index("idx_datasource_metrics_orgId").on(table.orgId),
+
+		// Health status tracking
 		index("idx_datasource_health").on(table.datasourceId, table.healthStatus),
 
 		// Retention: delete old records by timestamp
@@ -150,6 +156,9 @@ export const alertRulesTable = sqliteTable(
 		// Cooldown period (seconds) to prevent alert spam
 		cooldownSeconds: integer("cooldown_seconds").default(3600),
 
+		// Organization scoping (for B2B multi-tenant)
+		orgId: text("org_id"),
+
 		// Timestamps
 		createdAt: integer("created_at")
 			.notNull()
@@ -160,6 +169,7 @@ export const alertRulesTable = sqliteTable(
 	},
 	(table) => [
 		index("idx_datasource_rules").on(table.datasourceId),
+		index("idx_alert_rules_orgId").on(table.orgId),
 		index("idx_enabled_rules").on(table.enabled),
 	]
 );
@@ -194,6 +204,9 @@ export const alertHistoryTable = sqliteTable(
 		message: text("message"),
 		context: text("context"), // JSON with metric values at time of alert
 
+		// Organization scoping (for B2B multi-tenant)
+		orgId: text("org_id"),
+
 		// Index for querying
 		createdAt: integer("created_at")
 			.notNull()
@@ -202,7 +215,149 @@ export const alertHistoryTable = sqliteTable(
 	(table) => [
 		index("idx_rule_alerts").on(table.ruleId),
 		index("idx_datasource_history").on(table.datasourceId),
+		index("idx_alert_history_orgId").on(table.orgId),
 		index("idx_state_triggered").on(table.state, table.triggeredAt),
+	]
+);
+
+/**
+ * Organization & Team Tables — multi-tenant B2B support
+ *
+ * organizations: Tenant container (company, agency)
+ * team_members: Users in org with role-based permissions
+ * brands: Products/clients per org (for agencies managing multiple clients)
+ */
+
+/**
+ * Organizations — tenant container for multi-tenant B2B
+ */
+export const organizationsTable = sqliteTable(
+	"organizations",
+	{
+		id: text("id").primaryKey(),
+		clerkId: text("clerk_id").unique(),
+		name: text("name").notNull(),
+		slug: text("slug").notNull().unique(),
+
+		// Plan tier (enforces limits)
+		plan: text("plan", {
+			enum: ["starter", "pro", "enterprise"],
+		})
+			.notNull()
+			.default("starter"),
+
+		// Billing
+		stripeCustomerId: text("stripe_customer_id"),
+		stripeSubscriptionId: text("stripe_subscription_id"),
+
+		// Metadata
+		website: text("website"),
+		logo: text("logo"),
+
+		// Timestamps
+		createdAt: integer("created_at")
+			.notNull()
+			.default(sql`(cast(strftime('%s', 'now') * 1000 as integer))`),
+		updatedAt: integer("updated_at")
+			.notNull()
+			.default(sql`(cast(strftime('%s', 'now') * 1000 as integer))`),
+	},
+	(table) => [
+		index("idx_organizations_clerkId").on(table.clerkId),
+		index("idx_organizations_slug").on(table.slug),
+		index("idx_organizations_plan").on(table.plan),
+	]
+);
+
+/**
+ * Team Members — users in organization with role-based permissions
+ */
+export const teamMembersTable = sqliteTable(
+	"team_members",
+	{
+		id: text("id").primaryKey(),
+		orgId: text("org_id").notNull(),
+		userId: text("user_id").notNull(),
+
+		// Permission role
+		role: text("role", {
+			enum: ["owner", "editor", "viewer"],
+		}).notNull(),
+
+		// Invitation tracking
+		invitedBy: text("invited_by"),
+		invitedAt: integer("invited_at"),
+		acceptedAt: integer("accepted_at"), // NULL = pending
+
+		// Status
+		active: integer("active", { mode: "boolean" })
+			.notNull()
+			.default(1),
+
+		// Timestamps
+		createdAt: integer("created_at")
+			.notNull()
+			.default(sql`(cast(strftime('%s', 'now') * 1000 as integer))`),
+		updatedAt: integer("updated_at")
+			.notNull()
+			.default(sql`(cast(strftime('%s', 'now') * 1000 as integer))`),
+	},
+	(table) => [
+		index("idx_team_members_orgId").on(table.orgId),
+		index("idx_team_members_userId").on(table.userId),
+		index("idx_team_members_orgId_active").on(table.orgId, table.active),
+		index("idx_team_members_role").on(table.role),
+		index("idx_team_members_acceptedAt").on(table.acceptedAt),
+	]
+);
+
+/**
+ * Brands — products/clients per organization
+ *
+ * Supports agencies managing multiple clients.
+ * Serves as scoping mechanism for datasources, competitors, and alerts.
+ */
+export const brandsTable = sqliteTable(
+	"brands",
+	{
+		id: text("id").primaryKey(),
+		orgId: text("org_id").notNull(),
+		name: text("name").notNull(),
+		slug: text("slug").notNull(),
+		domain: text("domain").notNull().unique(),
+
+		// Metadata
+		logo: text("logo"),
+		favicon: text("favicon"),
+		themeColor: text("theme_color"),
+
+		// Configuration (JSON arrays)
+		datasources: text("datasources").default("[]"), // e.g. '["stripe", "ga4"]'
+		competitors: text("competitors").default("[]"), // e.g. '["adidas.com", "puma.com"]'
+		keywords: text("keywords").default("[]"), // e.g. '["best shoes", "running gear"]'
+
+		// Status
+		active: integer("active", { mode: "boolean" })
+			.notNull()
+			.default(1),
+		archived: integer("archived", { mode: "boolean" })
+			.notNull()
+			.default(0),
+		archivedAt: integer("archived_at"),
+
+		// Timestamps
+		createdAt: integer("created_at")
+			.notNull()
+			.default(sql`(cast(strftime('%s', 'now') * 1000 as integer))`),
+		updatedAt: integer("updated_at")
+			.notNull()
+			.default(sql`(cast(strftime('%s', 'now') * 1000 as integer))`),
+	},
+	(table) => [
+		index("idx_brands_orgId").on(table.orgId),
+		index("idx_brands_orgId_active").on(table.orgId, table.active),
+		index("idx_brands_domain").on(table.domain),
+		index("idx_brands_slug").on(table.slug),
 	]
 );
 

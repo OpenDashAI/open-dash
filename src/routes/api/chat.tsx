@@ -4,8 +4,9 @@ import { createOpenAICompatible } from '@ai-sdk/openai-compatible'
 import { z } from 'zod'
 import type { UIMessage } from 'ai'
 import * as orch from '../../server/orchestrator'
+import { ciTools } from './ci-tools'
 
-const BASE_SYSTEM_PROMPT = `You are the OpenDash AI — an operations control plane assistant. You help manage machines, brands, and execution across a multi-project portfolio.
+const BASE_SYSTEM_PROMPT = `You are the OpenDash AI — an operations control plane assistant. You help manage machines, brands, and execution across a multi-project portfolio, with deep competitive intelligence capabilities.
 
 You have deep knowledge of:
 - 4 machines on Tailscale: providence (macOS, primary), destiny (macOS, secondary), stargate (Windows, GPU), stargate-wsl (Linux/WSL)
@@ -15,11 +16,19 @@ You have deep knowledge of:
 - Tech: Cloudflare Workers, D1, Queues, Astro (Pages-Plus), TanStack Start (OpenDash)
 - Services: Scramjet (pipeline), Scalable Media (brand operator), API Mom (managed keys), GatherFeed (research), Pages-Plus (multi-site), Social-Good (social), Virtual-Media (API gateway)
 
-You can execute real operations via tools. Use them when the user asks to audit, research, generate content, or check status. Always confirm destructive operations before executing.
+COMPETITIVE INTELLIGENCE CAPABILITIES:
+- Monitor 10+ competitors across SERP rankings, domain metrics, content, and market signals
+- Analyze market opportunities and threats in real-time using AI
+- Track content gaps and positioning vs competitors
+- Cost-controlled API access via API Mom (prevents runaway costs)
+- Daily/weekly/monthly automated collection jobs with quota management
+- Integrate findings into marketing strategy and product decisions
+
+You can execute real operations via tools. Use them when the user asks to audit, research, generate content, check competitive status, or check CI status. Always confirm destructive operations before executing.
 
 You have browser automation tools (browserOpen, browserClick, browserType, browserNavigate, browserEval, browserScreenshot, browserClose). When the user asks to "open", "view", "look at", or "check" a website, use browserOpen to launch a session. The browser runs on Cloudflare's edge — you control it and the user sees screenshots in the dashboard. You can click elements, type text, evaluate JS (e.g., modify CSS to test design changes), and navigate pages. Always share the sessionId so the user can see the live browser card.
 
-Be concise and actionable. Use markdown formatting. When discussing brands or machines, reference specific data.
+Be concise and actionable. Use markdown formatting. When discussing brands, machines, or competitors, reference specific data.
 
 When the conversation warrants a HUD display change (mode switch, spawning cards), append a directive block after your text response:
 
@@ -349,7 +358,10 @@ export const Route = createFileRoute('/api/chat')({
           model: openrouter.chatModel('qwen/qwen-2.5-72b-instruct'),
           system: buildSystemPrompt(focusBrand ?? null),
           messages: await convertToModelMessages(messages),
-          tools: orchestratorTools,
+          tools: {
+            ...orchestratorTools,
+            ...ciTools, // Add competitive intelligence tools
+          },
           maxSteps: 5, // Allow multi-step tool use
           maxTokens: 2048,
         })
