@@ -1,6 +1,9 @@
 import { useNavigate } from "@tanstack/react-router";
 import type { DashboardYaml } from "../lib/dashboard-config";
 import type { BriefingItem } from "../lib/briefing";
+import { PortfolioHeader } from "./portfolio/PortfolioHeader";
+import { PortfolioGrid } from "./portfolio/PortfolioGrid";
+import { EmptyState } from "./portfolio/EmptyState";
 
 interface BrandMetric {
 	slug: string;
@@ -16,26 +19,15 @@ interface BrandsPortfolioViewProps {
 	brands: BrandMetric[];
 }
 
-function getHealthColor(score: number): string {
-	if (score >= 80) return "var(--hud-success)";
-	if (score >= 60) return "var(--hud-warning)";
-	return "var(--hud-error)";
-}
-
-function getHealthLabel(score: number): string {
-	if (score >= 80) return "Healthy";
-	if (score >= 60) return "Degraded";
-	return "Critical";
-}
-
 export function BrandsPortfolioView({ brands }: BrandsPortfolioViewProps) {
 	const navigate = useNavigate({ from: "/brands" });
 
-	const sortedBrands = [...brands].sort((a, b) => b.healthScore - a.healthScore);
 	const avgHealth =
 		brands.length > 0
 			? Math.round(brands.reduce((sum, b) => sum + b.healthScore, 0) / brands.length)
 			: 0;
+
+	const totalItems = brands.reduce((sum, b) => sum + b.items.length, 0);
 
 	return (
 		<div className="brands-portfolio">
@@ -195,15 +187,6 @@ export function BrandsPortfolioView({ brands }: BrandsPortfolioViewProps) {
 					font-size: 0.75rem;
 				}
 
-				.source-badge {
-					padding: 0.25rem 0.5rem;
-					background: var(--hud-accent-dim);
-					color: var(--hud-accent);
-					border-radius: 2px;
-					text-transform: uppercase;
-					letter-spacing: 0.02em;
-				}
-
 				.empty-state {
 					display: flex;
 					flex-direction: column;
@@ -220,101 +203,21 @@ export function BrandsPortfolioView({ brands }: BrandsPortfolioViewProps) {
 				}
 			`}</style>
 
-			<div className="portfolio-header">
-				<div className="portfolio-title">Brands Portfolio</div>
-				<div className="portfolio-stats">
-					<div className="stat-item">
-						<span className="stat-label">Total Brands:</span>
-						<span className="stat-value">{brands.length}</span>
-					</div>
-					<div className="stat-item">
-						<span className="stat-label">Avg Health:</span>
-						<span className="stat-value" style={{ color: getHealthColor(avgHealth) }}>
-							{avgHealth}%
-						</span>
-					</div>
-					<div className="stat-item">
-						<span className="stat-label">Total Items:</span>
-						<span className="stat-value">
-							{brands.reduce((sum, b) => sum + b.items.length, 0)}
-						</span>
-					</div>
-				</div>
-			</div>
+			<PortfolioHeader
+				totalBrands={brands.length}
+				avgHealth={avgHealth}
+				totalItems={totalItems}
+			/>
 
 			{brands.length === 0 ? (
-				<div className="empty-state">
-					<div className="empty-icon">📊</div>
-					<div>No dashboards configured</div>
-					<div style={{ fontSize: "0.875rem", marginTop: "0.5rem" }}>
-						Add a dashboard.yaml to the configs/ directory to get started
-					</div>
-				</div>
+				<EmptyState />
 			) : (
-				<div className="portfolio-grid">
-					{sortedBrands.map((brand) => (
-						<div
-							key={brand.slug}
-							className="brand-card"
-							onClick={() =>
-								navigate({ to: "/brands/$slug", params: { slug: brand.slug } })
-							}
-						>
-							<div className="brand-card-header">
-								<div className="brand-name">{brand.config.brand}</div>
-								<div
-									className="health-badge"
-									style={{
-										color: getHealthColor(brand.healthScore),
-										borderColor: getHealthColor(brand.healthScore),
-										backgroundColor: `${getHealthColor(brand.healthScore)}15`,
-									}}
-								>
-									<div
-										className="health-dot"
-										style={{ backgroundColor: getHealthColor(brand.healthScore) }}
-									/>
-									{brand.healthScore}%
-								</div>
-							</div>
-
-							{brand.config.domain && (
-								<div className="brand-domain">{brand.config.domain}</div>
-							)}
-
-							{brand.config.description && (
-								<div className="brand-description">{brand.config.description}</div>
-							)}
-
-							<div className="brand-metrics">
-								<div className="metric">
-									<div className="metric-label">Issues</div>
-									<div className="metric-value">{brand.issueCount}</div>
-								</div>
-								<div className="metric">
-									<div className="metric-label">Deploys</div>
-									<div className="metric-value">{brand.deployCount}</div>
-								</div>
-								<div className="metric">
-									<div className="metric-label">Revenue Events</div>
-									<div className="metric-value">{brand.revenueCount}</div>
-								</div>
-								<div className="metric">
-									<div className="metric-label">Total Items</div>
-									<div className="metric-value">{brand.items.length}</div>
-								</div>
-							</div>
-
-							<div className="brand-footer">
-								<span style={{ color: "var(--hud-text-muted)" }}>
-									{brand.config.sources.length} source
-									{brand.config.sources.length !== 1 ? "s" : ""}
-								</span>
-								<span style={{ color: "var(--hud-accent)" }}>View →</span>
-							</div>
-						</div>
-					))}
-				</div>
+				<PortfolioGrid
+					brands={brands}
+					onNavigate={(slug) =>
+						navigate({ to: "/brands/$slug", params: { slug } })
+					}
+				/>
 			)}
 		</div>
 	);

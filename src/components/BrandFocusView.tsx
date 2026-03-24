@@ -1,9 +1,10 @@
 import { useNavigate } from "@tanstack/react-router";
-import { useMemo } from "react";
-import { BriefingCard } from "./cards/BriefingCard";
 import type { DashboardYaml } from "../lib/dashboard-config";
 import type { BriefingItem } from "../lib/briefing";
 import type { DataSourceInfo } from "../server/datasources";
+import { ConfigNotFound } from "./focus/ConfigNotFound";
+import { BrandFocusHeader } from "./focus/BrandFocusHeader";
+import { BrandFocusContent } from "./focus/BrandFocusContent";
 
 interface BrandMetrics {
 	totalItems: number;
@@ -29,37 +30,21 @@ export function BrandFocusView({
 }: BrandFocusViewProps) {
 	const navigate = useNavigate({ from: "/brands/$slug" });
 
-	// Group items by type
-	const groupedItems = useMemo(() => {
-		const groups: Record<string, BriefingItem[]> = {};
-		items.forEach((item) => {
-			if (!groups[item.type]) groups[item.type] = [];
-			groups[item.type].push(item);
-		});
-		return groups;
-	}, [items]);
-
-	const highPriorityItems = useMemo(
-		() => items.filter((i) => i.priority === "high"),
-		[items]
-	);
-
 	if (!config) {
 		return (
-			<div
-				className="brand-focus"
-				style={{
-					display: "flex",
-					alignItems: "center",
-					justifyContent: "center",
-					height: "100%",
-					color: "var(--hud-text-muted)",
-				}}
-			>
-				<div style={{ textAlign: "center" }}>
-					<div style={{ fontSize: "1.5rem", marginBottom: "1rem" }}>⚠️</div>
-					<div>Brand configuration not found</div>
-				</div>
+			<div className="brand-focus">
+				<style>{`
+					.brand-focus {
+						display: flex;
+						flex-direction: column;
+						height: 100%;
+						background: var(--hud-bg);
+						color: var(--hud-text);
+						font-family: var(--font-mono);
+						overflow-y: auto;
+					}
+				`}</style>
+				<ConfigNotFound />
 			</div>
 		);
 	}
@@ -267,111 +252,18 @@ export function BrandFocusView({
 				}
 			`}</style>
 
-			<div className="brand-focus-header">
-				<div className="brand-focus-title">
-					<button className="back-button" onClick={() => navigate({ to: "/brands" })}>
-						← Brands
-					</button>
-					<div className="brand-title">{config.brand}</div>
-				</div>
+			<BrandFocusHeader
+				config={config}
+				totalItems={metrics.totalItems}
+				highPriority={metrics.highPriority}
+				onBack={() => navigate({ to: "/brands" })}
+			/>
 
-				<div className="brand-info">
-					{config.domain && (
-						<div className="info-item">
-							<div className="info-label">Domain</div>
-							<div className="info-value">{config.domain}</div>
-						</div>
-					)}
-					<div className="info-item">
-						<div className="info-label">Sources</div>
-						<div className="info-value">{config.sources.length}</div>
-					</div>
-					<div className="info-item">
-						<div className="info-label">Total Items</div>
-						<div className="info-value">{metrics.totalItems}</div>
-					</div>
-					<div className="info-item">
-						<div className="info-label">High Priority</div>
-						<div className="info-value" style={{ color: "var(--hud-warning)" }}>
-							{metrics.highPriority}
-						</div>
-					</div>
-				</div>
-			</div>
-
-			<div className="brand-focus-content">
-				<div className="items-section">
-					{highPriorityItems.length > 0 && (
-						<div className="items-group">
-							<div className="group-title">⚠️ High Priority</div>
-							{highPriorityItems.map((item) => (
-								<BriefingCard key={item.id} item={item} />
-							))}
-						</div>
-					)}
-
-					{Object.entries(groupedItems).map(([type, typeItems]) => (
-						<div key={type} className="items-group">
-							<div className="group-title">{type}</div>
-							{typeItems.slice(0, 5).map((item) => (
-								<BriefingCard key={item.id} item={item} />
-							))}
-							{typeItems.length > 5 && (
-								<div style={{ fontSize: "0.75rem", color: "var(--hud-text-muted)" }}>
-									+{typeItems.length - 5} more {type}
-									{typeItems.length - 5 !== 1 ? "s" : ""}
-								</div>
-							)}
-						</div>
-					))}
-
-					{items.length === 0 && (
-						<div className="empty-items">
-							<div style={{ fontSize: "2rem", marginBottom: "0.5rem" }}>✓</div>
-							<div>No items to display</div>
-						</div>
-					)}
-				</div>
-
-				<div className="sidebar">
-					<div className="sidebar-section">
-						<div className="section-title">Metrics</div>
-						<div className="metric-row">
-							<span className="metric-label">Issues</span>
-							<span className="metric-value">{metrics.issues}</span>
-						</div>
-						<div className="metric-row">
-							<span className="metric-label">Deploys</span>
-							<span className="metric-value">{metrics.deploys}</span>
-						</div>
-						<div className="metric-row">
-							<span className="metric-label">Revenue</span>
-							<span className="metric-value">{metrics.revenue}</span>
-						</div>
-						<div className="metric-row">
-							<span className="metric-label">Alerts</span>
-							<span className="metric-value">{metrics.alerts}</span>
-						</div>
-					</div>
-
-					<div className="sidebar-section">
-						<div className="section-title">Data Sources</div>
-						{sources.map((source) => (
-							<div key={source.id} className="source-item">
-								<span className="source-name">{source.name}</span>
-								<div className="source-status">
-									<div
-										className={`status-dot ${
-											source.status.connected ? "" : "disconnected"
-										}`}
-									/>
-									<span>{source.status.connected ? "Connected" : "Offline"}</span>
-								</div>
-							</div>
-						))}
-					</div>
-				</div>
-			</div>
+			<BrandFocusContent
+				items={items}
+				sources={sources}
+				metrics={metrics}
+			/>
 		</div>
 	);
 }
