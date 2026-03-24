@@ -27,6 +27,14 @@ import {
   DataSourceConfigSchema,
   GitHubEnvSchema,
   StripeBrandConfigSchema,
+  // Input validation
+  FetchAllSourcesInputSchema,
+  FetchBrandDashboardInputSchema,
+  GetBrandsInputSchema,
+  validateInput,
+  // Datasource validation
+  validateGitHubConfig,
+  validateStripeConfig,
 } from "../schemas";
 
 describe("TimestampSchema", () => {
@@ -495,5 +503,213 @@ describe("StripeBrandConfigSchema", () => {
         minAmountFilter: -10,
       })
     ).toThrow();
+  });
+});
+
+describe("FetchAllSourcesInputSchema", () => {
+  it("accepts valid input", () => {
+    const result = FetchAllSourcesInputSchema.parse({
+      lastVisited: new Date().toISOString(),
+    });
+    expect(result.lastVisited).toBeTruthy();
+  });
+
+  it("accepts null lastVisited", () => {
+    const result = FetchAllSourcesInputSchema.parse({
+      lastVisited: null,
+    });
+    expect(result.lastVisited).toBeNull();
+  });
+
+  it("accepts undefined lastVisited", () => {
+    const result = FetchAllSourcesInputSchema.parse({});
+    expect(result.lastVisited).toBeUndefined();
+  });
+
+  it("rejects invalid ISO timestamp", () => {
+    expect(() =>
+      FetchAllSourcesInputSchema.parse({
+        lastVisited: "not-a-date",
+      })
+    ).toThrow();
+  });
+
+  it("accepts empty object", () => {
+    const result = FetchAllSourcesInputSchema.parse({});
+    expect(result).toEqual({});
+  });
+});
+
+describe("FetchBrandDashboardInputSchema", () => {
+  it("accepts valid input", () => {
+    const result = FetchBrandDashboardInputSchema.parse({
+      brandSlug: "my-brand",
+      lastVisited: new Date().toISOString(),
+    });
+    expect(result.brandSlug).toBe("my-brand");
+  });
+
+  it("rejects empty brandSlug", () => {
+    expect(() =>
+      FetchBrandDashboardInputSchema.parse({
+        brandSlug: "",
+      })
+    ).toThrow();
+  });
+
+  it("rejects brandSlug too long", () => {
+    expect(() =>
+      FetchBrandDashboardInputSchema.parse({
+        brandSlug: "a".repeat(101),
+      })
+    ).toThrow();
+  });
+
+  it("rejects brandSlug with uppercase", () => {
+    expect(() =>
+      FetchBrandDashboardInputSchema.parse({
+        brandSlug: "My-Brand",
+      })
+    ).toThrow();
+  });
+
+  it("rejects brandSlug with underscores", () => {
+    expect(() =>
+      FetchBrandDashboardInputSchema.parse({
+        brandSlug: "my_brand",
+      })
+    ).toThrow();
+  });
+
+  it("rejects brandSlug with spaces", () => {
+    expect(() =>
+      FetchBrandDashboardInputSchema.parse({
+        brandSlug: "my brand",
+      })
+    ).toThrow();
+  });
+
+  it("accepts valid slug formats", () => {
+    const validSlugs = ["my-brand", "brand123", "a", "test-brand-123"];
+    validSlugs.forEach((slug) => {
+      const result = FetchBrandDashboardInputSchema.parse({
+        brandSlug: slug,
+      });
+      expect(result.brandSlug).toBe(slug);
+    });
+  });
+
+  it("rejects invalid ISO timestamp", () => {
+    expect(() =>
+      FetchBrandDashboardInputSchema.parse({
+        brandSlug: "my-brand",
+        lastVisited: "invalid",
+      })
+    ).toThrow();
+  });
+
+  it("accepts null lastVisited", () => {
+    const result = FetchBrandDashboardInputSchema.parse({
+      brandSlug: "my-brand",
+      lastVisited: null,
+    });
+    expect(result.lastVisited).toBeNull();
+  });
+});
+
+describe("GetBrandsInputSchema", () => {
+  it("accepts empty object", () => {
+    const result = GetBrandsInputSchema.parse({});
+    expect(result).toEqual({});
+  });
+
+  it("rejects any properties", () => {
+    expect(() =>
+      GetBrandsInputSchema.parse({
+        extra: "prop",
+      })
+    ).toThrow();
+  });
+});
+
+describe("validateInput helper", () => {
+  it("parses valid data", () => {
+    const result = validateInput(
+      FetchBrandDashboardInputSchema,
+      { brandSlug: "test" },
+      "test input"
+    );
+    expect(result.brandSlug).toBe("test");
+  });
+
+  it("throws on invalid data", () => {
+    const fn = () =>
+      validateInput(FetchBrandDashboardInputSchema, { brandSlug: "" }, "test");
+    expect(fn).toThrow("Invalid test:");
+  });
+});
+
+describe("validateGitHubConfig", () => {
+  it("validates GitHub env vars", () => {
+    const config = {
+      env: { GITHUB_TOKEN: "ghp_xxx" },
+      lastVisited: null,
+    };
+    const result = validateGitHubConfig(config);
+    expect(result.env.GITHUB_TOKEN).toBe("ghp_xxx");
+  });
+
+  it("throws on missing GITHUB_TOKEN", () => {
+    const config = {
+      env: {},
+      lastVisited: null,
+    };
+    expect(() => validateGitHubConfig(config)).toThrow("GitHub");
+  });
+
+  it("validates brand config", () => {
+    const config = {
+      env: { GITHUB_TOKEN: "ghp_xxx" },
+      lastVisited: null,
+      brandConfig: { owner: "garywu" },
+    };
+    const result = validateGitHubConfig(config);
+    expect(result.brandConfig.owner).toBe("garywu");
+  });
+});
+
+describe("validateStripeConfig", () => {
+  it("validates Stripe env vars", () => {
+    const config = {
+      env: {
+        STRIPE_SECRET_KEY: "sk_test_xxx",
+        STRIPE_PUBLIC_KEY: "pk_test_xxx",
+      },
+      lastVisited: null,
+    };
+    const result = validateStripeConfig(config);
+    expect(result.env.STRIPE_SECRET_KEY).toBe("sk_test_xxx");
+  });
+
+  it("throws on missing STRIPE_SECRET_KEY", () => {
+    const config = {
+      env: { STRIPE_PUBLIC_KEY: "pk_test_xxx" },
+      lastVisited: null,
+    };
+    expect(() => validateStripeConfig(config)).toThrow("Stripe");
+  });
+
+  it("validates brand config with defaults", () => {
+    const config = {
+      env: {
+        STRIPE_SECRET_KEY: "sk_test_xxx",
+        STRIPE_PUBLIC_KEY: "pk_test_xxx",
+      },
+      lastVisited: null,
+      brandConfig: { currencyFilter: "USD" },
+    };
+    const result = validateStripeConfig(config);
+    expect(result.brandConfig.currencyFilter).toBe("USD");
+    expect(result.brandConfig.lookbackDays).toBe(30);
   });
 });

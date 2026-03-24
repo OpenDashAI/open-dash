@@ -4,6 +4,11 @@ import type { DataSourceConfig, DataSourceStatus } from "../lib/datasource";
 import { registry } from "../datasources";
 import { loadDashboardConfig } from "./config-loader";
 import type { DashboardYaml } from "../lib/dashboard-config";
+import {
+	FetchAllSourcesInputSchema,
+	FetchBrandDashboardInputSchema,
+	validateInput,
+} from "../lib/schemas/input";
 
 export interface DataSourceInfo {
 	id: string;
@@ -19,11 +24,18 @@ export const fetchAllSources = createServerFn().handler(
 	async ({
 		data,
 	}: {
-		data: { lastVisited: string | null };
+		data: unknown;
 	}): Promise<{
 		items: BriefingItem[];
 		sources: DataSourceInfo[];
 	}> => {
+		// ✅ Validate input at handler boundary
+		const input = validateInput(
+			FetchAllSourcesInputSchema,
+			data,
+			"fetchAllSources input"
+		);
+
 		const config: DataSourceConfig = {
 			env: {
 				GITHUB_TOKEN: process.env.GITHUB_TOKEN,
@@ -34,7 +46,7 @@ export const fetchAllSources = createServerFn().handler(
 				SM_API_URL: process.env.SM_API_URL,
 				SM_SERVICE_KEY: process.env.SM_SERVICE_KEY,
 			},
-			lastVisited: data.lastVisited,
+			lastVisited: input.lastVisited ?? null,
 		};
 
 		const { items, statuses } = await registry.fetchAll(config);
@@ -88,9 +100,16 @@ export const fetchBrandDashboard = createServerFn()
 			sources: DataSourceInfo[];
 			error?: string;
 		}> => {
+			// ✅ Validate input at handler boundary
+			const input = validateInput(
+				FetchBrandDashboardInputSchema,
+				data,
+				"fetchBrandDashboard input"
+			);
+
 			// Load dashboard config from YAML
 			const config = await loadDashboardConfig({
-				data: { brandSlug: data.brandSlug },
+				data: { brandSlug: input.brandSlug },
 			});
 
 			if (!config) {
@@ -98,7 +117,7 @@ export const fetchBrandDashboard = createServerFn()
 					config: null,
 					items: [],
 					sources: [],
-					error: `No configuration found for brand: ${data.brandSlug}`,
+					error: `No configuration found for brand: ${input.brandSlug}`,
 				};
 			}
 
@@ -113,7 +132,7 @@ export const fetchBrandDashboard = createServerFn()
 					SM_API_URL: process.env.SM_API_URL,
 					SM_SERVICE_KEY: process.env.SM_SERVICE_KEY,
 				},
-				lastVisited: data.lastVisited || null,
+				lastVisited: input.lastVisited ?? null,
 			};
 
 			// Fetch from specified datasources only
