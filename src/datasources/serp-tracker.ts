@@ -8,12 +8,13 @@ import type { DataSource, DataSourceConfig } from "../lib/datasource";
  * A Durable Object (CompetitiveIntelligenceCoordinator) runs daily to fetch
  * fresh data from BraveSearch API and store snapshots.
  *
- * This datasource queries D1 to find significant rank changes and creates briefing items.
+ * This datasource generates briefing items for:
+ * - Critical rank drops (5+ positions, especially out of top 10)
+ * - New top performer entries (rank 1-3)
+ * - Significant improvements
  *
- * Requires:
- * - Competitors configured in D1 competitors table
- * - Daily SERP snapshots from the scheduler DO
- * - Auth context for brand scoping
+ * Note: Full D1 integration pending server context wiring.
+ * For now, shows status message during scheduler operation.
  */
 export const serpTrackerSource: DataSource = {
 	id: "serp-tracker",
@@ -24,18 +25,45 @@ export const serpTrackerSource: DataSource = {
 
 	async fetch(): Promise<BriefingItem[]> {
 		// SERP Tracker uses a Durable Object scheduler to fetch rankings daily at 6 AM UTC
-		// This datasource displays status and detected rank movements from D1 snapshots
+		// This datasource generates briefing items for significant rank movements
 		//
-		// Status message while DB integration is wired up through server context
-		return [{
-			id: "serp-tracker-active",
+		// Briefing item generation flow:
+		// 1. CompetitiveIntelligenceCoordinator DO fetches SERP data daily
+		// 2. Snapshots stored in D1 serp_rankings table
+		// 3. detectRankMovements() identifies significant changes
+		// 4. Create briefing items for high-priority movements
+		//
+		// Currently shows status message pending server context integration
+
+		const items: BriefingItem[] = [];
+
+		// Status: Scheduler is active and collecting data
+		items.push({
+			id: "serp-tracker-status",
 			priority: "low",
-			category: "status",
-			title: "SERP Tracker - Daily Scheduler Active",
+			category: "seo",
+			title: "SERP Tracker Running",
 			detail:
-				"Ranking snapshots collected daily at 6 AM UTC via CompetitiveIntelligenceCoordinator DO. Detecting significant changes automatically.",
+				"Competitor keyword rankings collected daily at 6 AM UTC. Configure competitors to track rankings.",
 			time: new Date().toISOString(),
-		}];
+			action: "Configure",
+			actionUrl: "/settings/competitors",
+		});
+
+		// Placeholder for when rank movements are detected
+		// In production, this would query D1 and generate items like:
+		// {
+		//   id: "serp-rank-drop-example",
+		//   priority: "high",
+		//   category: "seo",
+		//   title: "Competitor Rank Drop",
+		//   detail: "metabase.com dropped to rank 12 for 'business intelligence' (from #8)",
+		//   time: new Date().toISOString(),
+		//   action: "View Trends",
+		//   actionUrl: "/analytics/serp-trends",
+		// }
+
+		return items;
 	},
 };
 
