@@ -2,12 +2,12 @@
  * Analytics Dashboard — Composite component for all analytics
  */
 
-import { useTransition } from "react";
-import { getTrendingData, getAnomalyData, evaluateAlerts } from "../../server/analytics";
+import { useEffect, useState, useTransition } from "react";
+import { getTrendingData, getAnomalyData, evaluateAlerts, getHealthSummary } from "../../server/analytics";
 import { TrendingCard } from "./TrendingCard";
 import { AnomalyBadge } from "./AnomalyBadge";
 import { AlertPanel } from "./AlertPanel";
-import type { DatasourceMetric } from "../../db/queries";
+import { HealthSummary } from "./HealthSummary";
 
 export interface AnalyticsDashboardProps {
   datasources: Array<{ id: string; name: string }>;
@@ -19,9 +19,6 @@ export function AnalyticsDashboard({
   autoRefreshSeconds = 60,
 }: AnalyticsDashboardProps) {
   const [_isPending, startTransition] = useTransition();
-
-  // In a real implementation, would use useEffect + polling for auto-refresh
-  // For now, this is a layout component that uses server functions
 
   return (
     <div className="space-y-4">
@@ -45,10 +42,10 @@ export function AnalyticsDashboard({
           </h3>
           <div className="space-y-3">
             {datasources.map((ds) => (
-              <AnalyticsCardLoader
+              <TrendingCardLoader
                 key={`trending-${ds.id}`}
-                type="trending"
                 datasourceId={ds.id}
+                datasourceName={ds.name}
               />
             ))}
           </div>
@@ -62,19 +59,26 @@ export function AnalyticsDashboard({
           <div className="space-y-3">
             {datasources.map((ds) => (
               <div key={`issues-${ds.id}`} className="space-y-2">
-                <AnalyticsCardLoader
-                  type="anomaly"
+                <AnomalyCardLoader
                   datasourceId={ds.id}
+                  datasourceName={ds.name}
                 />
-                <AnalyticsCardLoader
-                  type="alerts"
+                <AlertCardLoader
                   datasourceId={ds.id}
+                  datasourceName={ds.name}
                 />
               </div>
             ))}
           </div>
         </div>
       </div>
+
+      {/* Health Summary */}
+      {datasources.length > 0 && (
+        <div className="mt-6 pt-4 border-t border-[var(--hud-border)]">
+          <HealthSummaryLoader />
+        </div>
+      )}
 
       {/* Info */}
       <div className="text-[10px] text-[var(--hud-text-muted)] mt-8 pt-4 border-t border-[var(--hud-border)]">
@@ -85,26 +89,160 @@ export function AnalyticsDashboard({
 }
 
 /**
- * Lazy loader for analytics cards — handles data fetching
+ * Trending card loader — fetches and displays trending data
  */
-interface AnalyticsCardLoaderProps {
-  type: "trending" | "anomaly" | "alerts";
+interface CardLoaderProps {
   datasourceId: string;
+  datasourceName: string;
 }
 
-function AnalyticsCardLoader({ type, datasourceId }: AnalyticsCardLoaderProps) {
-  // In a real implementation, would use useAsync or React Query
-  // For now, return placeholder
-  // Server functions would be called here to fetch data
+function TrendingCardLoader({ datasourceId, datasourceName }: CardLoaderProps) {
+  const [data, setData] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        const result = await getTrendingData({ data: { datasourceId } });
+        if (result.error) {
+          setError(result.error);
+          setData(null);
+        } else {
+          setData(result.trending);
+          setError(null);
+        }
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Failed to load trending data");
+        setData(null);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [datasourceId]);
 
   return (
-    <div className="hud-card">
-      <div className="text-[11px] text-[var(--hud-text-muted)] uppercase tracking-wider">
-        {type.charAt(0).toUpperCase() + type.slice(1)} — {datasourceId}
-      </div>
-      <div className="text-xs text-[var(--hud-text-muted)] mt-2">
-        Ready to display {type} data
-      </div>
-    </div>
+    <TrendingCard
+      datasourceId={datasourceId}
+      trending={data}
+      loading={loading}
+      error={error}
+    />
+  );
+}
+
+function AnomalyCardLoader({ datasourceId, datasourceName }: CardLoaderProps) {
+  const [data, setData] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        const result = await getAnomalyData({ data: { datasourceId } });
+        if (result.error) {
+          setError(result.error);
+          setData(null);
+        } else {
+          setData(result.anomalies);
+          setError(null);
+        }
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Failed to load anomalies");
+        setData(null);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [datasourceId]);
+
+  return (
+    <AnomalyBadge
+      datasourceId={datasourceId}
+      anomalies={data}
+      loading={loading}
+      error={error}
+    />
+  );
+}
+
+function AlertCardLoader({ datasourceId, datasourceName }: CardLoaderProps) {
+  const [data, setData] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        const result = await evaluateAlerts({ data: { datasourceId } });
+        if (result.error) {
+          setError(result.error);
+          setData(null);
+        } else {
+          setData(result.alerts);
+          setError(null);
+        }
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Failed to load alerts");
+        setData(null);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [datasourceId]);
+
+  return (
+    <AlertPanel
+      alerts={data || []}
+      datasourceId={datasourceId}
+      loading={loading}
+      error={error}
+    />
+  );
+}
+
+function HealthSummaryLoader() {
+  const [data, setData] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        const result = await getHealthSummary();
+        if (result.error) {
+          setError(result.error);
+          setData(null);
+        } else {
+          setData(result.summary);
+          setError(null);
+        }
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Failed to load health summary");
+        setData(null);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  return (
+    <HealthSummary
+      health={data}
+      loading={loading}
+      error={error}
+    />
   );
 }

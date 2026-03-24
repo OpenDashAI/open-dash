@@ -13,6 +13,7 @@ import { ActivityCard } from "../cards/ActivityCard";
 import { BriefingCard } from "../cards/BriefingCard";
 import { IssueCard } from "../cards/IssueCard";
 import { StatusCard } from "../cards/StatusCard";
+import { AnalyticsDashboard } from "../analytics/AnalyticsDashboard";
 
 function handleAction(item: BriefingItem) {
 	// If this is an escalation with an approval action, approve it
@@ -234,6 +235,26 @@ function PortfolioView() {
 	);
 }
 
+function AnalyticsView() {
+	const { dataSources } = useHudState();
+
+	if (dataSources.length === 0) {
+		return (
+			<div className="flex flex-col items-center justify-center py-8 text-center">
+				<span className="text-2xl mb-2">◎</span>
+				<span className="text-[13px] text-[var(--hud-text-bright)]">
+					No datasources
+				</span>
+				<span className="text-[11px] text-[var(--hud-text-muted)] mt-1">
+					Configure datasources to see analytics
+				</span>
+			</div>
+		);
+	}
+
+	return <AnalyticsDashboard datasources={dataSources} />;
+}
+
 export function FocusPanel() {
 	const { experience, cards, browserSession } = useHudState();
 
@@ -248,7 +269,9 @@ export function FocusPanel() {
 						? "Briefing"
 						: experience === "focus"
 							? "Project"
-							: "Portfolio"}
+							: experience === "portfolio"
+								? "Portfolio"
+								: "Analytics"}
 				</span>
 			</div>
 			<div className="panel-body">
@@ -268,6 +291,7 @@ export function FocusPanel() {
 				{experience === "briefing" && <BriefingView />}
 				{experience === "focus" && <FocusView />}
 				{experience === "portfolio" && <PortfolioView />}
+				{experience === "analytics" && <AnalyticsView />}
 			</div>
 		</div>
 	);

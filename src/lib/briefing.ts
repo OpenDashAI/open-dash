@@ -36,7 +36,7 @@ export interface BriefingItem {
 	snoozedUntil?: string;
 }
 
-export type HudExperience = "briefing" | "focus" | "portfolio";
+export type HudExperience = "briefing" | "focus" | "portfolio" | "analytics";
 
 export interface ExperienceConfig {
 	label: string;
@@ -59,6 +59,11 @@ export const EXPERIENCES: Record<HudExperience, ExperienceConfig> = {
 		label: "Portfolio",
 		description: "How everything is doing",
 		icon: "\u25A3", // ▣
+	},
+	analytics: {
+		label: "Analytics",
+		description: "Trending, anomalies, alerts",
+		icon: "\u2394", // ⎔
 	},
 };
 
