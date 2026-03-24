@@ -18,6 +18,9 @@ import { competitorDomainMetricsSource } from "./competitor-domain-metrics";
 import { competitorSocialListenerSource } from "./competitor-social-listener";
 import { marketInsightsSource } from "./market-insights";
 
+// Campaign performance sources
+import { googleAdsSource } from "./google-ads";
+
 // Register all built-in sources
 registry.register(githubIssuesSource);
 registry.register(githubActivitySource);
@@ -33,5 +36,8 @@ registry.register(competitorContentSource);
 registry.register(competitorDomainMetricsSource);
 registry.register(competitorSocialListenerSource);
 registry.register(marketInsightsSource);
+
+// Register campaign performance sources (Week 2+)
+registry.register(googleAdsSource);
 
 export { registry };
