@@ -1,6 +1,7 @@
 import { useNavigate } from "@tanstack/react-router";
 import "../styles/brands.css";
 import "../styles/errors.css";
+import "../styles/monitoring.css";
 import type { DashboardYaml } from "../lib/dashboard-config";
 import type { BriefingItem } from "../lib/briefing";
 import type { DataSourceInfo } from "../server/datasources";

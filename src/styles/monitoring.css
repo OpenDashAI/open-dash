@@ -1,0 +1,126 @@
+/* Sources Monitor */
+.sources-monitor {
+	display: flex;
+	flex-direction: column;
+	gap: 0.5rem;
+}
+
+.source-monitor-item {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	padding: 0.5rem;
+	background: var(--hud-bg);
+	border: 1px solid var(--hud-border);
+	border-radius: 3px;
+	font-size: 0.75rem;
+}
+
+.source-info {
+	display: flex;
+	flex-direction: column;
+	gap: 0.25rem;
+	flex: 1;
+}
+
+.source-name {
+	color: var(--hud-text-bright);
+	font-weight: 500;
+}
+
+.last-fetch {
+	color: var(--hud-text-muted);
+	font-size: 0.7rem;
+}
+
+.source-health {
+	display: flex;
+	align-items: center;
+	gap: 0.5rem;
+}
+
+.health-indicator {
+	width: 8px;
+	height: 8px;
+	border-radius: 50%;
+	animation: pulse 2s infinite;
+}
+
+.health-indicator.health-healthy {
+	background: var(--hud-success);
+}
+
+.health-indicator.health-degraded {
+	background: var(--hud-warning);
+	animation: pulse-warning 2s infinite;
+}
+
+.health-indicator.health-critical {
+	background: var(--hud-error);
+	animation: pulse-error 1.5s infinite;
+}
+
+.latency {
+	color: var(--hud-text-muted);
+	font-size: 0.7rem;
+	min-width: 40px;
+	text-align: right;
+}
+
+/* Pulse animations */
+@keyframes pulse {
+	0%, 100% {
+		opacity: 1;
+	}
+	50% {
+		opacity: 0.6;
+	}
+}
+
+@keyframes pulse-warning {
+	0%, 100% {
+		opacity: 1;
+	}
+	50% {
+		opacity: 0.4;
+	}
+}
+
+@keyframes pulse-error {
+	0%, 100% {
+		opacity: 1;
+	}
+	50% {
+		opacity: 0.3;
+	}
+}
+
+/* Monitoring Badge */
+.monitoring-badge {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.3rem;
+	padding: 0.2rem 0.5rem;
+	background: var(--hud-accent-dim);
+	color: var(--hud-accent);
+	border-radius: 2px;
+	font-size: 0.65rem;
+	font-weight: bold;
+	text-transform: uppercase;
+	letter-spacing: 0.05em;
+}
+
+.monitoring-badge.health-healthy {
+	background: rgba(74, 222, 128, 0.1);
+	color: rgb(74, 222, 128);
+}
+
+.monitoring-badge.health-degraded {
+	background: rgba(251, 146, 60, 0.1);
+	color: rgb(251, 146, 60);
+}
+
+.monitoring-badge.health-critical {
+	background: rgba(239, 68, 68, 0.1);
+	color: rgb(239, 68, 68);
+}
