@@ -12,11 +12,11 @@ export const DataSourceStatusSchema = z.object({
   lastFetch: z
     .string()
     .datetime("Invalid ISO timestamp")
-    .optional()
+    .optional(),
   error: z
     .string()
     .max(1000, "Error message too long")
-    .optional()
+    .optional(),
   itemCount: z
     .number()
     .nonnegative("Item count cannot be negative")
@@ -38,7 +38,7 @@ export const DataSourceConfigSchema = z
       .nullable(),
   })
   .extend({
-    brandConfig: z.record(z.unknown()).optional(),
+    brandConfig: z.unknown().optional(),
   });
 
 export type DataSourceConfig = z.infer<typeof DataSourceConfigSchema>;

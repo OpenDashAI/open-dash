@@ -60,8 +60,7 @@ export const BriefingItemSchema = z.object({
     .optional(),
   time: z
     .string()
-    .datetime("Invalid ISO timestamp")
-    .describe("ISO 8601 timestamp when item was created/detected"),
+    .datetime("Invalid ISO timestamp"),
   action: z
     .string()
     .max(100, "Action label too long")

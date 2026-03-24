@@ -13,7 +13,7 @@ import { z } from "zod";
  */
 export const DataSourceYamlConfigSchema = z.object({
 	id: z.string(),
-	config: z.record(z.unknown()).optional(),
+	config: z.unknown().optional(),
 });
 
 export type DataSourceYamlConfig = z.infer<typeof DataSourceYamlConfigSchema>;
@@ -25,7 +25,7 @@ export type DataSourceYamlConfig = z.infer<typeof DataSourceYamlConfigSchema>;
 export const WidgetSchema = z.object({
 	type: z.string(),
 	source: z.string().optional(),
-	config: z.record(z.unknown()).optional(),
+	config: z.unknown().optional(),
 	title: z.string().optional(),
 });
 
@@ -62,8 +62,9 @@ export function validateDashboardYaml(
 	if (result.success) {
 		return { success: true, data: result.data };
 	}
+	const issues = result.error.issues || [];
 	return {
 		success: false,
-		errors: result.error.errors.map((e) => `${e.path.join(".")}: ${e.message}`),
+		errors: issues.map((e) => `${e.path.join(".")}: ${e.message}`),
 	};
 }

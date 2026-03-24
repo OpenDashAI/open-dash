@@ -14,7 +14,6 @@ export const FetchAllSourcesInputSchema = z.object({
     .datetime("Invalid ISO timestamp for lastVisited")
     .nullable()
     .optional()
-    .describe("Last time user visited dashboard (ISO 8601)"),
 });
 
 export type FetchAllSourcesInput = z.infer<typeof FetchAllSourcesInputSchema>;
@@ -31,14 +30,12 @@ export const FetchBrandDashboardInputSchema = z.object({
     .regex(
       /^[a-z0-9-]+$/,
       "Brand slug must contain only lowercase letters, numbers, and hyphens"
-    )
-    .describe("Brand identifier (slug format)"),
+    ),
   lastVisited: z
     .string()
     .datetime("Invalid ISO timestamp for lastVisited")
     .nullable()
     .optional()
-    .describe("Last time user visited this brand dashboard (ISO 8601)"),
 });
 
 export type FetchBrandDashboardInput = z.infer<

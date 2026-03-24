@@ -25,17 +25,15 @@ export const DatasourceMetricSchema = z.object({
     .string()
     .min(1, "Name cannot be empty")
     .max(100, "Name too long"),
-  lastFetch: TimestampSchema.describe("Unix milliseconds of last fetch attempt"),
+  lastFetch: TimestampSchema,
   fetchLatency: z
     .number()
     .nonnegative("Latency cannot be negative")
-    .max(600000, "Latency exceeded 10 minutes (likely hung)")
-    .describe("Fetch duration in milliseconds"),
+    .max(600000, "Latency exceeded 10 minutes (likely hung)"),
   errorRate: z
     .number()
     .min(0, "Error rate cannot be negative")
-    .max(1, "Error rate cannot exceed 1")
-    .describe("Exponential moving average (0-1)"),
+    .max(1, "Error rate cannot exceed 1"),
   connected: z.boolean(),
   healthStatus: HealthStatusEnum.optional(),
 });
