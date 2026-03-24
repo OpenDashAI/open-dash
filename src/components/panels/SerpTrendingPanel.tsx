@@ -9,7 +9,8 @@
  */
 
 import { useEffect, useState } from "react";
-import { getSerpTrends } from "../../server/serp-trends";
+// TODO: Fix serp-trends import for Phase 2
+// import { getSerpTrends } from "../../server/serp-trends";
 import { SerpTrendingCard } from "../cards/SerpTrendingCard";
 import type { BriefingItemPriority } from "../../lib/briefing";
 
@@ -43,6 +44,8 @@ export function SerpTrendingPanel({
 	// Fetch trends on mount and periodically
 	useEffect(() => {
 		const fetchTrends = async () => {
+			// TODO: Re-enable for Phase 2 once serp-trends is fixed
+			/*
 			try {
 				setLoading(true);
 				setError(null);
@@ -57,6 +60,10 @@ export function SerpTrendingPanel({
 			} finally {
 				setLoading(false);
 			}
+			*/
+			// Phase 1: Skip trends, just set empty data
+			setTrendData([]);
+			setLastRefresh(new Date());
 		};
 
 		fetchTrends();

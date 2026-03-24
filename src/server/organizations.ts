@@ -24,6 +24,10 @@ import type {
 	TeamMemberInsert,
 	BrandInsert,
 } from "@/lib/db/schema";
+import {
+	getEmailService,
+	generateInviteLink,
+} from "@/server/email-service";
 
 /**
  * Tier limits by plan
@@ -149,21 +153,22 @@ export async function inviteUserToOrg(
 	// Blocked on: Email service wiring, environment variable setup
 	let emailSent = false;
 	try {
-		// Uncomment when email service is integrated:
-		// const emailService = getEmailService();
-		// const inviteLink = generateInviteLink(memberId);
-		// const result = await emailService.sendInviteEmail(
-		//   email,
-		//   orgName,
-		//   inviterName,
-		//   role,
-		//   inviteLink
-		// );
-		// emailSent = result.success;
-
-		console.log(
-			`[TODO] Send invite email to ${email} for org ${orgId} (memberId: ${memberId})`
+		const emailService = getEmailService();
+		const inviteLink = generateInviteLink(memberId);
+		const result = await emailService.sendInviteEmail(
+			email,
+			orgName,
+			inviterName,
+			role,
+			inviteLink
 		);
+		emailSent = result.success;
+
+		if (!emailSent) {
+			console.warn(
+				`Failed to send invite email to ${email}: ${result.error}`
+			);
+		}
 	} catch (err) {
 		console.error("Failed to send invite email:", err);
 		// Non-fatal — invitation created even if email fails

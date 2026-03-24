@@ -17,6 +17,7 @@ import {
 	clearRequestAuthContext,
 } from "./lib/worker-context";
 import { metricsTracker } from "./lib/monitoring";
+import { initEmailService } from "./server/email-service";
 
 // Export Durable Object classes for Cloudflare bindings
 export { HudSocket } from "./server/hud-socket";
@@ -27,6 +28,7 @@ interface Env {
 	COMPETITIVE_INTEL: DurableObjectNamespace;
 	CLERK_SECRET_KEY: string;
 	CLERK_PUBLISHABLE_KEY: string;
+	RESEND_API_KEY: string; // Resend email service API key
 	ALLOWED_IPS: string; // Comma-separated IPs that bypass auth
 	SM_SERVICE_KEY: string; // Service key for SM webhook auth
 	DB: D1Database;
@@ -58,6 +60,16 @@ export default {
 				metricsTracker.initialize(env.DB);
 			}
 
+			// Initialize email service
+			if (env.RESEND_API_KEY) {
+				initEmailService({
+					apiKey: env.RESEND_API_KEY,
+					fromEmail: "noreply@opendash.ai",
+					fromName: "OpenDash",
+				});
+			}
+
+			let clerkUserId: string | null = null;
 			const url = new URL(request.url);
 			const isSecure = url.protocol === "https:";
 
@@ -251,7 +263,24 @@ export default {
 			// Delegate to TanStack Start
 			return await (startEntry as WorkerHandler).fetch(request, env, ctx);
 		} catch (err) {
-			console.error("Worker error:", err);
+			const errorMsg = err instanceof Error ? err.message : String(err);
+			const errorStack = err instanceof Error ? err.stack : '';
+			console.error("Worker error:", {
+				message: errorMsg,
+				stack: errorStack,
+				url: request.url,
+				method: request.method,
+				timestamp: new Date().toISOString()
+			});
+			// In dev mode, return error details for debugging
+			const isDev = !env.CLERK_SECRET_KEY;
+			if (isDev) {
+				return Response.json({
+					error: errorMsg,
+					stack: errorStack,
+					timestamp: new Date().toISOString()
+				}, { status: 500 });
+			}
 			return new Response("Internal Server Error", { status: 500 });
 		}
 	},

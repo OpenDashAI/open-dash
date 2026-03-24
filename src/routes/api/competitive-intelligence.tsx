@@ -138,25 +138,56 @@ async function seedCompetitors(context: any): Promise<Response> {
 async function listCompetitors(context: any): Promise<Response> {
 	try {
 		const db = context.env.DB;
+		const authContext = context.auth;
+
+		// Get competitors for current brand or org
+		const whereClause = authContext?.brandId
+			? "WHERE brandId = ?"
+			: authContext?.orgId
+				? "WHERE orgId = ?"
+				: "";
+
+		const bindings = authContext?.brandId
+			? [authContext.brandId]
+			: authContext?.orgId
+				? [authContext.orgId]
+				: [];
 
 		const competitors = await db
 			.prepare(
 				`
-      SELECT id, name, website_url, domain_authority, traffic_estimate,
-             organic_keywords, last_checked, updated_at
-      FROM competitor_domains
-      ORDER BY updated_at DESC
+      SELECT id, brandId, orgId, domain, name, keywords, active, createdAt, updatedAt
+      FROM competitors
+      ${whereClause}
+      ORDER BY updatedAt DESC
       LIMIT 50
     `
 			)
+			.bind(...bindings)
 			.all();
 
 		return Response.json({
-			competitors: competitors.results || [],
+			success: true,
+			competitors: (competitors.results || []).map((c: any) => ({
+				id: c.id,
+				brandId: c.brandId,
+				domain: c.domain,
+				name: c.name,
+				keywords: JSON.parse(c.keywords || "[]"),
+				active: Boolean(c.active),
+				createdAt: c.createdAt,
+				updatedAt: c.updatedAt,
+			})),
 			count: (competitors.results || []).length,
 		});
 	} catch (error) {
-		throw error;
+		return Response.json(
+			{
+				error:
+					error instanceof Error ? error.message : "Unknown error",
+			},
+			{ status: 500 }
+		);
 	}
 }
 
@@ -221,6 +252,27 @@ async function getSerpStatus(
 ): Promise<Response> {
 	try {
 		const db = context.env.DB;
+		const authContext = context.auth;
+
+		if (!keyword || typeof keyword !== "string") {
+			return Response.json(
+				{ error: "Keyword is required and must be a string" },
+				{ status: 400 }
+			);
+		}
+
+		// Add org/brand filtering if auth context available
+		const whereClause = authContext?.brandId
+			? "AND sr.brandId = ?"
+			: authContext?.orgId
+				? "AND sr.orgId = ?"
+				: "";
+
+		const bindings = authContext?.brandId
+			? [keyword, authContext.brandId]
+			: authContext?.orgId
+				? [keyword, authContext.orgId]
+				: [keyword];
 
 		// Get latest SERP rankings for this keyword
 		const results = await db
@@ -231,20 +283,38 @@ async function getSerpStatus(
              c.domain, c.name
       FROM serp_rankings sr
       LEFT JOIN competitors c ON sr.competitorId = c.id
-      WHERE sr.keyword = ?
+      WHERE sr.keyword = ? ${whereClause}
       ORDER BY sr.snapshotDate DESC, sr.rank ASC
       LIMIT 50
     `
 			)
-			.bind(keyword)
+			.bind(...bindings)
 			.all();
 
 		return Response.json({
+			success: true,
 			keyword,
-			results: results.results || [],
+			results: (results.results || []).map((r: any) => ({
+				id: r.id,
+				competitorId: r.competitorId,
+				domain: r.domain,
+				name: r.name,
+				keyword: r.keyword,
+				rank: r.rank,
+				url: r.url,
+				title: r.title,
+				snapshotDate: r.snapshotDate,
+				createdAt: r.createdAt,
+			})),
 			count: (results.results || []).length,
 		});
 	} catch (error) {
-		throw error;
+		return Response.json(
+			{
+				error:
+					error instanceof Error ? error.message : "Unknown error",
+			},
+			{ status: 500 }
+		);
 	}
 }

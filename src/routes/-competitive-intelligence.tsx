@@ -1,10 +1,10 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { useState, useEffect } from 'react'
-import { server$ } from '@tanstack/start'
+import { createServerFn } from '@tanstack/start'
 import * as ciOrch from '../server/ci-orchestrator'
 
 // Server functions wrapped for client access
-const fetchDashboard = server$(async () => {
+const fetchDashboard = createServerFn().handler(async () => {
 	try {
 		return await ciOrch.getDashboard()
 	} catch (error) {
@@ -13,7 +13,7 @@ const fetchDashboard = server$(async () => {
 	}
 })
 
-const fetchAlerts = server$(async (hours: number = 24) => {
+const fetchAlerts = createServerFn().handler(async (hours: number = 24) => {
 	try {
 		return await ciOrch.getAlerts(hours)
 	} catch (error) {

@@ -8,7 +8,7 @@
 import { createServerFn } from "@tanstack/start";
 import { getWorkerDb } from "../lib/worker-context";
 import { getRequestAuthContext } from "../lib/worker-context";
-import type { EventContext } from "@tanstack/start";
+import type { EventContext } from "@cloudflare/workers-types";
 import {
 	getLatestSerpRankings,
 	getSerpTrend,
