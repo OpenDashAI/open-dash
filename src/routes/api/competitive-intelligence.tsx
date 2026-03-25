@@ -1,7 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { getRequestAuthContext } from "../../lib/worker-context";
 import { z } from "zod";
 import { validate, validationErrorResponse, validators } from "../../lib/validation";
+import { requireAuth } from "../../server/auth-middleware";
+import { handleError } from "../../server/error-handler-middleware";
 
 const ciActionSchema = z.discriminatedUnion("action", [
 	z.object({ action: z.literal("seed-competitors") }),
@@ -18,7 +19,7 @@ export const Route = createFileRoute("/api/competitive-intelligence")({
 		handlers: {
 			POST: async ({ request, context }) => {
 				// SECURITY: Require authentication for all CI operations
-				const authContext = getRequestAuthContext(request);
+				const authContext = requireAuth(request);
 				if (!authContext?.userId) {
 					return Response.json(
 						{ error: "Authentication required" },
