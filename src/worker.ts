@@ -3,6 +3,21 @@ import startEntry from "@tanstack/react-start/server-entry";
 import { metricsHandler } from "./routes/api/metrics";
 import type { EventContext } from "@cloudflare/workers-types";
 
+// IP whitelist for /api/metrics endpoint
+// Production: only allow specific IPs to prevent unauthorized access
+const METRICS_IP_WHITELIST = [
+	"76.240.123.80", // Local development public IP
+];
+
+function isMetricsAccessAllowed(request: Request): boolean {
+	// Get client IP from Cloudflare headers
+	const clientIp = request.headers.get("cf-connecting-ip") ||
+	                 request.headers.get("x-forwarded-for")?.split(",")[0] ||
+	                 "unknown";
+
+	return METRICS_IP_WHITELIST.includes(clientIp.trim());
+}
+
 // Custom fetch handler that intercepts API routes before TanStack Start
 export default {
 	async fetch(
@@ -10,9 +25,19 @@ export default {
 		env: any,
 		ctx: ExecutionContext
 	): Promise<Response> {
-		// Route metrics endpoint directly
+		// Route metrics endpoint directly with IP gating
 		const url = new URL(request.url);
 		if (url.pathname === "/api/metrics") {
+			// Check IP allowlist
+			if (!isMetricsAccessAllowed(request)) {
+				const clientIp = request.headers.get("cf-connecting-ip") || "unknown";
+				console.warn(`[Metrics] Access denied for IP: ${clientIp}`);
+				return new Response(
+					JSON.stringify({ success: false, error: "Access denied" }),
+					{ status: 403, headers: { "Content-Type": "application/json" } }
+				);
+			}
+
 			// Pass both env and context to the handler
 			return await metricsHandler(request, { env, ctx });
 		}
