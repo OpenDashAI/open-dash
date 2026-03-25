@@ -1,0 +1,16 @@
+{
+  "name": "sample-scram-jet-pipeline",
+  "version": "1.0.0",
+  "description": "Sample Scram Jet pipeline demonstrating metrics collection via service binding",
+  "main": "src/index.ts",
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "test": "echo 'Run: curl http://localhost:8787/stripe'"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20240603.0",
+    "wrangler": "^4.73.0"
+  }
+}

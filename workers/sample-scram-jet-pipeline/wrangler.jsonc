@@ -1,0 +1,14 @@
+{
+  "name": "sample-scram-jet-pipeline",
+  "main": "src/index.ts",
+  "type": "service",
+  "compatibility_date": "2026-03-24",
+
+  "services": [
+    {
+      "binding": "METRICS_COLLECTOR",
+      "service": "metrics-collector",
+      "environment": "production"
+    }
+  ]
+}
