@@ -34,7 +34,16 @@
       "database_name": "open-dash-db",
       "database_id": "ecb3df92-04a4-45ef-8c6e-d4a8e84b4d7f"
     }
-  ]
+  ],
+
+  "services": [
+    {
+      "binding": "METRICS_COLLECTOR",
+      "service": "metrics-collector",
+      "environment": "production"
+    }
+  ],
+
   // Secrets (set via `wrangler secret put`):
   // - API_MOM_URL: API Mom proxy URL (https://apimom.dev)
   // - API_MOM_KEY: API Mom project key for open-dash

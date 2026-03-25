@@ -1,0 +1,20 @@
+{
+  "name": "metrics-collector",
+  "main": "src/index.ts",
+  "type": "service",
+  "compatibility_date": "2026-03-24",
+
+  "env": {
+    "production": {
+      "name": "metrics-collector-production"
+    }
+  },
+
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "open-dash-db",
+      "database_id": "ecb3df92-04a4-45ef-8c6e-d4a8e84b4d7f"
+    }
+  ]
+}

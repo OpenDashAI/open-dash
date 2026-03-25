@@ -1,0 +1,20 @@
+{
+  "name": "metrics-collector",
+  "version": "1.0.0",
+  "description": "Metrics collector worker for Scram Jet pipelines",
+  "main": "src/index.ts",
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "build": "wrangler publish --dry-run"
+  },
+  "dependencies": {
+    "drizzle-orm": "^0.31.4",
+    "zod": "^3.22.4"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20240603.0",
+    "wrangler": "^4.73.0"
+  }
+}
