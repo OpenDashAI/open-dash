@@ -11,10 +11,11 @@ interface Todo {
 interface TodoListDisplayProps {
   componentId: string
   listenToComponent: string
+  initialTodos?: Todo[]
 }
 
-export function TodoListDisplay({ componentId, listenToComponent }: TodoListDisplayProps) {
-  const [todos, setTodos] = useState<Todo[]>([])
+export function TodoListDisplay({ componentId, listenToComponent, initialTodos = [] }: TodoListDisplayProps) {
+  const [todos, setTodos] = useState<Todo[]>(initialTodos)
   const ctx = useContext(CompositionContextReact)
 
   useEffect(() => {

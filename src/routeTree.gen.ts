@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as OnboardingRouteImport } from './routes/onboarding'
+import { Route as MusicRouteImport } from './routes/music'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as DemoRouteImport } from './routes/demo'
 import { Route as BrandsRouteImport } from './routes/brands'
@@ -25,6 +26,11 @@ import { Route as ApiChatRouteImport } from './routes/api/chat'
 const OnboardingRoute = OnboardingRouteImport.update({
   id: '/onboarding',
   path: '/onboarding',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MusicRoute = MusicRouteImport.update({
+  id: '/music',
+  path: '/music',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LoginRoute = LoginRouteImport.update({
@@ -89,6 +95,7 @@ export interface FileRoutesByFullPath {
   '/brands': typeof BrandsRouteWithChildren
   '/demo': typeof DemoRoute
   '/login': typeof LoginRoute
+  '/music': typeof MusicRoute
   '/onboarding': typeof OnboardingRoute
   '/api/chat': typeof ApiChatRoute
   '/api/competitive-intelligence': typeof ApiCompetitiveIntelligenceRoute
@@ -103,6 +110,7 @@ export interface FileRoutesByTo {
   '/brands': typeof BrandsRouteWithChildren
   '/demo': typeof DemoRoute
   '/login': typeof LoginRoute
+  '/music': typeof MusicRoute
   '/onboarding': typeof OnboardingRoute
   '/api/chat': typeof ApiChatRoute
   '/api/competitive-intelligence': typeof ApiCompetitiveIntelligenceRoute
@@ -118,6 +126,7 @@ export interface FileRoutesById {
   '/brands': typeof BrandsRouteWithChildren
   '/demo': typeof DemoRoute
   '/login': typeof LoginRoute
+  '/music': typeof MusicRoute
   '/onboarding': typeof OnboardingRoute
   '/api/chat': typeof ApiChatRoute
   '/api/competitive-intelligence': typeof ApiCompetitiveIntelligenceRoute
@@ -134,6 +143,7 @@ export interface FileRouteTypes {
     | '/brands'
     | '/demo'
     | '/login'
+    | '/music'
     | '/onboarding'
     | '/api/chat'
     | '/api/competitive-intelligence'
@@ -148,6 +158,7 @@ export interface FileRouteTypes {
     | '/brands'
     | '/demo'
     | '/login'
+    | '/music'
     | '/onboarding'
     | '/api/chat'
     | '/api/competitive-intelligence'
@@ -162,6 +173,7 @@ export interface FileRouteTypes {
     | '/brands'
     | '/demo'
     | '/login'
+    | '/music'
     | '/onboarding'
     | '/api/chat'
     | '/api/competitive-intelligence'
@@ -177,6 +189,7 @@ export interface RootRouteChildren {
   BrandsRoute: typeof BrandsRouteWithChildren
   DemoRoute: typeof DemoRoute
   LoginRoute: typeof LoginRoute
+  MusicRoute: typeof MusicRoute
   OnboardingRoute: typeof OnboardingRoute
   ApiChatRoute: typeof ApiChatRoute
   ApiCompetitiveIntelligenceRoute: typeof ApiCompetitiveIntelligenceRoute
@@ -193,6 +206,13 @@ declare module '@tanstack/react-router' {
       path: '/onboarding'
       fullPath: '/onboarding'
       preLoaderRoute: typeof OnboardingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/music': {
+      id: '/music'
+      path: '/music'
+      fullPath: '/music'
+      preLoaderRoute: typeof MusicRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/login': {
@@ -291,6 +311,7 @@ const rootRouteChildren: RootRouteChildren = {
   BrandsRoute: BrandsRouteWithChildren,
   DemoRoute: DemoRoute,
   LoginRoute: LoginRoute,
+  MusicRoute: MusicRoute,
   OnboardingRoute: OnboardingRoute,
   ApiChatRoute: ApiChatRoute,
   ApiCompetitiveIntelligenceRoute: ApiCompetitiveIntelligenceRoute,

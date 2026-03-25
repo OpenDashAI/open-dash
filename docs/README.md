@@ -7,14 +7,23 @@ Complete guide to all research, architecture, implementation, and strategy docum
 
 ---
 
+## ⚡ Start Here
+
+**First time?** → [QUICK-START.md](QUICK-START.md) - Get oriented in 5 minutes
+**Just want links?** → [Quick Navigation](#quick-navigation) below
+
+---
+
 ## Quick Navigation
 
-- **New to OpenDash?** → Start with [Product Overview](#product-overview)
-- **Want to deploy?** → See [Deployment & Infrastructure](#deployment--infrastructure)
-- **Need architecture details?** → Check [Architecture & Design](#architecture--design)
-- **Planning next sprint?** → Read [Project Plans & Roadmaps](#project-plans--roadmaps)
-- **Understanding competitive intelligence?** → Jump to [Competitive Intelligence](#competitive-intelligence)
-- **Working on components?** → See [Component Ecosystem](#component-ecosystem)
+- **I'm new to OpenDash** → [QUICK-START.md](QUICK-START.md) (5 min)
+- **I want to understand architecture** → [architecture/README.md](architecture/) or [TECHNICAL-ARCHITECTURE-REVIEW.md](architecture/TECHNICAL-ARCHITECTURE-REVIEW.md)
+- **I need to deploy to production** → [deployment/README.md](deployment/) or [guides/DEPLOYMENT-GUIDE.md](guides/DEPLOYMENT-GUIDE.md)
+- **I want to build a component** → [components/README.md](components/) or [Standards/component-sdk-spec.md](../Standards/component-sdk-spec.md)
+- **I need to run tests** → [testing/README.md](testing/) or [testing/SMOKE-TEST-BASELINE.md](testing/SMOKE-TEST-BASELINE.md)
+- **I need setup instructions** → [setup/README.md](setup/)
+- **I'm planning the next sprint** → [Project Plans & Roadmaps](#project-plans--roadmaps)
+- **I want competitive intelligence** → [Competitive Intelligence](#competitive-intelligence)
 
 ---
 
@@ -105,6 +114,8 @@ Complete guide to all research, architecture, implementation, and strategy docum
 
 ## Architecture & Design
 
+**📁 Start with**: [architecture/README.md](architecture/) for navigation and overview
+
 ### Core Architecture
 
 | Document | Topic | Depth |
@@ -124,6 +135,8 @@ Complete guide to all research, architecture, implementation, and strategy docum
 
 ## Deployment & Infrastructure
 
+**📁 Start with**: [deployment/README.md](deployment/) for deployment navigation and procedures
+
 ### Database Setup
 
 | Document | Tool | Purpose |
@@ -134,9 +147,9 @@ Complete guide to all research, architecture, implementation, and strategy docum
 
 | Document | Target | Detail |
 |----------|--------|--------|
-| [DEPLOYMENT.md](guides/DEPLOYMENT.md) | Full deployment guide | Comprehensive |
-| [DEPLOYMENT-GUIDE.md](guides/DEPLOYMENT-GUIDE.md) | Step-by-step guide | Tactical |
-| [DEPLOYMENT-READY.md](archive/DEPLOYMENT-READY.md) | Deployment checklist | Ready-to-go |
+| [guides/DEPLOYMENT-GUIDE.md](guides/DEPLOYMENT-GUIDE.md) | Full deployment guide | Comprehensive |
+| [deployment/DEPLOYMENT-STANDARD-PROCEDURE.md](deployment/DEPLOYMENT-STANDARD-PROCEDURE.md) | Standard procedure | Step-by-step |
+| [deployment/DEPLOYMENT-CHECKLIST.md](deployment/DEPLOYMENT-CHECKLIST.md) | Pre/post checklist | Verification |
 
 ### CI/CD & Monitoring
 
@@ -195,7 +208,9 @@ Complete guide to all research, architecture, implementation, and strategy docum
 
 ## Component Ecosystem
 
-### Standards (New)
+**📁 Start with**: [components/README.md](components/) for component system overview and guides
+
+### Standards (Formal Specifications)
 
 | Document | Topic | Purpose |
 |----------|-------|---------|
@@ -293,6 +308,33 @@ Complete guide to all research, architecture, implementation, and strategy docum
 
 ---
 
+## Testing & Quality Assurance
+
+**📁 Start with**: [testing/README.md](testing/) for testing strategy and guides
+
+### Testing Documentation
+
+| Document | Purpose | Focus |
+|----------|---------|-------|
+| [testing/SMOKE-TEST-BASELINE.md](testing/SMOKE-TEST-BASELINE.md) | Post-deployment verification | Critical features |
+| [testing/README.md](testing/) | Testing strategy & execution | Complete guide |
+
+---
+
+## Completed Work & History
+
+**📁 Start with**: [archive/completed/README.md](archive/completed/) for historical context
+
+### Completed Tasks & Milestones
+
+| Document | What | When |
+|----------|------|------|
+| [archive/completed/IMPLEMENTATION-COMPLETE-SUMMARY.md](archive/completed/IMPLEMENTATION-COMPLETE-SUMMARY.md) | Full MVP delivery summary | 2026-03-25 |
+| [archive/completed/WEEK1-TASK3-DEPLOYMENT-SUMMARY.md](archive/completed/WEEK1-TASK3-DEPLOYMENT-SUMMARY.md) | Scram Jet integration | 2026-03-25 |
+| [archive/completed/README.md](archive/completed/) | Historical context & lessons learned | Reference |
+
+---
+
 ## Reference Guides
 
 ### Quick References
@@ -370,9 +412,29 @@ When creating new documents:
 
 ---
 
+## Category Navigation
+
+All documentation is organized into focused categories with dedicated READMEs:
+
+| Category | README | Purpose |
+|----------|--------|---------|
+| **Architecture** | [architecture/README.md](architecture/) | System design, technical decisions |
+| **Components** | [components/README.md](components/) | Component system, SDK, building components |
+| **Deployment** | [deployment/README.md](deployment/) | Deploy to production, CI/CD, operations |
+| **Testing** | [testing/README.md](testing/) | Testing strategy, quality assurance |
+| **Setup** | [setup/README.md](setup/) | Environment configuration, tools |
+| **Guides** | [guides/README.md](guides/) | How-to guides, operational procedures |
+| **Audits** | [audits/README.md](audits/) | Code quality, security, accessibility |
+| **Archive** | [archive/README.md](archive/) | Historical docs, completed work |
+
+Each category has its own README with focused navigation.
+
+---
+
 ## See Also
 
-- **repo root** → All markdown files
-- **Standards/** → Formal standards and specifications
-- **docs/** → Documentation (this directory)
-- **packages/** → SDK and component packages
+- **[QUICK-START.md](QUICK-START.md)** → Get oriented in 5 minutes
+- **[DOCUMENTATION-ORGANIZATION-PLAN.md](../DOCUMENTATION-ORGANIZATION-PLAN.md)** → How docs are organized
+- **[repo root](../README.md)** → Project root & overview
+- **[Standards/](../Standards/)** → Formal standards and specifications
+- **[packages/](../packages/)** → SDK and component packages

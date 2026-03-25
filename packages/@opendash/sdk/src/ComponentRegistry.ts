@@ -1,11 +1,11 @@
 /**
  * Component Registry — Discovers, loads, and manages all components
  *
- * Central registry for both OpenDash datasource components and Virtual-Media components.
- * Enables dynamic loading, composition, and orchestration.
+ * Central registry for OpenDash datasource components.
+ * Enables dynamic loading and orchestration.
  */
 
-import type { Component, ComponentMetadata } from "./Component";
+import type { Component, ComponentConfig, BriefingItem } from "./component";
 
 /**
  * Component Registry
@@ -14,24 +14,22 @@ import type { Component, ComponentMetadata } from "./Component";
  * - Discovery: find all available components
  * - Loading: dynamically load components from packages
  * - Lookup: get a component by ID
- * - Metadata: access component information
+ * - Fetching: execute fetch on all components in parallel
  */
 export class ComponentRegistry {
   private components: Map<string, Component> = new Map();
-  private metadata: Map<string, ComponentMetadata> = new Map();
 
   /**
    * Register a component
    */
   register(component: Component): void {
-    const id = component.metadata.id;
+    const id = component.id;
 
     if (this.components.has(id)) {
       throw new Error(`Component with id "${id}" is already registered`);
     }
 
     this.components.set(id, component);
-    this.metadata.set(id, component.metadata);
   }
 
   /**
@@ -49,20 +47,6 @@ export class ComponentRegistry {
   }
 
   /**
-   * Get all component metadata
-   */
-  getAllMetadata(): ComponentMetadata[] {
-    return Array.from(this.metadata.values());
-  }
-
-  /**
-   * Get metadata for a specific component
-   */
-  getMetadata(id: string): ComponentMetadata | undefined {
-    return this.metadata.get(id);
-  }
-
-  /**
    * Check if a component is registered
    */
   has(id: string): boolean {
@@ -70,12 +54,18 @@ export class ComponentRegistry {
   }
 
   /**
-   * Get all components from a specific team
+   * Fetch briefing items from all registered components in parallel
    */
-  getByTeam(team: "opendash" | "virtual-media"): Component[] {
-    return Array.from(this.components.values()).filter(
-      (c) => c.metadata.team === team
+  async fetchAll(config: ComponentConfig): Promise<BriefingItem[]> {
+    const promises = Array.from(this.components.values()).map((component) =>
+      component.fetch(config).catch((err) => {
+        console.error(`[${component.id}] Fetch error:`, err);
+        return [];
+      })
     );
+
+    const results = await Promise.all(promises);
+    return results.flat();
   }
 
   /**
@@ -83,7 +73,6 @@ export class ComponentRegistry {
    */
   unregister(id: string): void {
     this.components.delete(id);
-    this.metadata.delete(id);
   }
 
   /**
@@ -91,7 +80,6 @@ export class ComponentRegistry {
    */
   clear(): void {
     this.components.clear();
-    this.metadata.clear();
   }
 
   /**

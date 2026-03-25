@@ -6,14 +6,16 @@
  */
 
 // Component interface and types
-export {
+export type {
   AbstractComponent,
   Component,
   ComponentConfig,
   ComponentInput,
   ComponentMetadata,
   ComponentOutput,
-} from "./Component";
+  BriefingItem,
+  FullComponent,
+} from "./component";
 
 // Component registry
 export {

@@ -15,13 +15,17 @@ import { useState } from 'react'
 
 function DemoPage() {
   const [activeExample, setActiveExample] = useState<'music' | 'todo' | 'dashboard' | 'email'>('music')
+  const buildTime = new Date().toLocaleTimeString()
 
   return (
-    <div className="min-h-screen bg-gray-100">
+    <div className="bg-gray-100">
       {/* Navigation */}
       <div className="sticky top-0 bg-white border-b border-gray-200 shadow-sm z-50">
         <div className="max-w-7xl mx-auto px-4 py-4">
-          <h1 className="text-2xl font-bold text-gray-900 mb-4">OpenDash Examples</h1>
+          <div className="flex justify-between items-start mb-4">
+            <h1 className="text-2xl font-bold text-gray-900">OpenDash Examples</h1>
+            <div className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded" suppressHydrationWarning>Build: {buildTime}</div>
+          </div>
           <div className="flex gap-4">
             <button
               onClick={() => setActiveExample('music')}

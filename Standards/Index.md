@@ -4,6 +4,20 @@ Standards for architecture, code quality, and operations patterns across OpenDas
 
 ---
 
+## Platform Architecture (2026-03-25)
+
+**opendash-unified-platform-architecture.md**
+- OpenDash is a unified SaaS platform for building composable, intelligent products
+- Four-layer architecture: Foundation (core) → Plugins (ecosystem) → Market Instances (products) → Dependent Products
+- Foundation: Dashboard engine, component system, datasource plugins, multi-user infrastructure
+- Plugins: 9+ intelligence datasources, feature plugins (alerts, analytics, billing, etc.)
+- Market instances: OpenDash Intelligence (solo founders), OpenDash Intelligence (marketing teams), Virtual-media (separate product)
+- Key principle: One codebase, multiple market instances
+- Implications: Repository reorganization needed to reflect platform structure
+- Related: Component SDK spec, plugin interface spec (to be created), instance configuration spec (to be created)
+
+---
+
 ## Multi-Tenant Architecture (2026-03-24)
 
 **opendash-org-rbac-architecture.md**
@@ -102,4 +116,4 @@ Standards for architecture, code quality, and operations patterns across OpenDas
 ---
 
 **Last Updated**: 2026-03-25
-**Total Standards**: 6
+**Total Standards**: 7

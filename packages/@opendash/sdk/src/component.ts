@@ -8,10 +8,31 @@
 import React from "react";
 
 /**
+ * Briefing Item — represents a single piece of actionable intelligence
+ * Returned by briefing components to populate the dashboard
+ */
+export interface BriefingItem {
+  id: string;
+  priority: "urgent" | "high" | "normal" | "low";
+  category: string;
+  title: string;
+  detail?: string;
+  brand?: string;
+  time: string;
+  action?: string;
+  actionUrl?: string;
+  dismissed?: boolean;
+  isNew?: boolean;
+  snoozedUntil?: string;
+}
+
+/**
  * Configuration for a component instance
  */
 export interface ComponentConfig {
-  [key: string]: unknown;
+  env?: Record<string, string | undefined>;
+  lastVisited?: string | null;
+  brandConfig?: Record<string, unknown>;
 }
 
 /**
@@ -55,7 +76,24 @@ export interface ComponentMetadata {
 }
 
 /**
- * Component Interface
+ * Briefing Component — simplified interface for datasources
+ * Returns BriefingItem[] to populate the dashboard briefing
+ *
+ * Used by: GA4, Stripe, Google Ads, Email Metrics, etc.
+ */
+export interface Component {
+  id: string;
+  name: string;
+  icon: string;
+  description?: string;
+  version?: string;
+  author?: string;
+  requiresConfig?: boolean;
+  fetch(config: ComponentConfig): Promise<BriefingItem[]>;
+}
+
+/**
+ * Full Component Interface (for future use)
  *
  * Every component (datasource, video tool, etc.) implements this interface.
  * This enables:
@@ -63,7 +101,7 @@ export interface ComponentMetadata {
  * - Composition: components can call other components
  * - Orchestration: dashboard can coordinate workflows
  */
-export interface Component {
+export interface FullComponent {
   /**
    * Component metadata (static info)
    */
@@ -104,18 +142,18 @@ export interface Component {
 }
 
 /**
- * Abstract base class for implementing components
+ * Abstract base class for implementing full components
  * Provides default implementations, components extend this
  */
-export abstract class AbstractComponent implements Component {
+export abstract class AbstractComponent implements FullComponent {
   abstract readonly metadata: ComponentMetadata;
 
-  validate(config: ComponentConfig): boolean {
+  validate(_config: ComponentConfig): boolean {
     // Override in subclass
     return true;
   }
 
-  abstract initialize(config: ComponentConfig): Promise<void>;
+  abstract initialize(_config: ComponentConfig): Promise<void>;
 
   abstract execute(input: ComponentInput): Promise<ComponentOutput>;
 

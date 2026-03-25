@@ -31,9 +31,7 @@
 }
 
 html, body, #app {
-  height: 100%;
   margin: 0;
-  overflow: hidden;
 }
 
 body {
@@ -212,7 +210,7 @@ body {
 
 /* Scrollbar */
 ::-webkit-scrollbar {
-  width: 4px;
+  width: 10px;
 }
 
 ::-webkit-scrollbar-track {
@@ -220,12 +218,12 @@ body {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: var(--hud-border);
-  border-radius: 2px;
+  background: #666;
+  border-radius: 5px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--hud-border-active);
+  background: #999;
 }
 
 /* AssistUI dark theme overrides */

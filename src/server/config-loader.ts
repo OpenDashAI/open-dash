@@ -4,8 +4,8 @@
  * Caches in memory for performance
  */
 
+import type { DashboardYaml } from "../lib/dashboard-config";
 import {
-	DashboardYaml,
 	parseDashboardYaml,
 	validateDashboardYaml,
 } from "../lib/dashboard-config";

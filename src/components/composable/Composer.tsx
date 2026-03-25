@@ -5,7 +5,7 @@ export interface ComposerProps {
   /** Unique ID for this component instance */
   componentId: string
   /** Initial items to display */
-  items?: string[]
+  items?: any[]
   /** Label for the input field */
   label?: string
   /** Placeholder for the input field */
@@ -44,9 +44,11 @@ export function Composer({
   const ctx = useCompositionContext()
   const [items, setItems] = useState<string[]>(initialItems)
   const [inputValue, setInputValue] = useState('')
+  const [initialized, setInitialized] = useState(false)
 
   // Register this component with the context
   useEffect(() => {
+    console.log(`[${componentId}] Registering with items:`, items)
     ctx.registerComponent(componentId, {
       id: componentId,
       type: 'composer',
@@ -58,6 +60,23 @@ export function Composer({
       },
     })
   }, [componentId, items, label, placeholder, ctx])
+
+  // Emit events for initial items on first mount
+  useEffect(() => {
+    if (!initialized && initialItems.length > 0) {
+      const msg = `[${componentId}] Emitting ${initialItems.length} item-added events`
+      console.log(msg)
+      localStorage.setItem('debug-composer', msg)
+      initialItems.forEach((item, index) => {
+        ctx.emitEvent(componentId, 'item-added', {
+          item,
+          allItems: initialItems,
+          index,
+        })
+      })
+      setInitialized(true)
+    }
+  }, [initialized, initialItems, componentId, ctx])
 
   /**
    * Handle adding a new item
@@ -137,7 +156,9 @@ export function Composer({
                 key={index}
                 className="flex items-center justify-between p-2 bg-gray-50 rounded border border-gray-200"
               >
-                <span className="text-sm text-gray-800">{item}</span>
+                <span className="text-sm text-gray-800">
+                  {typeof item === 'object' && item !== null && 'name' in item ? item.name : item}
+                </span>
                 <button
                   onClick={() => handleRemoveItem(index)}
                   className="text-sm px-2 py-1 text-red-600 hover:bg-red-50 rounded transition-colors font-medium"

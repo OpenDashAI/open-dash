@@ -33,10 +33,11 @@ describe('SimpleMusicPlayer Example App', () => {
     expect(allInstances.length).toBeGreaterThan(0)
   })
 
-  it('should display Transport status when no tracks', () => {
+  it('should display Transport status with sample tracks', () => {
     render(<SimpleMusicPlayer />)
 
-    expect(screen.getByText('No items loaded')).toBeInTheDocument()
+    // SimpleMusicPlayer provides sample tracks, so Transport should show them loaded
+    expect(screen.getByText(/5 items loaded/)).toBeInTheDocument()
     expect(screen.getByText('⏸ Stopped')).toBeInTheDocument()
   })
 
@@ -49,7 +50,8 @@ describe('SimpleMusicPlayer Example App', () => {
     fireEvent.change(input, { target: { value: 'Track 1' } })
     fireEvent.click(addButton)
 
-    expect(screen.getByText(/1 item loaded/)).toBeInTheDocument()
+    // 5 sample tracks + 1 added = 6 items
+    expect(screen.getByText(/6 items loaded/)).toBeInTheDocument()
   })
 
   it('should update Transport when multiple tracks are added', () => {
@@ -58,20 +60,20 @@ describe('SimpleMusicPlayer Example App', () => {
     const input = screen.getByPlaceholderText('Enter track name...') as HTMLInputElement
     const addButton = screen.getByRole('button', { name: /Add/i })
 
-    // Add first track
+    // Add first track (5 sample + 1 = 6)
     fireEvent.change(input, { target: { value: 'Track 1' } })
     fireEvent.click(addButton)
-    expect(screen.getByText(/1 item loaded/)).toBeInTheDocument()
+    expect(screen.getByText(/6 items loaded/)).toBeInTheDocument()
 
-    // Add second track
+    // Add second track (5 sample + 2 = 7)
     fireEvent.change(input, { target: { value: 'Track 2' } })
     fireEvent.click(addButton)
-    expect(screen.getByText(/2 items loaded/)).toBeInTheDocument()
+    expect(screen.getByText(/7 items loaded/)).toBeInTheDocument()
 
-    // Add third track
+    // Add third track (5 sample + 3 = 8)
     fireEvent.change(input, { target: { value: 'Track 3' } })
     fireEvent.click(addButton)
-    expect(screen.getByText(/3 items loaded/)).toBeInTheDocument()
+    expect(screen.getByText(/8 items loaded/)).toBeInTheDocument()
   })
 
   it('should have all transport control buttons enabled when tracks exist', () => {
@@ -89,7 +91,7 @@ describe('SimpleMusicPlayer Example App', () => {
 
     expect(prevButton).toBeDisabled() // At position 0
     expect(playButton).not.toBeDisabled()
-    expect(nextButton).toBeDisabled() // Only 1 item
+    expect(nextButton).not.toBeDisabled() // 6 items total, can move to next
   })
 
   it('should allow removing tracks via Composer', () => {
@@ -102,15 +104,18 @@ describe('SimpleMusicPlayer Example App', () => {
     fireEvent.click(addButton)
 
     // Track to Remove appears in both Composer and Transport
+    // Initially 5 sample tracks + 1 added = 6 items
     const allInstances = screen.getAllByText('Track to Remove')
     expect(allInstances.length).toBeGreaterThan(0)
-    expect(screen.getByText(/1 item loaded/)).toBeInTheDocument()
+    expect(screen.getByText(/6 items loaded/)).toBeInTheDocument()
 
-    const removeButton = screen.getByRole('button', { name: /Remove/i })
-    fireEvent.click(removeButton)
+    const removeButtons = screen.getAllByRole('button', { name: /Remove/i })
+    // Click the last Remove button (the one we just added)
+    fireEvent.click(removeButtons[removeButtons.length - 1])
 
     expect(screen.queryAllByText('Track to Remove')).toHaveLength(0)
-    expect(screen.getByText('No items loaded')).toBeInTheDocument()
+    // After removal, should have 5 items again (the original sample tracks)
+    expect(screen.getByText(/5 items loaded/)).toBeInTheDocument()
   })
 
   it('should demonstrate component communication via events', () => {
@@ -119,18 +124,18 @@ describe('SimpleMusicPlayer Example App', () => {
     const input = screen.getByPlaceholderText('Enter track name...')
     const addButton = screen.getByRole('button', { name: /Add/i })
 
-    // Initial state: no items
-    expect(screen.getByText('No items loaded')).toBeInTheDocument()
+    // Initial state: sample tracks are loaded
+    expect(screen.getByText(/5 items loaded/)).toBeInTheDocument()
 
     // Add a track via Composer
     fireEvent.change(input, { target: { value: 'Test Track' } })
     fireEvent.click(addButton)
 
-    // Transport automatically updates via event listener
+    // Transport automatically updates via event listener - now 6 items
     const allInstances = screen.getAllByText('Test Track')
     expect(allInstances.length).toBeGreaterThan(0)
-    expect(screen.getByText(/1 item loaded/)).toBeInTheDocument()
-    expect(screen.getByText(/1\/1/)).toBeInTheDocument() // Position indicator
+    expect(screen.getByText(/6 items loaded/)).toBeInTheDocument()
+    expect(screen.getByText(/1\/6/)).toBeInTheDocument() // Position indicator (1st of 6)
   })
 
   it('should display instructions for the example', () => {

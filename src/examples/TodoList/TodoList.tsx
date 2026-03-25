@@ -2,6 +2,13 @@ import { CompositionProvider } from '../../lib/composition-provider'
 import { TodoInput } from './components/TodoInput'
 import { TodoListDisplay } from './components/TodoListDisplay'
 import { TodoStats } from './components/TodoStats'
+import { useEffect, useState } from 'react'
+
+const SAMPLE_TODOS = [
+  { id: '1', text: 'Review component architecture', completed: true, createdAt: new Date().toISOString() },
+  { id: '2', text: 'Test tab switching between examples', completed: false, createdAt: new Date().toISOString() },
+  { id: '3', text: 'Add sample data to all examples', completed: false, createdAt: new Date().toISOString() },
+]
 
 /**
  * TodoList Example App
@@ -16,9 +23,22 @@ import { TodoStats } from './components/TodoStats'
  * TodoListDisplay → todos-updated → TodoStats
  */
 export function TodoList() {
+  const [initialized, setInitialized] = useState(false)
+
+  useEffect(() => {
+    if (!initialized && typeof window !== 'undefined') {
+      const key = 'opendash-demo-todos'
+      const stored = localStorage.getItem(key)
+      if (!stored) {
+        localStorage.setItem(key, JSON.stringify(SAMPLE_TODOS))
+      }
+      setInitialized(true)
+    }
+  }, [initialized])
+
   return (
     <CompositionProvider>
-      <div className="min-h-screen bg-gradient-to-br from-purple-900 to-purple-800 p-8">
+      <div className="bg-gradient-to-br from-purple-900 to-purple-800 p-8">
         <div className="max-w-2xl mx-auto">
           {/* Header */}
           <div className="mb-8">
@@ -33,7 +53,7 @@ export function TodoList() {
 
             {/* List and Stats */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <TodoListDisplay componentId="todo-list" listenToComponent="todo-input" />
+              <TodoListDisplay componentId="todo-list" listenToComponent="todo-input" initialTodos={SAMPLE_TODOS} />
               <TodoStats componentId="todo-stats" listenToComponent="todo-list" />
             </div>
 

@@ -3,6 +3,7 @@ import { Filter } from '../../components/composable/Filter'
 import { Display } from '../../components/composable/Display'
 import { Summary } from '../../components/composable/Summary'
 import { CompositionProvider } from '../../lib/composition-provider'
+import { useEffect, useState } from 'react'
 
 // Sample data for the dashboard
 const SAMPLE_DATA = [
@@ -40,9 +41,23 @@ const SAMPLE_DATA = [
  * - Change data flow? Modify one event listener
  */
 export function Dashboard() {
+  const [initialized, setInitialized] = useState(false)
+
+  useEffect(() => {
+    if (!initialized && typeof window !== 'undefined') {
+      const key = 'opendash-demo-dashboard-selection'
+      const stored = localStorage.getItem(key)
+      if (!stored) {
+        // Pre-select some dashboard items
+        localStorage.setItem(key, JSON.stringify(['Google Analytics Dashboard', 'GitHub Activity Feed', 'SEO Performance Dashboard']))
+      }
+      setInitialized(true)
+    }
+  }, [initialized])
+
   return (
     <CompositionProvider>
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 p-8">
+      <div className="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 p-8">
         <div className="max-w-6xl mx-auto">
           {/* Header */}
           <div className="mb-8">

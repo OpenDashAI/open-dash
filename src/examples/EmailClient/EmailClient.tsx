@@ -5,6 +5,7 @@ import { EmailSearch } from '../../components/composable/EmailSearch'
 import { ContactsList } from '../../components/composable/ContactsList'
 import { EmailSettings } from '../../components/composable/EmailSettings'
 import { CompositionProvider } from '../../lib/composition-provider'
+import { useEffect, useState } from 'react'
 
 /**
  * EmailClient Example App
@@ -33,9 +34,26 @@ import { CompositionProvider } from '../../lib/composition-provider'
  * EmailSettings → settings-changed → (All components respond)
  */
 export function EmailClient() {
+  const [initialized, setInitialized] = useState(false)
+
+  useEffect(() => {
+    if (!initialized && typeof window !== 'undefined') {
+      const folderKey = 'opendash-demo-email-folder'
+      const contactKey = 'opendash-demo-email-contact'
+
+      if (!localStorage.getItem(folderKey)) {
+        localStorage.setItem(folderKey, JSON.stringify('Inbox'))
+      }
+      if (!localStorage.getItem(contactKey)) {
+        localStorage.setItem(contactKey, JSON.stringify({ name: 'Sarah Johnson', email: 'sarah@example.com' }))
+      }
+      setInitialized(true)
+    }
+  }, [initialized])
+
   return (
     <CompositionProvider>
-      <div className="min-h-screen bg-gradient-to-br from-gray-900 to-gray-800 p-4">
+      <div className="bg-gradient-to-br from-gray-900 to-gray-800 p-4">
         <div className="max-w-7xl mx-auto">
           {/* Header */}
           <div className="mb-6">

@@ -1,13 +1,18 @@
 import { HeadContent, Outlet, Scripts, createRootRoute, useRouterState } from '@tanstack/react-router'
 import appCss from '../styles.css?url'
-import { createSecurityContext, GlobalSecurityContext } from '../server/global-middleware'
+import { createSecurityContext } from '../server/global-middleware'
+import type { GlobalSecurityContext } from '../server/global-middleware'
 import { getClientErrorResponse, getErrorStatusCode, logErrorServer, createErrorContext } from '../server/error-logger'
 
 export const Route = createRootRoute({
 	beforeLoad: async ({ context, location }) => {
 		// Create security context for this request
 		try {
-			const url = typeof location === 'string' ? location : location.href || '/'
+			// Construct absolute URL from location
+			const pathname = typeof location === 'string' ? location : location.pathname || '/'
+			const baseUrl = 'http://localhost:9000'
+			const url = new URL(pathname, baseUrl).toString()
+
 			const { context: security, shouldBlock } = createSecurityContext(
 				new Request(url, {
 					method: 'GET',
