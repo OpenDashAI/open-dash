@@ -1,34 +1,28 @@
 /**
  * @opendash/sdk
  *
- * OpenDash Component SDK - Interface and registry for building
- * interoperable components that work together in the dashboard.
- *
- * Usage:
- * ```typescript
- * import { createComponentRegistry } from '@opendash/sdk';
- * import { myComponent } from '@my-team/my-component';
- *
- * const registry = createComponentRegistry();
- * registry.register(myComponent);
- *
- * const items = await registry.fetchAll({
- *   env: process.env,
- *   lastVisited: user.lastVisited,
- * });
- * ```
+ * Core component interface and registry for OpenDash + Virtual-Media components.
+ * This is the single source of truth for how components work.
  */
 
-export type {
-  BriefingItem,
+// Component interface and types
+export {
+  AbstractComponent,
   Component,
   ComponentConfig,
-  ComponentStatus,
-  ComponentMarketplaceMetadata,
-} from "./component.js";
+  ComponentInput,
+  ComponentMetadata,
+  ComponentOutput,
+} from "./Component";
 
+// Component registry
 export {
   ComponentRegistry,
-  createComponentRegistry,
-  type RegistryError,
-} from "./registry.js";
+  getAllComponents,
+  getComponent,
+  globalComponentRegistry,
+  registerComponent,
+} from "./ComponentRegistry";
+
+// Re-export React for component rendering
+export { default as React } from "react";

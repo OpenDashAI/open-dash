@@ -1,149 +1,127 @@
 /**
- * OpenDash Component Interface
+ * Component Interface — The contract all OpenDash + Virtual-Media components implement
  *
- * A component is a self-contained unit that:
- * - Fetches data from an external system
- * - Transforms data into BriefingItems
- * - Registers with the ComponentRegistry
- * - Works alongside other components
+ * Both OpenDash datasources and Virtual-Media production tools implement this interface.
+ * This enables them to be discoverable, composable, and loadable by the dashboard.
  */
 
-/**
- * A single item of information displayed in the briefing
- */
-export interface BriefingItem {
-  /** Unique identifier within the component */
-  id: string;
-
-  /** Priority for display ordering */
-  priority: "low" | "normal" | "high";
-
-  /** Category for grouping (e.g., "revenue", "alert", "deployment") */
-  category: string;
-
-  /** One-liner headline */
-  title: string;
-
-  /** Additional context/detail */
-  detail: string;
-
-  /** ISO 8601 timestamp */
-  time: string;
-
-  /** Highlight if new since last visit */
-  isNew?: boolean;
-
-  /** Optional button label for action */
-  actionLabel?: string;
-
-  /** Handler identifier for action (e.g., "open-dashboard") */
-  actionHandler?: string;
-
-  /** Optional metadata for frontend rendering */
-  metadata?: Record<string, unknown>;
-}
+import React from "react";
 
 /**
- * Configuration passed to component.fetch()
+ * Configuration for a component instance
  */
 export interface ComponentConfig {
-  /** Environment variables (secrets) */
-  env: Record<string, string | undefined>;
-
-  /** Last time user visited dashboard (for isNew detection) */
-  lastVisited: string | null;
-
-  /** Brand/org-specific configuration */
-  brandConfig?: Record<string, unknown>;
+  [key: string]: unknown;
 }
 
 /**
- * Current status of a component
+ * Execution input for a component
  */
-export interface ComponentStatus {
-  /** Successfully connected and fetched last time */
-  connected: boolean;
-
-  /** ISO 8601 timestamp of last successful fetch */
-  lastFetch?: string;
-
-  /** Error message if last fetch failed */
-  error?: string;
-
-  /** Number of briefing items returned */
-  itemCount?: number;
+export interface ComponentInput {
+  [key: string]: unknown;
 }
 
 /**
- * Component interface - all components must implement this
+ * Execution output from a component
  */
-export interface Component {
-  // Identity
-  /** Globally unique identifier (kebab-case) */
+export interface ComponentOutput {
+  [key: string]: unknown;
+}
+
+/**
+ * Component metadata
+ */
+export interface ComponentMetadata {
+  /** Unique identifier (e.g., "stripe", "grok", "composition") */
   id: string;
 
-  /** Display name */
+  /** Display name (e.g., "Stripe", "Grok Video", "Video Composition") */
   name: string;
 
-  /** Single character emoji or icon */
-  icon: string;
-
-  /** One-line description */
+  /** Description of what this component does */
   description: string;
 
-  // Capabilities
-  /** Semantic version (e.g., "1.0.0") */
+  /** Which team built this component */
+  team: "opendash" | "virtual-media";
+
+  /** Component version */
   version: string;
 
-  /** Component author/team */
-  author: string;
+  /** Expected input schema (optional) */
+  inputSchema?: unknown;
 
-  /** Whether this component requires configuration (env vars or settings) */
-  requiresConfig: boolean;
-
-  // Behavior
-  /**
-   * Fetch data from external source and return briefing items
-   *
-   * IMPORTANT: This function should NEVER throw an error.
-   * Instead, return a briefing item describing the problem.
-   * This ensures one component's failure doesn't block others.
-   *
-   * @param config Configuration including env vars and brand settings
-   * @returns Array of briefing items (empty array if unconfigured or no data)
-   */
-  fetch(config: ComponentConfig): Promise<BriefingItem[]>;
+  /** Expected output schema (optional) */
+  outputSchema?: unknown;
 }
 
 /**
- * Metadata for component marketplace registration
+ * Component Interface
+ *
+ * Every component (datasource, video tool, etc.) implements this interface.
+ * This enables:
+ * - Discovery: registry can find all components
+ * - Composition: components can call other components
+ * - Orchestration: dashboard can coordinate workflows
  */
-export interface ComponentMarketplaceMetadata {
-  /** Repository URL (GitHub, etc.) */
-  repository?: string;
+export interface Component {
+  /**
+   * Component metadata (static info)
+   */
+  readonly metadata: ComponentMetadata;
 
-  /** Component license (MIT, Apache 2.0, etc.) */
-  license?: string;
+  /**
+   * Validate configuration for this component
+   * Checks if config is valid before initialization
+   */
+  validate(config: ComponentConfig): boolean;
 
-  /** Component category for discovery */
-  category?: string;
+  /**
+   * Initialize the component with configuration
+   * Called once before any execute() calls
+   * Sets up API clients, databases, etc.
+   */
+  initialize(config: ComponentConfig): Promise<void>;
 
-  /** Tags for searching */
-  tags?: string[];
+  /**
+   * Execute the component with given input
+   * The main work happens here
+   * Returns output that can be consumed by other components
+   */
+  execute(input: ComponentInput): Promise<ComponentOutput>;
 
-  /** Number of downloads/installs */
-  downloads?: number;
+  /**
+   * Render component UI for the dashboard
+   * Shows status, progress, results, errors
+   * Can be null for headless components
+   */
+  render(data: unknown): React.ReactNode | null;
 
-  /** Average rating (1-5) */
-  rating?: number;
+  /**
+   * Cleanup resources
+   * Called when component is unloaded
+   */
+  teardown?(): Promise<void>;
+}
 
-  /** Whether this is a premium/paid component */
-  isPremium?: boolean;
+/**
+ * Abstract base class for implementing components
+ * Provides default implementations, components extend this
+ */
+export abstract class AbstractComponent implements Component {
+  abstract readonly metadata: ComponentMetadata;
 
-  /** Maintainer contact */
-  maintainer?: {
-    name: string;
-    email?: string;
-    url?: string;
-  };
+  validate(config: ComponentConfig): boolean {
+    // Override in subclass
+    return true;
+  }
+
+  abstract initialize(config: ComponentConfig): Promise<void>;
+
+  abstract execute(input: ComponentInput): Promise<ComponentOutput>;
+
+  abstract render(data: unknown): React.ReactNode | null;
+
+  async teardown(): Promise<void> {
+    // Override in subclass if cleanup needed
+  }
 }
