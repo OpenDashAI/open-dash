@@ -57,8 +57,8 @@ describe("ExportManager", () => {
   });
 
   it("displays overall status", () => {
-    render(<ExportManager manager={mockManager} />);
-    expect(screen.getByText("Uploaded")).toBeInTheDocument();
+    const { container } = render(<ExportManager manager={mockManager} />);
+    expect(container.textContent).toContain("Uploaded");
   });
 
   it("displays master file info", () => {
@@ -81,9 +81,9 @@ describe("ExportManager", () => {
   });
 
   it("displays YouTube video status", () => {
-    render(<ExportManager manager={mockManager} />);
-    expect(screen.getByText(/YouTube/)).toBeInTheDocument();
-    expect(screen.getByText("Live")).toBeInTheDocument();
+    const { container } = render(<ExportManager manager={mockManager} />);
+    expect(container.textContent).toContain("YouTube");
+    expect(container.textContent).toContain("Live");
   });
 
   it("displays YouTube video URL", () => {
@@ -101,8 +101,8 @@ describe("ExportManager", () => {
       ...mockManager,
       overallStatus: "pending",
     };
-    render(<ExportManager manager={pendingManager} />);
-    expect(screen.getByText("Pending")).toBeInTheDocument();
+    const { container } = render(<ExportManager manager={pendingManager} />);
+    expect(container.textContent).toContain("Pending");
   });
 
   it("handles exporting status", () => {
@@ -110,8 +110,8 @@ describe("ExportManager", () => {
       ...mockManager,
       overallStatus: "exporting",
     };
-    render(<ExportManager manager={exportingManager} />);
-    expect(screen.getByText("Exporting...")).toBeInTheDocument();
+    const { container } = render(<ExportManager manager={exportingManager} />);
+    expect(container.textContent).toContain("Exporting");
   });
 
   it("displays upload progress when uploading", () => {

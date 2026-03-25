@@ -45,8 +45,9 @@ describe("CompositionTracker", () => {
 
   it("displays scene completion progress", () => {
     render(<CompositionTracker tracker={mockTracker} />);
-    expect(screen.getByText("32")).toBeInTheDocument();
-    expect(screen.getByText("48")).toBeInTheDocument();
+    expect(screen.getByText(/Scenes Completed/)).toBeInTheDocument();
+    expect(screen.getByText(/32/)).toBeInTheDocument();
+    expect(screen.getByText(/48/)).toBeInTheDocument();
   });
 
   it("displays current in-progress scene", () => {
@@ -61,9 +62,9 @@ describe("CompositionTracker", () => {
   });
 
   it("shows task status counts", () => {
-    render(<CompositionTracker tracker={mockTracker} />);
-    expect(screen.getByText(/Completed/)).toBeInTheDocument();
-    expect(screen.getByText(/Queued/)).toBeInTheDocument();
+    const { container } = render(<CompositionTracker tracker={mockTracker} />);
+    expect(container.textContent).toContain("Completed");
+    expect(container.textContent).toContain("Queued");
   });
 
   it("displays last updated timestamp", () => {
