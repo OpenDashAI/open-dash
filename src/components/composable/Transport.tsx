@@ -37,7 +37,8 @@ export function Transport({ componentId, listenToComponent = 'any', items: initi
   const audioRef = useRef<HTMLAudioElement>(null)
   const [items, setItems] = useState<any[]>(initialItems)
   const [isPlaying, setIsPlaying] = useState(false)
-  const [currentPosition, setCurrentPosition] = useState(0)
+  const [currentTrackIndex, setCurrentTrackIndex] = useState(0)
+  const [playbackTime, setPlaybackTime] = useState(0)
   const [duration, setDuration] = useState(0)
 
   // Register this component with the context
@@ -48,14 +49,14 @@ export function Transport({ componentId, listenToComponent = 'any', items: initi
       enabled: true,
       state: {
         isPlaying,
-        currentPosition,
+        currentTrackIndex,
         itemsCount: items.length,
       },
       props: {
         listenToComponent,
       },
     })
-  }, [componentId, isPlaying, currentPosition, items.length, listenToComponent, ctx])
+  }, [componentId, isPlaying, currentTrackIndex, items.length, listenToComponent, ctx])
 
   // Listen for 'item-added' events from source component (handles initial items and additions)
   useEffect(() => {
@@ -65,14 +66,14 @@ export function Transport({ componentId, listenToComponent = 'any', items: initi
       localStorage.setItem('debug-transport', msg)
       if (payload?.allItems) {
         setItems(payload.allItems)
-        // Auto-update position if we were at the end
-        if (currentPosition >= items.length) {
-          setCurrentPosition(payload.allItems.length - 1)
+        // Auto-update track index if we were at the end
+        if (currentTrackIndex >= items.length) {
+          setCurrentTrackIndex(payload.allItems.length - 1)
         }
       }
     })
     return unsubscribe
-  }, [ctx, listenToComponent, currentPosition, items.length, componentId])
+  }, [ctx, listenToComponent, currentTrackIndex, items.length, componentId])
 
   // Listen for 'item-removed' events from source component
   useEffect(() => {
@@ -80,37 +81,87 @@ export function Transport({ componentId, listenToComponent = 'any', items: initi
       console.log(`[${componentId}] Received item-removed event`, payload)
       if (payload?.allItems) {
         setItems(payload.allItems)
-        // Adjust position if we're beyond the new length
-        if (currentPosition >= payload.allItems.length) {
-          setCurrentPosition(Math.max(0, payload.allItems.length - 1))
+        // Adjust track index if we're beyond the new length
+        if (currentTrackIndex >= payload.allItems.length) {
+          setCurrentTrackIndex(Math.max(0, payload.allItems.length - 1))
         }
       }
     })
-  }, [ctx, listenToComponent, currentPosition, componentId])
+  }, [ctx, listenToComponent, currentTrackIndex, componentId])
 
-  // Update audio source when current track changes
+  // Update audio source when current track changes (only when track actually changes, not time update)
+  const lastTrackIdRef = useRef<string | null>(null)
+
   useEffect(() => {
-    if (audioRef.current && items.length > 0) {
-      const currentTrack = items[currentPosition]
+    console.log(`[${componentId}] Effect running: items.length=${items.length}, currentTrackIndex=${currentTrackIndex}`)
+
+    if (items.length > 0) {
+      const currentTrack = items[currentTrackIndex]
+      console.log(`[${componentId}] Current track:`, currentTrack)
+      console.log(`[${componentId}] Track is object:`, typeof currentTrack === 'object')
+      console.log(`[${componentId}] Track has url:`, 'url' in currentTrack)
+
       if (currentTrack && typeof currentTrack === 'object' && 'url' in currentTrack) {
-        audioRef.current.src = currentTrack.url
-        if (isPlaying) {
-          audioRef.current.play().catch(err => console.log('Playback failed:', err))
+        // Only load if we're changing to a different track
+        if (lastTrackIdRef.current !== currentTrack.id) {
+          console.log(`[${componentId}] Loading track: ${currentTrack.name}`)
+          const wasPlaying = audioRef.current && !audioRef.current.paused
+          if (audioRef.current) {
+            audioRef.current.src = currentTrack.url
+            audioRef.current.load()
+            console.log(`[${componentId}] ✓ Audio src set to: ${currentTrack.url}`)
+            lastTrackIdRef.current = currentTrack.id
+
+            // If it was playing, start playing the new track
+            if (wasPlaying) {
+              audioRef.current.play().catch(err => console.error('Playback failed:', err))
+            }
+          }
         }
+      } else {
+        console.log(`[${componentId}] ✗ Current track is not a valid Track object or missing url`)
       }
+    } else {
+      console.log(`[${componentId}] No items available`)
     }
-  }, [currentPosition, items])
+  }, [currentTrackIndex, items, componentId])
 
   // Sync audio playback with isPlaying state
   useEffect(() => {
-    if (audioRef.current) {
-      if (isPlaying) {
-        audioRef.current.play().catch(err => console.log('Playback failed:', err))
+    const audio = audioRef.current
+    if (!audio) return
+
+    if (isPlaying) {
+      console.log(`[${componentId}] Play requested`)
+      console.log(`[${componentId}] Audio src: ${audio.src}`)
+      console.log(`[${componentId}] Audio ready state: ${audio.readyState}`)
+      console.log(`[${componentId}] Audio paused: ${audio.paused}`)
+      console.log(`[${componentId}] Audio duration: ${audio.duration}`)
+
+      // If audio is already loaded and ready, play it
+      if (audio.readyState >= 2) {
+        // HAVE_CURRENT_DATA or better
+        const playPromise = audio.play()
+        if (playPromise !== undefined) {
+          playPromise
+            .then(() => console.log(`[${componentId}] ✓ Playback started successfully`))
+            .catch(err => console.error(`[${componentId}] ✗ Playback failed:`, err.message))
+        }
       } else {
-        audioRef.current.pause()
+        // Audio not ready yet, wait for it
+        console.log(`[${componentId}] Audio not ready yet, waiting for canplay event`)
+        const onCanPlay = () => {
+          console.log(`[${componentId}] Audio is now ready, playing`)
+          audio.play().catch(err => console.error(`[${componentId}] Playback failed:`, err.message))
+          audio.removeEventListener('canplay', onCanPlay)
+        }
+        audio.addEventListener('canplay', onCanPlay)
       }
+    } else {
+      console.log(`[${componentId}] Pause requested`)
+      audio.pause()
     }
-  }, [isPlaying])
+  }, [isPlaying, componentId])
 
   // Update position as audio plays
   useEffect(() => {
@@ -118,13 +169,13 @@ export function Transport({ componentId, listenToComponent = 'any', items: initi
     if (!audio) return
 
     const handleTimeUpdate = () => {
-      setCurrentPosition(Math.floor(audio.currentTime))
+      setPlaybackTime(Math.floor(audio.currentTime))
     }
 
     const handleEnded = () => {
       // Move to next track when current track ends
-      if (currentPosition < items.length - 1) {
-        setCurrentPosition(currentPosition + 1)
+      if (currentTrackIndex < items.length - 1) {
+        setCurrentTrackIndex(currentTrackIndex + 1)
       } else {
         setIsPlaying(false)
       }
@@ -143,7 +194,7 @@ export function Transport({ componentId, listenToComponent = 'any', items: initi
       audio.removeEventListener('ended', handleEnded)
       audio.removeEventListener('loadedmetadata', handleLoadedMetadata)
     }
-  }, [currentPosition, items.length])
+  }, [currentTrackIndex, items.length])
 
   /**
    * Handle play button click
@@ -154,7 +205,7 @@ export function Transport({ componentId, listenToComponent = 'any', items: initi
       setIsPlaying(true)
       ctx.emitEvent(componentId, 'playback-started', {
         items,
-        currentPosition,
+        currentTrackIndex,
         itemsCount: items.length,
       })
     }
@@ -167,7 +218,7 @@ export function Transport({ componentId, listenToComponent = 'any', items: initi
   const handlePause = () => {
     setIsPlaying(false)
     ctx.emitEvent(componentId, 'playback-stopped', {
-      currentPosition,
+      currentTrackIndex,
     })
   }
 
@@ -176,10 +227,10 @@ export function Transport({ componentId, listenToComponent = 'any', items: initi
    * Moves to next item and emits position change event
    */
   const handleNext = () => {
-    const nextPos = Math.min(currentPosition + 1, items.length - 1)
-    setCurrentPosition(nextPos)
+    const nextPos = Math.min(currentTrackIndex + 1, items.length - 1)
+    setCurrentTrackIndex(nextPos)
     ctx.emitEvent(componentId, 'position-changed', {
-      currentPosition: nextPos,
+      currentTrackIndex: nextPos,
       item: items[nextPos],
     })
   }
@@ -189,23 +240,47 @@ export function Transport({ componentId, listenToComponent = 'any', items: initi
    * Moves to previous item and emits position change event
    */
   const handlePrevious = () => {
-    const prevPos = Math.max(currentPosition - 1, 0)
-    setCurrentPosition(prevPos)
+    const prevPos = Math.max(currentTrackIndex - 1, 0)
+    setCurrentTrackIndex(prevPos)
     ctx.emitEvent(componentId, 'position-changed', {
-      currentPosition: prevPos,
+      currentTrackIndex: prevPos,
       item: items[prevPos],
     })
   }
 
-  const currentTrack = items.length > 0 ? items[currentPosition] : null
+  const currentTrack = items.length > 0 ? items[currentTrackIndex] : null
   const currentTrackName = currentTrack && typeof currentTrack === 'object' && 'name' in currentTrack
     ? currentTrack.name
     : currentTrack
 
+  const handleAudioError = (e: any) => {
+    const error = audioRef.current?.error
+    console.error(`[${componentId}] Audio error:`, error?.code, error?.message)
+  }
+
+  /**
+   * Handle seeking by clicking on the progress bar
+   */
+  const handleProgressBarClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!audioRef.current || duration === 0) return
+
+    const progressBar = e.currentTarget
+    const rect = progressBar.getBoundingClientRect()
+    const clickX = e.clientX - rect.left
+    const percentage = clickX / rect.width
+    const newTime = percentage * duration
+
+    audioRef.current.currentTime = newTime
+  }
+
   return (
     <div className="flex flex-col gap-3 p-4 border border-green-200 rounded-lg bg-white">
-      {/* Hidden audio element for playback */}
-      <audio ref={audioRef} crossOrigin="anonymous" />
+      {/* Audio element for playback */}
+      <audio
+        ref={audioRef}
+        crossOrigin="anonymous"
+        onError={handleAudioError}
+      />
 
       {/* Header */}
       <div className="flex items-center justify-between">
@@ -226,12 +301,23 @@ export function Transport({ componentId, listenToComponent = 'any', items: initi
             {items.length} item{items.length !== 1 ? 's' : ''} loaded
             {items.length > 0 && (
               <span className="ml-2 font-medium text-gray-800">
-                ({currentPosition + 1}/{items.length})
+                ({currentTrackIndex + 1}/{items.length})
               </span>
             )}
           </span>
         )}
       </div>
+
+      {/* Debug info */}
+      {items.length > 0 && (
+        <div className="text-xs text-gray-500 bg-gray-100 p-2 rounded font-mono">
+          <div>Type: {typeof items[currentTrackIndex] === 'object' ? 'object' : 'string'}</div>
+          <div>Has URL: {items[currentTrackIndex] && 'url' in items[currentTrackIndex] ? '✓ yes' : '✗ no'}</div>
+          {items[currentTrackIndex] && 'url' in items[currentTrackIndex] && (
+            <div className="truncate text-gray-600">URL: {(items[currentTrackIndex] as any).url}</div>
+          )}
+        </div>
+      )}
 
       {/* Current Item Display */}
       {items.length > 0 && (
@@ -242,7 +328,7 @@ export function Transport({ componentId, listenToComponent = 'any', items: initi
           </div>
           {duration > 0 && (
             <div className="text-xs text-gray-500 mt-1">
-              {Math.floor(currentPosition / 60)}:{String(currentPosition % 60).padStart(2, '0')} / {Math.floor(duration / 60)}:{String(duration % 60).padStart(2, '0')}
+              {Math.floor(playbackTime / 60)}:{String(playbackTime % 60).padStart(2, '0')} / {Math.floor(duration / 60)}:{String(duration % 60).padStart(2, '0')}
             </div>
           )}
         </div>
@@ -252,7 +338,7 @@ export function Transport({ componentId, listenToComponent = 'any', items: initi
       <div className="flex gap-2">
         <button
           onClick={handlePrevious}
-          disabled={items.length === 0 || currentPosition === 0}
+          disabled={items.length === 0 || currentTrackIndex === 0}
           className="px-3 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium text-sm"
         >
           ⏮ Previous
@@ -277,19 +363,22 @@ export function Transport({ componentId, listenToComponent = 'any', items: initi
 
         <button
           onClick={handleNext}
-          disabled={items.length === 0 || currentPosition === items.length - 1}
+          disabled={items.length === 0 || currentTrackIndex === items.length - 1}
           className="px-3 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium text-sm"
         >
           Next ⏭
         </button>
       </div>
 
-      {/* Position Indicator */}
-      {items.length > 0 && (
-        <div className="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
+      {/* Playback Progress Indicator - clickable to seek */}
+      {items.length > 0 && duration > 0 && (
+        <div
+          onClick={handleProgressBarClick}
+          className="w-full bg-gray-200 rounded-full h-2 overflow-hidden cursor-pointer hover:h-3 transition-all"
+        >
           <div
             className="bg-green-500 h-full transition-all"
-            style={{ width: `${((currentPosition + 1) / items.length) * 100}%` }}
+            style={{ width: `${(playbackTime / duration) * 100}%` }}
           />
         </div>
       )}

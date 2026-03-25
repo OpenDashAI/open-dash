@@ -1,27 +1,90 @@
 # Current Session Priority
 
-**Status**: 🔴 COMPONENT ECOSYSTEM PHASE 2
+**Status**: 🔴 STRATEGIC PIVOT REQUIRED - Component Architecture Validation
 
-**What**: Extract official components + build marketplace foundation
-- Extract 5 components (GA4, Google Ads, GitHub Issues, Meta Ads, Email Metrics)
-- Publish to npm registry
-- Validate component SDK works in production
+**Critical Insight** (2026-03-25):
+Components ONLY provide value if users can re-mix them via AI.
 
-**Why**: Validation is complete (see Standards/COMPONENT-ECOSYSTEM-VALIDATION.md). This is the growth lever for opendash.ai — enabling community + enterprise components.
-
-**What NOT to do**: Don't touch Alert System polish, deployment to opendash.ai, or Team Settings right now. These are blocked on component ecosystem working first.
-
-**Next steps**:
-1. Start with GA4 component extraction
-2. Publish to npm (@opendash-components/ga4)
-3. Integrate into dashboard registry
-4. Repeat for Google Ads, GitHub, Meta, Email
-
-**See also**:
-- Standards/COMPONENT-ECOSYSTEM-VALIDATION.md (full roadmap)
-- Standards/component-sdk-spec.md (SDK contract)
-- packages/stripe-revenue/ (reference implementation)
+Without AI composition → components are over-engineering
+With AI composition → components are essential infrastructure
 
 ---
-Last updated: 2026-03-25
-Updated by: User (clarifying priority system)
+
+## Current Status
+
+✅ **GA4 component extracted** (Commit: 68901b8)
+✅ **SDK working** (Component interface, BriefingItem, ComponentRegistry)
+
+❌ **Missing: AI remix layer** (This is where the actual value is)
+
+---
+
+## The Real Problem
+
+Current plan extracts 4 more components → builds marketplace → enables third-party developers
+
+**But**: None of this matters without the AI layer that lets users say:
+- "Give me a founder's briefing" → AI composes: Stripe + GA4 + GitHub
+- "I need marketing metrics" → AI composes: GA4 + Google Ads + Meta Ads
+- "Show me what matters" → AI figures out: which components matter for THIS user
+
+Without AI: Component architecture adds unnecessary complexity
+With AI: Component architecture is fundamental to customization
+
+---
+
+## What Needs to Happen (In Order)
+
+1. **Component metadata spec** — AI needs to understand what each component does
+   - What data does GA4 return?
+   - What configuration does Stripe need?
+   - What's the learning outcome of using this component?
+
+2. **Configuration automation** — AI needs to set up components
+   - Can AI generate OAuth flows?
+   - Can AI validate and store secrets?
+   - Can AI guide user through setup?
+
+3. **Composition logic** — AI needs to select right components
+   - User: "I'm a SaaS founder"
+   - AI queries: "Which components matter for founders?"
+   - AI composes: Best subset for this user's needs
+
+4. **User-facing AI** — Users request custom dashboards via conversation
+   - "Tell me about your business"
+   - "What would you like to monitor?"
+   - AI creates custom briefing from components
+
+5. **Validate**: Does AI composition actually work?
+   - Can AI understand component capabilities?
+   - Does composed briefing delight users?
+   - Is it better than "configure 15 datasources manually"?
+
+---
+
+## What This Means for Phase 2
+
+**Not**: Extract 4 more components, build marketplace registry
+
+**Instead**: Build the AI remix layer that makes components valuable
+
+GA4 component is valuable ONLY if it's part of this larger system.
+
+---
+
+## Decision Required
+
+Before continuing component extraction:
+
+**Do we believe components' value comes from AI remix?**
+
+If YES → Pause component extraction, build AI layer first
+If NO → Different architecture might be better
+If UNCLEAR → Research what competitors do
+
+See: `Standards/component-architecture-actual-value-proposition.md`
+
+---
+
+Last updated: 2026-03-25 (Session 2 - Strategic pivot identified)
+Status: Awaiting decision before continuing Phase 2

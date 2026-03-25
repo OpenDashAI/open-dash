@@ -13,27 +13,27 @@ const SAMPLE_TRACKS: Track[] = [
   {
     id: 'track-1',
     name: 'Midnight Dreams - Synthwave',
-    url: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3',
+    url: '/midnight-dreams.mp3',
   },
   {
     id: 'track-2',
     name: 'Ocean Waves - Ambient',
-    url: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3',
+    url: '/ocean-waves.mp3',
   },
   {
     id: 'track-3',
     name: 'Urban Pulse - Hip Hop',
-    url: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3',
+    url: '/urban-pulse.mp3',
   },
   {
     id: 'track-4',
     name: 'Jazz Improvisation - Modern Jazz',
-    url: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-4.mp3',
+    url: '/jazz-improvisation.mp3',
   },
   {
     id: 'track-5',
     name: 'Electric Sunset - Electronic',
-    url: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-5.mp3',
+    url: '/electric-sunset.mp3',
   },
 ]
 
@@ -52,7 +52,7 @@ const SAMPLE_TRACKS: Track[] = [
  */
 export function SimpleMusicPlayer() {
   const [initialized, setInitialized] = useState(false)
-  const [items, setItems] = useState<string[]>(SAMPLE_TRACKS)
+  const [items, setItems] = useState<Track[]>(SAMPLE_TRACKS)
 
   useEffect(() => {
     if (!initialized && typeof window !== 'undefined') {
