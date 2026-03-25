@@ -1,0 +1,436 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry.json",
+  "name": "opendash",
+  "homepage": "https://opendash.ai",
+  "items": [
+    {
+      "name": "composition-provider",
+      "type": "registry:lib",
+      "description": "Event bus for composable components. Manages registration, event routing, and listener subscriptions.",
+      "registryDependencies": ["composition-context", "use-composition-context"],
+      "files": [
+        { "path": "src/lib/composition-provider.tsx", "type": "registry:lib" }
+      ],
+      "meta": {
+        "composable": false,
+        "role": "infrastructure"
+      }
+    },
+    {
+      "name": "composition-context",
+      "type": "registry:lib",
+      "description": "Interface defining how composable components communicate through events.",
+      "files": [
+        { "path": "src/lib/composition-context.ts", "type": "registry:lib" }
+      ],
+      "meta": {
+        "composable": false,
+        "role": "infrastructure"
+      }
+    },
+    {
+      "name": "use-composition-context",
+      "type": "registry:hook",
+      "description": "React hook to access the CompositionContext from any composable component.",
+      "registryDependencies": ["composition-context"],
+      "files": [
+        { "path": "src/hooks/useCompositionContext.ts", "type": "registry:hook" }
+      ],
+      "meta": {
+        "composable": false,
+        "role": "infrastructure"
+      }
+    },
+    {
+      "name": "data-selector",
+      "type": "registry:component",
+      "description": "Displays a list of items with checkboxes. User selects which items to include in the pipeline.",
+      "registryDependencies": ["composition-provider"],
+      "files": [
+        { "path": "src/components/composable/DataSelector.tsx", "type": "registry:component" }
+      ],
+      "meta": {
+        "composable": true,
+        "componentType": "dataselector",
+        "emits": [
+          {
+            "event": "selection-changed",
+            "payload": "{ selectedItems: string[], selectedCount: number }",
+            "description": "Fired when user checks/unchecks items"
+          }
+        ],
+        "listensTo": [],
+        "props": {
+          "componentId": { "type": "string", "required": true, "description": "Unique instance ID" },
+          "items": { "type": "string[]", "required": false, "default": "[]", "description": "Available items to select from" },
+          "label": { "type": "string", "required": false, "default": "Select Data", "description": "Header label" }
+        },
+        "pipelineRole": "source",
+        "validDownstream": ["filter", "display"]
+      }
+    },
+    {
+      "name": "filter",
+      "type": "registry:component",
+      "description": "Applies text-based search filtering to items received from upstream. Passes filtered results downstream.",
+      "registryDependencies": ["composition-provider"],
+      "files": [
+        { "path": "src/components/composable/Filter.tsx", "type": "registry:component" }
+      ],
+      "meta": {
+        "composable": true,
+        "componentType": "filter",
+        "emits": [
+          {
+            "event": "filter-updated",
+            "payload": "{ filteredItems: string[], filterText: string, selectedCount: number }",
+            "description": "Fired when filter text changes or upstream selection changes"
+          }
+        ],
+        "listensTo": [
+          {
+            "event": "selection-changed",
+            "payload": "{ selectedItems: string[] }",
+            "description": "Receives selected items from DataSelector or similar source"
+          }
+        ],
+        "props": {
+          "componentId": { "type": "string", "required": true },
+          "listenToComponent": { "type": "string", "required": false, "default": "any", "description": "componentId to listen to, or 'any'" },
+          "label": { "type": "string", "required": false, "default": "Filter Results" }
+        },
+        "pipelineRole": "transform",
+        "validUpstream": ["data-selector", "composer"],
+        "validDownstream": ["display"]
+      }
+    },
+    {
+      "name": "display",
+      "type": "registry:component",
+      "description": "Renders filtered items as a table. Shows results from upstream filter or data source.",
+      "registryDependencies": ["composition-provider"],
+      "files": [
+        { "path": "src/components/composable/Display.tsx", "type": "registry:component" }
+      ],
+      "meta": {
+        "composable": true,
+        "componentType": "display",
+        "emits": [
+          {
+            "event": "display-ready",
+            "payload": "{ itemCount: number, items: string[] }",
+            "description": "Fired when display renders new data"
+          }
+        ],
+        "listensTo": [
+          {
+            "event": "filter-updated",
+            "payload": "{ filteredItems: string[], filterText: string }",
+            "description": "Receives filtered items from Filter"
+          }
+        ],
+        "props": {
+          "componentId": { "type": "string", "required": true },
+          "listenToComponent": { "type": "string", "required": false, "default": "any" },
+          "label": { "type": "string", "required": false, "default": "Results" }
+        },
+        "pipelineRole": "render",
+        "validUpstream": ["filter", "data-selector"],
+        "validDownstream": ["summary"]
+      }
+    },
+    {
+      "name": "summary",
+      "type": "registry:component",
+      "description": "Computes and displays aggregate statistics (count, averages, min/max) from upstream display data.",
+      "registryDependencies": ["composition-provider"],
+      "files": [
+        { "path": "src/components/composable/Summary.tsx", "type": "registry:component" }
+      ],
+      "meta": {
+        "composable": true,
+        "componentType": "summary",
+        "emits": [
+          {
+            "event": "summary-ready",
+            "payload": "{ totalCount: number, items: string[], timestamp: string }",
+            "description": "Fired when summary statistics are computed"
+          }
+        ],
+        "listensTo": [
+          {
+            "event": "display-ready",
+            "payload": "{ itemCount: number, items: string[] }",
+            "description": "Receives displayed items from Display"
+          }
+        ],
+        "props": {
+          "componentId": { "type": "string", "required": true },
+          "listenToComponent": { "type": "string", "required": false, "default": "any" },
+          "label": { "type": "string", "required": false, "default": "Summary" }
+        },
+        "pipelineRole": "terminal",
+        "validUpstream": ["display"]
+      }
+    },
+    {
+      "name": "composer",
+      "type": "registry:component",
+      "description": "Allows users to add and remove items from a list. Source component for item-based pipelines.",
+      "registryDependencies": ["composition-provider"],
+      "files": [
+        { "path": "src/components/composable/Composer.tsx", "type": "registry:component" }
+      ],
+      "meta": {
+        "composable": true,
+        "componentType": "composer",
+        "emits": [
+          {
+            "event": "item-added",
+            "payload": "{ item: string, allItems: string[], index: number }",
+            "description": "Fired when user adds an item"
+          },
+          {
+            "event": "item-removed",
+            "payload": "{ removedIndex: number, removedItem: string, allItems: string[] }",
+            "description": "Fired when user removes an item"
+          }
+        ],
+        "listensTo": [],
+        "props": {
+          "componentId": { "type": "string", "required": true },
+          "items": { "type": "any[]", "required": false, "default": "[]", "description": "Initial items" },
+          "label": { "type": "string", "required": false, "default": "Add Item" },
+          "placeholder": { "type": "string", "required": false, "default": "Enter item..." }
+        },
+        "pipelineRole": "source",
+        "validDownstream": ["transport", "filter", "display"]
+      }
+    },
+    {
+      "name": "transport",
+      "type": "registry:component",
+      "description": "Playback controls with play/pause/next/prev. Listens for item events and manages audio playback.",
+      "registryDependencies": ["composition-provider"],
+      "files": [
+        { "path": "src/components/composable/Transport.tsx", "type": "registry:component" }
+      ],
+      "meta": {
+        "composable": true,
+        "componentType": "transport",
+        "emits": [
+          {
+            "event": "playback-started",
+            "payload": "{ items: any[], currentTrackIndex: number, itemsCount: number }",
+            "description": "Fired when playback begins"
+          },
+          {
+            "event": "playback-stopped",
+            "payload": "{ currentTrackIndex: number }",
+            "description": "Fired when playback pauses"
+          },
+          {
+            "event": "position-changed",
+            "payload": "{ currentTrackIndex: number, item: any }",
+            "description": "Fired when user skips to next/prev"
+          }
+        ],
+        "listensTo": [
+          {
+            "event": "item-added",
+            "payload": "{ allItems: any[] }",
+            "description": "Updates playlist when items are added"
+          },
+          {
+            "event": "item-removed",
+            "payload": "{ allItems: any[] }",
+            "description": "Updates playlist when items are removed"
+          }
+        ],
+        "props": {
+          "componentId": { "type": "string", "required": true },
+          "listenToComponent": { "type": "string", "required": false, "default": "any" },
+          "items": { "type": "any[]", "required": false, "default": "[]", "description": "Initial items" }
+        },
+        "pipelineRole": "render",
+        "validUpstream": ["composer"]
+      }
+    },
+    {
+      "name": "folder-selector",
+      "type": "registry:component",
+      "description": "Email folder sidebar. Lets user pick Inbox, Sent, Drafts, etc.",
+      "registryDependencies": ["composition-provider"],
+      "files": [
+        { "path": "src/components/composable/FolderSelector.tsx", "type": "registry:component" }
+      ],
+      "meta": {
+        "composable": true,
+        "componentType": "folderselector",
+        "emits": [
+          {
+            "event": "folder-selected",
+            "payload": "{ folder: string }",
+            "description": "Fired when user selects a folder"
+          }
+        ],
+        "listensTo": [],
+        "props": {
+          "componentId": { "type": "string", "required": true },
+          "label": { "type": "string", "required": false, "default": "Folders" }
+        },
+        "pipelineRole": "source",
+        "validDownstream": ["email-list"]
+      }
+    },
+    {
+      "name": "email-list",
+      "type": "registry:component",
+      "description": "Displays list of emails in selected folder. Emits when user clicks an email.",
+      "registryDependencies": ["composition-provider"],
+      "files": [
+        { "path": "src/components/composable/EmailList.tsx", "type": "registry:component" }
+      ],
+      "meta": {
+        "composable": true,
+        "componentType": "emaillist",
+        "emits": [
+          {
+            "event": "email-selected",
+            "payload": "{ email: { id: string, subject: string, from: string, body: string } }",
+            "description": "Fired when user clicks an email"
+          }
+        ],
+        "listensTo": [
+          {
+            "event": "folder-selected",
+            "payload": "{ folder: string }",
+            "description": "Updates email list when folder changes"
+          }
+        ],
+        "props": {
+          "componentId": { "type": "string", "required": true },
+          "listenToComponent": { "type": "string", "required": false, "default": "any" },
+          "label": { "type": "string", "required": false, "default": "Inbox" }
+        },
+        "pipelineRole": "transform",
+        "validUpstream": ["folder-selector"],
+        "validDownstream": ["email-preview"]
+      }
+    },
+    {
+      "name": "email-preview",
+      "type": "registry:component",
+      "description": "Renders full email content when an email is selected from the list.",
+      "registryDependencies": ["composition-provider"],
+      "files": [
+        { "path": "src/components/composable/EmailPreview.tsx", "type": "registry:component" }
+      ],
+      "meta": {
+        "composable": true,
+        "componentType": "emailpreview",
+        "emits": [],
+        "listensTo": [
+          {
+            "event": "email-selected",
+            "payload": "{ email: { id: string, subject: string, from: string, body: string } }",
+            "description": "Displays the selected email"
+          }
+        ],
+        "props": {
+          "componentId": { "type": "string", "required": true },
+          "listenToComponent": { "type": "string", "required": false, "default": "any" },
+          "label": { "type": "string", "required": false, "default": "Message" }
+        },
+        "pipelineRole": "terminal",
+        "validUpstream": ["email-list"]
+      }
+    },
+    {
+      "name": "email-search",
+      "type": "registry:component",
+      "description": "Search box that emits search queries to filter email lists.",
+      "registryDependencies": ["composition-provider"],
+      "files": [
+        { "path": "src/components/composable/EmailSearch.tsx", "type": "registry:component" }
+      ],
+      "meta": {
+        "composable": true,
+        "componentType": "emailsearch",
+        "emits": [
+          {
+            "event": "search-updated",
+            "payload": "{ query: string }",
+            "description": "Fired when search text changes"
+          },
+          {
+            "event": "search-cleared",
+            "payload": "{}",
+            "description": "Fired when search is cleared"
+          }
+        ],
+        "listensTo": [],
+        "props": {
+          "componentId": { "type": "string", "required": true },
+          "label": { "type": "string", "required": false, "default": "Search" }
+        },
+        "pipelineRole": "source",
+        "validDownstream": ["email-list"]
+      }
+    },
+    {
+      "name": "contacts-list",
+      "type": "registry:component",
+      "description": "Quick access list of contacts with click-to-select.",
+      "registryDependencies": ["composition-provider"],
+      "files": [
+        { "path": "src/components/composable/ContactsList.tsx", "type": "registry:component" }
+      ],
+      "meta": {
+        "composable": true,
+        "componentType": "contactslist",
+        "emits": [
+          {
+            "event": "contact-selected",
+            "payload": "{ contact: { name: string, email: string } }",
+            "description": "Fired when user clicks a contact"
+          }
+        ],
+        "listensTo": [],
+        "props": {
+          "componentId": { "type": "string", "required": true },
+          "label": { "type": "string", "required": false, "default": "Contacts" }
+        },
+        "pipelineRole": "source",
+        "validDownstream": ["email-preview"]
+      }
+    },
+    {
+      "name": "email-settings",
+      "type": "registry:component",
+      "description": "User preferences panel. Emits settings changes that all components can respond to.",
+      "registryDependencies": ["composition-provider"],
+      "files": [
+        { "path": "src/components/composable/EmailSettings.tsx", "type": "registry:component" }
+      ],
+      "meta": {
+        "composable": true,
+        "componentType": "emailsettings",
+        "emits": [
+          {
+            "event": "settings-changed",
+            "payload": "{ settings: Record<string, unknown> }",
+            "description": "Fired when any setting changes"
+          }
+        ],
+        "listensTo": [],
+        "props": {
+          "componentId": { "type": "string", "required": true },
+          "label": { "type": "string", "required": false, "default": "Preferences" }
+        },
+        "pipelineRole": "source",
+        "validDownstream": []
+      }
+    }
+  ]
+}
