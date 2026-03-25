@@ -67,44 +67,23 @@ export function SimpleMusicPlayer() {
 
   return (
     <CompositionProvider>
-      <div className="bg-gradient-to-br from-slate-900 to-slate-800 p-4 sm:p-8 w-full">
-        <div className="max-w-2xl mx-auto">
-          {/* Header */}
-          <div className="mb-8">
-            <h1 className="text-4xl font-bold text-white mb-2">Music Player</h1>
-            <p className="text-slate-400">
-              Add tracks below and use the transport controls to play, pause, and navigate.
-            </p>
-          </div>
+      <div className="bg-black min-h-full flex flex-col items-center justify-center py-8">
+        <div className="max-w-md w-full">
+          {/* Transport - Playback Controls */}
+          <Transport
+            componentId="transport-main"
+            listenToComponent="composer-main"
+            items={items}
+          />
 
-          {/* Components Grid */}
-          <div className="space-y-6">
-            {/* Composer - Add/Remove Tracks */}
+          {/* Composer - Add/Remove Tracks (collapsible in Transport) */}
+          <div className="hidden">
             <Composer
               componentId="composer-main"
               label="Add Track"
               placeholder="Enter track name..."
               items={SAMPLE_TRACKS}
             />
-
-            {/* Transport - Playback Controls */}
-            <Transport
-              componentId="transport-main"
-              listenToComponent="composer-main"
-              items={items}
-            />
-
-            {/* Info Box */}
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 text-sm text-blue-900">
-              <p className="font-medium mb-2">How it works:</p>
-              <ul className="space-y-1 text-blue-800">
-                <li>• Click "Play" to listen to the sample tracks (audio will play)</li>
-                <li>• Use "Previous" and "Next" to navigate between tracks</li>
-                <li>• The Transport component shows playback time and automatically moves to the next track when one finishes</li>
-                <li>• Type a track name and click "Add" to add custom items to the playlist</li>
-                <li>• Components communicate through events without importing each other (component mesh architecture)</li>
-              </ul>
-            </div>
           </div>
         </div>
       </div>

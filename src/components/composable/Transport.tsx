@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { useCompositionContext } from '../../hooks/useCompositionContext'
+import { Composer } from './Composer'
 
 export interface TransportProps {
   /** Unique ID for this component instance */
@@ -273,8 +274,10 @@ export function Transport({ componentId, listenToComponent = 'any', items: initi
     audioRef.current.currentTime = newTime
   }
 
+  const [showPlaylist, setShowPlaylist] = useState(false)
+
   return (
-    <div className="flex flex-col gap-3 p-4 border border-green-200 rounded-lg bg-white">
+    <div className="flex flex-col gap-6 max-w-md mx-auto w-full">
       {/* Audio element for playback */}
       <audio
         ref={audioRef}
@@ -282,104 +285,141 @@ export function Transport({ componentId, listenToComponent = 'any', items: initi
         onError={handleAudioError}
       />
 
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="text-sm font-medium text-gray-700">Transport Control</div>
-        <div
-          className={`px-2 py-1 text-xs font-medium rounded-full ${isPlaying ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700'}`}
-        >
-          {isPlaying ? '▶ Playing' : '⏸ Stopped'}
-        </div>
-      </div>
+      {/* Main Player Card */}
+      <div className="bg-gradient-to-br from-zinc-900 to-black rounded-2xl p-8 shadow-2xl border border-zinc-800">
+        {/* Track Info */}
+        {items.length > 0 && (
+          <div className="text-center mb-8">
+            <div className="text-sm text-zinc-400 uppercase tracking-widest mb-3">
+              {currentTrackIndex + 1} of {items.length}
+            </div>
+            <h2 className="text-xl font-light text-white mb-6 line-clamp-2">
+              {currentTrackName}
+            </h2>
 
-      {/* Items Info */}
-      <div className="text-sm text-gray-600">
-        {items.length === 0 ? (
-          <span>No items loaded</span>
-        ) : (
-          <span>
-            {items.length} item{items.length !== 1 ? 's' : ''} loaded
-            {items.length > 0 && (
-              <span className="ml-2 font-medium text-gray-800">
-                ({currentTrackIndex + 1}/{items.length})
-              </span>
+            {/* Progress Bar */}
+            {duration > 0 && (
+              <>
+                <div
+                  onClick={handleProgressBarClick}
+                  className="w-full bg-zinc-700 rounded-full h-1 overflow-hidden cursor-pointer hover:h-1.5 transition-all mb-2"
+                >
+                  <div
+                    className="bg-green-500 h-full transition-all"
+                    style={{ width: `${(playbackTime / duration) * 100}%` }}
+                  />
+                </div>
+                <div className="text-xs text-zinc-500">
+                  {Math.floor(playbackTime / 60)}:{String(playbackTime % 60).padStart(2, '0')} / {Math.floor(duration / 60)}:{String(duration % 60).padStart(2, '0')}
+                </div>
+              </>
             )}
-          </span>
+          </div>
         )}
+
+        {/* Playback Controls */}
+        <div className="flex items-center justify-center gap-6 mb-8">
+          {/* Previous Button */}
+          <button
+            onClick={handlePrevious}
+            disabled={items.length === 0 || currentTrackIndex === 0}
+            className="text-zinc-400 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+          >
+            <svg className="w-8 h-8" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M6 6h2v12H6V6zm3.5 6l8.5 6V6l-8.5 6z" />
+            </svg>
+          </button>
+
+          {/* Main Play/Pause Button */}
+          {!isPlaying ? (
+            <button
+              onClick={handlePlay}
+              disabled={items.length === 0}
+              className="relative w-32 h-32 rounded-full bg-green-500 hover:bg-green-600 disabled:bg-zinc-600 disabled:cursor-not-allowed transition-all transform hover:scale-105 active:scale-95 shadow-lg hover:shadow-green-500/50 flex items-center justify-center group disabled:opacity-50"
+            >
+              <svg className="w-16 h-16 text-white ml-1" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M8 5v14l11-7z" />
+              </svg>
+              {/* Glow effect */}
+              <div className="absolute inset-0 rounded-full bg-green-500 opacity-0 group-hover:opacity-20 blur-xl transition-opacity" />
+            </button>
+          ) : (
+            <button
+              onClick={handlePause}
+              className="relative w-32 h-32 rounded-full bg-red-500 hover:bg-red-600 transition-all transform hover:scale-105 active:scale-95 shadow-lg hover:shadow-red-500/50 flex items-center justify-center group"
+            >
+              <svg className="w-16 h-16 text-white" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z" />
+              </svg>
+              {/* Glow effect */}
+              <div className="absolute inset-0 rounded-full bg-red-500 opacity-0 group-hover:opacity-20 blur-xl transition-opacity" />
+            </button>
+          )}
+
+          {/* Next Button */}
+          <button
+            onClick={handleNext}
+            disabled={items.length === 0 || currentTrackIndex === items.length - 1}
+            className="text-zinc-400 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+          >
+            <svg className="w-8 h-8" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M16 18h2V6h-2v12zM2 18l8.5-6L2 6v12z" />
+            </svg>
+          </button>
+        </div>
+
+        {/* Playlist Toggle */}
+        <button
+          onClick={() => setShowPlaylist(!showPlaylist)}
+          className="w-full py-3 text-sm text-green-500 hover:text-green-400 transition-colors border border-green-500 border-opacity-30 hover:border-opacity-60 rounded-lg"
+        >
+          {showPlaylist ? '−' : '+'} Playlist
+        </button>
       </div>
 
-      {/* Debug info */}
-      {items.length > 0 && (
-        <div className="text-xs text-gray-500 bg-gray-100 p-2 rounded font-mono">
-          <div>Type: {typeof items[currentTrackIndex] === 'object' ? 'object' : 'string'}</div>
-          <div>Has URL: {items[currentTrackIndex] && 'url' in items[currentTrackIndex] ? '✓ yes' : '✗ no'}</div>
-          {items[currentTrackIndex] && 'url' in items[currentTrackIndex] && (
-            <div className="truncate text-gray-600">URL: {(items[currentTrackIndex] as any).url}</div>
-          )}
-        </div>
-      )}
-
-      {/* Current Item Display */}
-      {items.length > 0 && (
-        <div className="p-2 bg-blue-50 rounded border border-blue-200">
-          <div className="text-xs text-gray-600">Now Playing:</div>
-          <div className="text-sm font-medium text-gray-800 truncate">
-            {currentTrackName}
+      {/* Collapsible Playlist & Add Track */}
+      {showPlaylist && (
+        <div className="bg-gradient-to-br from-zinc-900 to-black rounded-2xl p-6 shadow-2xl border border-zinc-800 space-y-4 max-h-48 overflow-hidden flex flex-col">
+          {/* Add Track Section */}
+          <div className="space-y-3 flex-shrink-0">
+            <label className="text-xs text-zinc-400 uppercase tracking-widest">Add Track</label>
+            <div className="flex gap-2">
+              <input
+                type="text"
+                placeholder="Track name..."
+                className="flex-1 px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-white placeholder-zinc-600 focus:outline-none focus:border-green-500 text-sm"
+              />
+              <button className="px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded-lg transition-colors text-sm font-medium flex-shrink-0">
+                Add
+              </button>
+            </div>
           </div>
-          {duration > 0 && (
-            <div className="text-xs text-gray-500 mt-1">
-              {Math.floor(playbackTime / 60)}:{String(playbackTime % 60).padStart(2, '0')} / {Math.floor(duration / 60)}:{String(duration % 60).padStart(2, '0')}
+
+          {/* Playlist */}
+          {items.length > 0 && (
+            <div className="space-y-2 overflow-y-auto flex-1 min-h-0">
+              <div className="text-xs text-zinc-400 uppercase tracking-widest sticky top-0">Queue</div>
+              {items.map((item, idx) => (
+                <div
+                  key={idx}
+                  className={`p-2 rounded text-sm transition-colors cursor-pointer ${
+                    idx === currentTrackIndex
+                      ? 'bg-green-500 bg-opacity-20 text-green-400 border border-green-500'
+                      : 'bg-zinc-800 text-zinc-300 hover:bg-zinc-700'
+                  }`}
+                  onClick={() => {
+                    setCurrentTrackIndex(idx)
+                  }}
+                >
+                  <div className="flex justify-between items-center">
+                    <span className="truncate text-xs">
+                      {idx + 1}. {typeof item === 'object' && 'name' in item ? item.name : item}
+                    </span>
+                  </div>
+                </div>
+              ))}
             </div>
           )}
-        </div>
-      )}
-
-      {/* Playback Controls */}
-      <div className="flex gap-2">
-        <button
-          onClick={handlePrevious}
-          disabled={items.length === 0 || currentTrackIndex === 0}
-          className="px-3 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium text-sm"
-        >
-          ⏮ Previous
-        </button>
-
-        {!isPlaying ? (
-          <button
-            onClick={handlePlay}
-            disabled={items.length === 0}
-            className="flex-1 px-3 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium"
-          >
-            ▶ Play
-          </button>
-        ) : (
-          <button
-            onClick={handlePause}
-            className="flex-1 px-3 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 transition-colors font-medium"
-          >
-            ⏸ Pause
-          </button>
-        )}
-
-        <button
-          onClick={handleNext}
-          disabled={items.length === 0 || currentTrackIndex === items.length - 1}
-          className="px-3 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium text-sm"
-        >
-          Next ⏭
-        </button>
-      </div>
-
-      {/* Playback Progress Indicator - clickable to seek */}
-      {items.length > 0 && duration > 0 && (
-        <div
-          onClick={handleProgressBarClick}
-          className="w-full bg-gray-200 rounded-full h-2 overflow-hidden cursor-pointer hover:h-3 transition-all"
-        >
-          <div
-            className="bg-green-500 h-full transition-all"
-            style={{ width: `${(playbackTime / duration) * 100}%` }}
-          />
         </div>
       )}
     </div>

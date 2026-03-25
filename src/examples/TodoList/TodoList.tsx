@@ -38,8 +38,8 @@ export function TodoList() {
 
   return (
     <CompositionProvider>
-      <div className="bg-gradient-to-br from-purple-900 to-purple-800 p-8">
-        <div className="max-w-2xl mx-auto">
+      <div className="bg-gradient-to-br from-purple-900 to-purple-800 min-h-full flex flex-col items-center justify-center p-8">
+        <div className="max-w-2xl w-full">
           {/* Header */}
           <div className="mb-8">
             <h1 className="text-4xl font-bold text-white mb-2">Todo List</h1>
