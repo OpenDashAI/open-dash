@@ -1,90 +1,54 @@
 # Current Session Priority
 
-**Status**: 🔴 STRATEGIC PIVOT REQUIRED - Component Architecture Validation
+**Status**: Component Registry Prototype Complete (#125)
 
-**Critical Insight** (2026-03-25):
-Components ONLY provide value if users can re-mix them via AI.
+## What We Built
 
-Without AI composition → components are over-engineering
-With AI composition → components are essential infrastructure
+✅ **Registry** (`public/r/index.json`) — 15 component entries with event contracts
+✅ **Proof** — Registry correctly describes all 3 example apps (Dashboard, Music Player, Email Client)
+✅ **Issue** — #125 created with full architecture description
+✅ **Design docs** — Why event contracts solve the AI composition problem
 
----
+## Architecture (Confirmed)
 
-## Current Status
+```
+Scram Jet (YAML) → D1 metrics → Composable Components → User Dashboard
+                                        ↑
+                                  Registry (shadcn model)
+                                  + Event contracts in meta
+                                        ↑
+                                   AI Composition
+                                (constraint satisfaction)
+```
 
-✅ **GA4 component extracted** (Commit: 68901b8)
-✅ **SDK working** (Component interface, BriefingItem, ComponentRegistry)
+- **Scram Jet** collects all data (no components call external APIs)
+- **Components** are local, event-driven (shadcn copy model, not npm packages)
+- **Registry** describes components with event contracts so AI can compose them
+- **AI** solves constraint satisfaction (select components, wire events, validate)
 
-❌ **Missing: AI remix layer** (This is where the actual value is)
+## Next Steps
 
----
+1. **Build D1-connected components** — MetricsSource, BriefingDisplay, AlertFilter, TrendChart
+   - These read from D1 (Scram Jet data) and emit events
+   - Add them to registry with data binding metadata
 
-## The Real Problem
+2. **Composition format** — JSON/YAML that AI generates and runtime renders
+   - Declarative description of a composition (components + wiring)
+   - Runtime interprets this and renders CompositionProvider tree
 
-Current plan extracts 4 more components → builds marketplace → enables third-party developers
+3. **AI composition endpoint** — Takes user intent, returns composition
+   - Reads registry, selects components, validates wiring
+   - Returns composition format
 
-**But**: None of this matters without the AI layer that lets users say:
-- "Give me a founder's briefing" → AI composes: Stripe + GA4 + GitHub
-- "I need marketing metrics" → AI composes: GA4 + Google Ads + Meta Ads
-- "Show me what matters" → AI figures out: which components matter for THIS user
+4. **CLI tooling** — `npx opendash add metrics-source` (shadcn-style)
 
-Without AI: Component architecture adds unnecessary complexity
-With AI: Component architecture is fundamental to customization
+## Key Files
 
----
-
-## What Needs to Happen (In Order)
-
-1. **Component metadata spec** — AI needs to understand what each component does
-   - What data does GA4 return?
-   - What configuration does Stripe need?
-   - What's the learning outcome of using this component?
-
-2. **Configuration automation** — AI needs to set up components
-   - Can AI generate OAuth flows?
-   - Can AI validate and store secrets?
-   - Can AI guide user through setup?
-
-3. **Composition logic** — AI needs to select right components
-   - User: "I'm a SaaS founder"
-   - AI queries: "Which components matter for founders?"
-   - AI composes: Best subset for this user's needs
-
-4. **User-facing AI** — Users request custom dashboards via conversation
-   - "Tell me about your business"
-   - "What would you like to monitor?"
-   - AI creates custom briefing from components
-
-5. **Validate**: Does AI composition actually work?
-   - Can AI understand component capabilities?
-   - Does composed briefing delight users?
-   - Is it better than "configure 15 datasources manually"?
+- `public/r/index.json` — Component registry
+- `src/lib/composition-provider.tsx` — Event bus
+- `src/components/composable/` — 12 composable components
+- `src/examples/` — 3 working example compositions
+- `Standards/component-registry-solves-ai-composition.md` — Design rationale
 
 ---
-
-## What This Means for Phase 2
-
-**Not**: Extract 4 more components, build marketplace registry
-
-**Instead**: Build the AI remix layer that makes components valuable
-
-GA4 component is valuable ONLY if it's part of this larger system.
-
----
-
-## Decision Required
-
-Before continuing component extraction:
-
-**Do we believe components' value comes from AI remix?**
-
-If YES → Pause component extraction, build AI layer first
-If NO → Different architecture might be better
-If UNCLEAR → Research what competitors do
-
-See: `Standards/component-architecture-actual-value-proposition.md`
-
----
-
-Last updated: 2026-03-25 (Session 2 - Strategic pivot identified)
-Status: Awaiting decision before continuing Phase 2
+Last updated: 2026-03-25

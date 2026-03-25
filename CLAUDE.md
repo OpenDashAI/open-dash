@@ -1,70 +1,52 @@
-# OpenDash — AI Operations Control Plane
+# OpenDash — Composable Intelligence Platform
 
-## What
-One interface to manage all machines, all brands, all execution. Three-panel HUD with AI-driven contextual mode switching.
+## ⚠️ ARCHITECTURE (Read First)
+
+**Always check `PRIORITY.md` at repo root before starting work.**
+
+### Three Layers
+1. **Scram Jet** — YAML pipelines collect ALL external data (Stripe, GA4, Google Ads, Meta, GitHub, Email) → D1 metrics table. Components NEVER call external APIs.
+2. **Composable Components** — Local (shadcn copy model), event-driven via CompositionProvider. Read from D1, emit/listen to events. NOT npm packages.
+3. **Registry** — `public/r/index.json` describes components with event contracts in `meta`. AI composes dashboards via constraint satisfaction (select components, wire events, validate graph).
+
+### What Does NOT Exist
+- ❌ npm packages for components (no @opendash-components/*)
+- ❌ Component marketplace or third-party distribution
+- ❌ Component SDK with fetch() → BriefingItem[]
+- ❌ packages/@opendash/sdk as distribution mechanism
+
+### Active Architecture Issues
+- **#125** — shadcn-style registry with event contracts for AI composition
+- **#126** — D1-connected composable components (MetricsSource, BriefingDisplay, AlertFilter)
+
+### Key Files
+- `public/r/index.json` — Component registry
+- `src/lib/composition-provider.tsx` — Event bus
+- `src/components/composable/` — All composable components
+- `src/examples/` — Dashboard, MusicPlayer, EmailClient compositions
+- `workers/metrics-collector/` — Scram Jet → D1 bridge
+- `Standards/component-registry-solves-ai-composition.md` — Design rationale
+- `Standards/component-system-correct-architecture.md` — Architecture overview
+
+---
 
 ## Tech Stack
 - **TanStack Start** — full-stack React, file-based routing, SSR
 - **Tailwind CSS v4** — utility-first styling
-- **Cloudflare Workers** — deployment target
+- **Cloudflare Workers** — deployment target (D1, R2, Durable Objects)
 - **Biome** — linting and formatting
+- **Scram Jet** — YAML pipeline engine for data collection
 
-## Architecture
-
-### Three-Panel HUD (Fighter Pilot Pattern)
-- **Left (Context)**: AI-driven — machines, brands, issues. Changes with mode.
-- **Center (Focus)**: AI-driven — activity feed, stats, approvals. Changes with mode.
-- **Right (Chat)**: User-docked — persistent conversation with AI.
-
-### HUD Modes
-Modes emerge from conversation, not menus:
-- `operating` — machine grid, brand status, activity feed
-- `building` — issues, code diff, preview
-- `analyzing` — charts, KPIs, funnels
-- `reviewing` — PR diff, approve/reject
-- `alert` — error context, affected systems
-
-### Card Registry
-6 card types in `src/components/cards/`, registered in `src/lib/card-registry.tsx`:
-- `machine_card` — Tailscale machine status
-- `brand_card` — brand health, score, revenue
-- `activity_card` — event feed
-- `status_card` — KPI metrics
-- `approval_card` — L2→L1 escalation with approve/reject
-- `issue_card` — GitHub issue with team labels
-
-### AI-Driven UI Protocol
-Chat responses can include `---HUD---` JSON directives to:
-- Switch HUD mode
-- Spawn cards in left/center panels
-- Cleared by next mode transition
-
-### Reactive HUD Store
-`src/lib/hud-store.ts` — useSyncExternalStore. Chat mutates, panels re-render.
+## Three-Panel HUD (Fighter Pilot Pattern)
+- **Left (Context)**: AI-driven — machines, brands, issues
+- **Center (Focus)**: AI-driven — activity feed, stats, approvals
+- **Right (Chat)**: User-docked — persistent conversation with AI
 
 ## Model Routing (NO direct Anthropic API)
-
-Layered cost strategy — maximize Pro/Max subscription:
-- **Tier 1 (free)**: Workers AI / Ollama on stargate-wsl — status lookups
-- **Tier 2 (cheap)**: Qwen 72B via API Mom → OpenRouter (~$0.0003/call) — dashboard chat
+- **Tier 1 (free)**: Workers AI / Ollama — status lookups
+- **Tier 2 (cheap)**: Qwen 72B via API Mom → OpenRouter — dashboard chat
 - **Tier 3 (research)**: GatherFeed L1-L4 via API Mom — investigation queries
-- **Tier 4 (subscription)**: Claude Pro/Max via Claude Code — interactive creative sessions
-
-Dashboard chat defaults to Tier 2. API Mom provides: permanent cache, cost attribution, budget enforcement, fallback chain.
-
-## Server Functions
-- `src/server/machines.ts` — Tailscale API → machine status
-- `src/server/brands.ts` — GitHub API → brand data
-- `src/server/activity.ts` — GitHub Issues #12 → activity feed + metrics
-- `src/server/chat.ts` — API Mom → OpenRouter → Qwen 72B (with fallback chain)
-- `src/server/research.ts` — API Mom → GatherFeed deep research (L1-L4)
-
-## Secrets (.dev.vars / wrangler secret)
-- `API_MOM_URL` — API Mom proxy (https://apimom.dev)
-- `API_MOM_KEY` — API Mom project key
-- `OPENROUTER_KEY` — OpenRouter API key (BYOK)
-- `TAILSCALE_API_KEY` — Tailscale device status
-- `GITHUB_TOKEN` — GitHub PAT for issues/activity
+- **Tier 4 (subscription)**: Claude Pro/Max via Claude Code — interactive sessions
 
 ## Commands
 ```bash
@@ -74,16 +56,14 @@ pnpm deploy       # build + wrangler deploy
 pnpm check        # biome check
 ```
 
-## Three-Layer Execution Model
-- **Layer 1** (this UI): Human + AI creative partnership
-- **Layer 2** (future): Autonomous context assembly + orchestration (SM Durable Object)
-- **Layer 3** (Code Turtle): Maximum throughput execution across machines
-
-## Distribution
-- **Web**: CF Workers (opendash.ai or staging URL)
-- **Desktop**: Tauri wrapper (future) — same web UI + system tray, local filesystem, Claude Code IPC
+## Secrets (.dev.vars / wrangler secret)
+- `API_MOM_URL`, `API_MOM_KEY` — API Mom proxy
+- `OPENROUTER_KEY` — OpenRouter API key
+- `TAILSCALE_API_KEY` — Tailscale device status
+- `GITHUB_TOKEN` — GitHub PAT
+- `SCRAMJET_WEBHOOK_SECRET` — Scram Jet metrics auth
 
 ## Related
-- Design doc: `~/Work/garywu/Operations/team-model.md`
 - Brand: OpenDash / opendash.ai
 - Org: github.com/OpenDashAI
+- Scram Jet: github.com/garywu/scram-jet
