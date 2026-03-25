@@ -1,13 +1,9 @@
 /**
  * Configuration loader for dashboard.yaml files
- * Hybrid approach: tries fs first (Phase 1-3), falls back to Brand System API (Phase 4+)
+ * Loads from Brand System API (works in Cloudflare Workers)
  * Caches in memory for performance
  */
 
-import { createServerFn } from "@tanstack/react-start";
-import { readFile } from "fs/promises";
-import { resolve } from "path";
-import YAML from "yaml";
 import {
 	DashboardYaml,
 	parseDashboardYaml,
@@ -19,44 +15,6 @@ import {
  * Maps brand slug → DashboardYaml
  */
 const configCache = new Map<string, DashboardYaml>();
-
-/**
- * Load a dashboard config from the configs/ directory
- * Cached after first load
- */
-async function loadDashboardYamlFromDisk(
-	brandSlug: string
-): Promise<DashboardYaml | null> {
-	try {
-		// Read YAML file from disk
-		// Path relative to project root: configs/{brandSlug}.yaml
-		const configPath = resolve(process.cwd(), `configs/${brandSlug}.yaml`);
-		const fileContent = await readFile(configPath, "utf-8");
-
-		// Parse YAML
-		const parsed = YAML.parse(fileContent);
-
-		// Validate against schema
-		const result = validateDashboardYaml(parsed);
-		if (!result.success) {
-			console.error(
-				`Invalid config for brand '${brandSlug}':`,
-				result.errors
-			);
-			return null;
-		}
-
-		return result.data;
-	} catch (err) {
-		if (err instanceof Error && "code" in err && err.code === "ENOENT") {
-			// File not found is normal, will try API fallback
-			return null;
-		} else {
-			console.error(`Failed to load config for brand '${brandSlug}':`, err);
-			return null;
-		}
-	}
-}
 
 /**
  * Load a dashboard config from Brand System API
@@ -102,67 +60,35 @@ async function loadDashboardYamlFromApi(
 }
 
 /**
- * Server function: Load dashboard config for a brand
- * Tries fs first, then Brand System API, then returns null
+ * Load dashboard config for a brand
+ * Uses Brand System API (Worker-compatible)
  */
-export const loadDashboardConfig = createServerFn()
-	.input<{ brandSlug: string }>()
-	.handler(async ({ data }) => {
-		// Check cache first
-		if (configCache.has(data.brandSlug)) {
-			return configCache.get(data.brandSlug)!;
-		}
-
-		// Try filesystem first (Phase 1-3 local development)
-		let config = await loadDashboardYamlFromDisk(data.brandSlug);
-
-		// Fall back to Brand System API (Phase 4+)
-		if (!config) {
-			const apiUrl = process.env.BRAND_SYSTEM_API_URL;
-			config = await loadDashboardYamlFromApi(data.brandSlug, apiUrl);
-		}
-
-		// Cache if found
-		if (config) {
-			configCache.set(data.brandSlug, config);
-		}
-
-		return config;
-	});
-
-/**
- * Server function: List all available dashboard configs
- * Tries fs first, falls back to Brand System API
- */
-export const listAvailableDashboards = createServerFn().handler(async () => {
-	const dashboards: DashboardYaml[] = [];
-
-	// Try filesystem first
-	try {
-		const { readdirSync } = await import("fs");
-		const configDir = resolve(process.cwd(), "configs");
-		const files = readdirSync(configDir).filter((f) => f.endsWith(".yaml"));
-
-		const slugs = files.map((f) => f.replace(".yaml", ""));
-
-		// Load all configs from disk
-		for (const slug of slugs) {
-			const config = await loadDashboardYamlFromDisk(slug);
-			if (config) {
-				dashboards.push(config);
-				configCache.set(slug, config);
-			}
-		}
-
-		// If we found configs on disk, return them
-		if (dashboards.length > 0) {
-			return dashboards;
-		}
-	} catch (err) {
-		console.warn("Failed to read configs from disk:", err);
+export async function loadDashboardConfig(brandSlug: string): Promise<DashboardYaml | null> {
+	// Check cache first
+	if (configCache.has(brandSlug)) {
+		return configCache.get(brandSlug)!;
 	}
 
-	// Fall back to Brand System API
+	// Load from Brand System API
+	const apiUrl = process.env.BRAND_SYSTEM_API_URL;
+	const config = await loadDashboardYamlFromApi(brandSlug, apiUrl);
+
+	// Cache if found
+	if (config) {
+		configCache.set(brandSlug, config);
+	}
+
+	return config;
+}
+
+/**
+ * List all available dashboard configs
+ * Uses Brand System API (Worker-compatible)
+ */
+export async function listAvailableDashboards(): Promise<DashboardYaml[]> {
+	const dashboards: DashboardYaml[] = [];
+
+	// Load from Brand System API
 	const apiUrl = process.env.BRAND_SYSTEM_API_URL;
 	if (!apiUrl) {
 		console.warn("BRAND_SYSTEM_API_URL not set, cannot load dashboards from API");
@@ -196,7 +122,7 @@ export const listAvailableDashboards = createServerFn().handler(async () => {
 		console.error("Failed to list dashboards from Brand System API:", err);
 		return [];
 	}
-});
+}
 
 /**
  * Clear the config cache (useful for testing or reloading)

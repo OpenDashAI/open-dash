@@ -61,11 +61,10 @@ function toResult(
 }
 
 /** Launch or reconnect to a browser session */
-export const browserLaunch = createServerFn({ method: "POST" }).handler(
-	async ({
-		data,
-	}: {
-		data: {
+export const browserLaunch = createServerFn(
+	{ method: "POST" },
+	async (request: Request, context: any): Promise<BrowserSessionResult> => {
+		const data = (await request.json()) as {
 			sessionId?: string;
 			url?: string;
 			viewport?: { width: number; height: number };
@@ -76,7 +75,6 @@ export const browserLaunch = createServerFn({ method: "POST" }).handler(
 				path?: string;
 			}>;
 		};
-	}): Promise<BrowserSessionResult> => {
 		const result = (await browserFetch("/sessions", {
 			sessionId: data.sessionId,
 			url: data.url,
@@ -89,12 +87,10 @@ export const browserLaunch = createServerFn({ method: "POST" }).handler(
 );
 
 /** Navigate to a URL */
-export const browserNavigate = createServerFn({ method: "POST" }).handler(
-	async ({
-		data,
-	}: {
-		data: { sessionId: string; url: string };
-	}): Promise<BrowserSessionResult> => {
+export const browserNavigate = createServerFn(
+	{ method: "POST" },
+	async (request: Request, context: any): Promise<BrowserSessionResult> => {
+		const data = (await request.json()) as { sessionId: string; url: string };
 		const result = (await browserFetch(
 			`/sessions/${data.sessionId}/navigate`,
 			{ url: data.url },
@@ -104,12 +100,10 @@ export const browserNavigate = createServerFn({ method: "POST" }).handler(
 );
 
 /** Take a screenshot */
-export const browserScreenshot = createServerFn({ method: "POST" }).handler(
-	async ({
-		data,
-	}: {
-		data: { sessionId: string };
-	}): Promise<BrowserSessionResult> => {
+export const browserScreenshot = createServerFn(
+	{ method: "POST" },
+	async (request: Request, context: any): Promise<BrowserSessionResult> => {
+		const data = (await request.json()) as { sessionId: string };
 		const result = (await browserFetch(
 			`/sessions/${data.sessionId}/screenshot`,
 			{},
@@ -119,12 +113,15 @@ export const browserScreenshot = createServerFn({ method: "POST" }).handler(
 );
 
 /** Click an element or coordinate */
-export const browserClick = createServerFn({ method: "POST" }).handler(
-	async ({
-		data,
-	}: {
-		data: { sessionId: string; selector?: string; x?: number; y?: number };
-	}): Promise<BrowserSessionResult> => {
+export const browserClick = createServerFn(
+	{ method: "POST" },
+	async (request: Request, context: any): Promise<BrowserSessionResult> => {
+		const data = (await request.json()) as {
+			sessionId: string;
+			selector?: string;
+			x?: number;
+			y?: number;
+		};
 		const result = (await browserFetch(
 			`/sessions/${data.sessionId}/click`,
 			{ selector: data.selector, x: data.x, y: data.y },
@@ -134,17 +131,15 @@ export const browserClick = createServerFn({ method: "POST" }).handler(
 );
 
 /** Type text into an element */
-export const browserType = createServerFn({ method: "POST" }).handler(
-	async ({
-		data,
-	}: {
-		data: {
+export const browserType = createServerFn(
+	{ method: "POST" },
+	async (request: Request, context: any): Promise<BrowserSessionResult> => {
+		const data = (await request.json()) as {
 			sessionId: string;
 			selector: string;
 			text: string;
 			pressEnter?: boolean;
 		};
-	}): Promise<BrowserSessionResult> => {
 		const result = (await browserFetch(
 			`/sessions/${data.sessionId}/type`,
 			{

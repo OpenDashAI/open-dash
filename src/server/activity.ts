@@ -6,8 +6,9 @@ import { githubFetch } from "./github";
  * Fetch recent activity from GitHub Issues API (comments on #12 session log).
  * Falls back to static data if GITHUB_TOKEN not set.
  */
-export const getActivity = createServerFn().handler(
-	async (): Promise<ActivityEvent[]> => {
+export const getActivity = createServerFn(
+	{ method: "POST" },
+	async (request: Request, context: any): Promise<ActivityEvent[]> => {
 		const token = process.env.GITHUB_TOKEN;
 		if (!token) {
 			return fallbackEvents();
@@ -47,8 +48,9 @@ export const getActivity = createServerFn().handler(
 /**
  * Compute status metrics from current data.
  */
-export const getMetrics = createServerFn().handler(
-	async (): Promise<StatusMetric[]> => {
+export const getMetrics = createServerFn(
+	{ method: "POST" },
+	async (request: Request, context: any): Promise<StatusMetric[]> => {
 		const token = process.env.GITHUB_TOKEN;
 
 		let openIssues = 30;

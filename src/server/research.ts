@@ -22,9 +22,10 @@ interface ResearchResponse {
  * L1=$0.01 (quick), L2=$0.10 (detailed), L3=$0.30 (deep), L4=$1.00 (exhaustive)
  * Routes through API Mom for caching + cost tracking.
  */
-export const research = createServerFn({ method: 'POST' })
-  .inputValidator((data: ResearchRequest) => data)
-  .handler(async ({ data }): Promise<ResearchResponse> => {
+export const research = createServerFn(
+	{ method: "POST" },
+	async (request: Request, context: any): Promise<ResearchResponse> => {
+		const data = (await request.json()) as ResearchRequest;
     const apiMomUrl = process.env.API_MOM_URL
     const apiMomKey = process.env.API_MOM_KEY
     const depth = data.depth ?? 1

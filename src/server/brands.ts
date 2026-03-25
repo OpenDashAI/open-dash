@@ -15,8 +15,9 @@ import type { EventContext } from "@cloudflare/workers-types";
  * For public routes (no org context):
  * - Falls back to static data or GitHub API
  */
-export const getBrands = createServerFn().handler(
-	async (context?: EventContext): Promise<Brand[]> => {
+export const getBrands = createServerFn(
+	{ method: "POST" },
+	async (request: Request, context: any): Promise<Brand[]> => {
 		// Try to get org context from request (Issue #27.2 RBAC middleware)
 		if (hasRequestAuthContext && context?.req) {
 			try {

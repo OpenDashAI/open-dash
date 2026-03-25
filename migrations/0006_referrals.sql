@@ -26,11 +26,12 @@ CREATE TABLE referral_codes (
   expires_at INTEGER,
   is_active INTEGER DEFAULT 1, -- Boolean: 0 or 1
   created_at INTEGER NOT NULL,
-  FOREIGN KEY (campaign_id) REFERENCES campaigns(id),
-  INDEX idx_code ON code,
-  INDEX idx_active ON (is_active, expires_at),
-  INDEX idx_campaign ON campaign_id
+  FOREIGN KEY (campaign_id) REFERENCES campaigns(id)
 );
+
+CREATE INDEX idx_code ON referral_codes(code);
+CREATE INDEX idx_active ON referral_codes(is_active, expires_at);
+CREATE INDEX idx_campaign ON referral_codes(campaign_id);
 
 -- Redemptions: Audit log of code uses
 CREATE TABLE redemptions (
@@ -42,11 +43,12 @@ CREATE TABLE redemptions (
   status TEXT DEFAULT 'applied', -- 'applied', 'refunded'
   ip_address TEXT,
   FOREIGN KEY (code_id) REFERENCES referral_codes(id),
-  INDEX idx_user ON user_id,
-  INDEX idx_code ON code_id,
-  INDEX idx_timestamp ON redeemed_at,
   UNIQUE(code_id, user_id) -- Prevent double redemption
 );
+
+CREATE INDEX idx_user ON redemptions(user_id);
+CREATE INDEX idx_redemption_code ON redemptions(code_id);
+CREATE INDEX idx_redemption_timestamp ON redemptions(redeemed_at);
 
 -- Referral rewards: Track rewards earned by referrers
 CREATE TABLE referral_rewards (
@@ -56,8 +58,9 @@ CREATE TABLE referral_rewards (
   code_id TEXT NOT NULL,
   reward_amount REAL NOT NULL,
   earned_at INTEGER NOT NULL,
-  FOREIGN KEY (code_id) REFERENCES referral_codes(id),
-  INDEX idx_referrer ON referrer_user_id,
-  INDEX idx_referee ON referee_user_id,
-  INDEX idx_timestamp ON earned_at
+  FOREIGN KEY (code_id) REFERENCES referral_codes(id)
 );
+
+CREATE INDEX idx_referrer ON referral_rewards(referrer_user_id);
+CREATE INDEX idx_referee ON referral_rewards(referee_user_id);
+CREATE INDEX idx_reward_timestamp ON referral_rewards(earned_at);

@@ -14,7 +14,7 @@
  * ```
  */
 
-import { createServerFn } from "@tanstack/react-start/server";
+import { createServerFn } from "@tanstack/start";
 import { logErrorServer, createErrorContext } from "../../server/error-logger";
 
 export const logClientError = createServerFn(
@@ -25,20 +25,18 @@ export const logClientError = createServerFn(
 			stack?: string;
 			url?: string;
 		},
-		{ request }
+		context: any
 	) => {
-		const errorContext = createErrorContext(request);
-
 		// Generate requestId for this error
 		const requestId = `client-${crypto.randomUUID()}`;
 
-		// Log the error server-side with full context
+		// Log the error server-side with minimal context
 		logErrorServer(
 			new Error(error.message + (error.stack ? `\n${error.stack}` : "")),
 			{
-				...errorContext,
 				requestId,
-				url: error.url || errorContext.url,
+				url: error.url || "unknown",
+				source: "client",
 			}
 		);
 

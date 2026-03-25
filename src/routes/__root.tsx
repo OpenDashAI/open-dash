@@ -6,20 +6,27 @@ import { getClientErrorResponse, getErrorStatusCode, logErrorServer, createError
 export const Route = createRootRoute({
 	beforeLoad: async ({ context, location }) => {
 		// Create security context for this request
-		const { context: security, shouldBlock } = createSecurityContext(
-			new Request(location.href, {
-				method: 'GET',
-				headers: context?.request?.headers || new Headers(),
-			})
-		)
+		try {
+			const url = typeof location === 'string' ? location : location.href || '/'
+			const { context: security, shouldBlock } = createSecurityContext(
+				new Request(url, {
+					method: 'GET',
+					headers: context?.request?.headers || new Headers(),
+				})
+			)
 
-		// Block if auth/rate-limit failed
-		if (shouldBlock) {
-			throw shouldBlock
+			// Block if auth/rate-limit failed
+			if (shouldBlock) {
+				throw shouldBlock
+			}
+
+			// Make security context available to all routes
+			return { security }
+		} catch (error) {
+			// Fallback if security context initialization fails
+			console.error('Security context initialization failed:', error)
+			return { security: {} }
 		}
-
-		// Make security context available to all routes
-		return { security }
 	},
 	errorComponent: ({ error }) => {
 		// Get security context if available

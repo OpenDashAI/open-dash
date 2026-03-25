@@ -13,8 +13,9 @@ interface Issue {
 /**
  * Fetch open issues from GitHub, grouped by team label.
  */
-export const getIssues = createServerFn().handler(
-	async (): Promise<Issue[]> => {
+export const getIssues = createServerFn(
+	{ method: "POST" },
+	async (request: Request, context: any): Promise<Issue[]> => {
 		const token = process.env.GITHUB_TOKEN;
 		if (!token) return fallbackIssues();
 

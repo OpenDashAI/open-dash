@@ -21,15 +21,13 @@ export interface DataSourceInfo {
 }
 
 /** Fetch briefing items from all registered data sources */
-export const fetchAllSources = createServerFn().handler(
-	async ({
-		data,
-	}: {
-		data: unknown;
-	}): Promise<{
+export const fetchAllSources = createServerFn(
+	{ method: "POST" },
+	async (request: Request, context: any): Promise<{
 		items: BriefingItem[];
 		sources: DataSourceInfo[];
 	}> => {
+		const data = (await request.json()) as unknown;
 		// ✅ Validate input at handler boundary
 		const input = validateInput(
 			FetchAllSourcesInputSchema,
@@ -76,8 +74,9 @@ export const fetchAllSources = createServerFn().handler(
 );
 
 /** List all registered data sources with their status */
-export const listSources = createServerFn().handler(
-	async (): Promise<
+export const listSources = createServerFn(
+	{ method: "POST" },
+	async (request: Request, context: any): Promise<
 		Array<{
 			id: string;
 			name: string;
@@ -100,17 +99,18 @@ export const listSources = createServerFn().handler(
  * Fetch briefing items for a specific brand dashboard
  * Loads config from YAML, instantiates brand-specific datasources, fetches all
  */
-export const fetchBrandDashboard = createServerFn()
-	.input<{ brandSlug: string; lastVisited?: string | null }>()
-	.handler(
-		async ({
-			data,
-		}): Promise<{
-			config: DashboardYaml | null;
-			items: BriefingItem[];
-			sources: DataSourceInfo[];
-			error?: string;
-		}> => {
+export const fetchBrandDashboard = createServerFn(
+	{ method: "POST" },
+	async (request: Request, context: any): Promise<{
+		config: DashboardYaml | null;
+		items: BriefingItem[];
+		sources: DataSourceInfo[];
+		error?: string;
+	}> => {
+		const data = (await request.json()) as {
+			brandSlug: string;
+			lastVisited?: string | null;
+		};
 			// ✅ Validate input at handler boundary
 			const input = validateInput(
 				FetchBrandDashboardInputSchema,

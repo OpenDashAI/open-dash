@@ -6,7 +6,7 @@
     "#/*": "./src/*"
   },
   "scripts": {
-    "dev": "bash scripts/tailscale-snapshot.sh 2>/dev/null; vite dev --port 3000",
+    "dev": "bash scripts/tailscale-snapshot.sh 2>/dev/null; vite dev --port 9000",
     "build": "vite build",
     "preview": "vite preview",
     "test": "vitest run",

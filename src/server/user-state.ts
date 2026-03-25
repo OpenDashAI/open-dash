@@ -17,8 +17,9 @@ function getDB(): D1Database | null {
 }
 
 /** Get the last time the user visited the dashboard */
-export const getLastVisited = createServerFn().handler(
-	async (): Promise<string | null> => {
+export const getLastVisited = createServerFn(
+	{ method: "POST" },
+	async (request: Request, context: any): Promise<string | null> => {
 		const db = getDB();
 		if (!db) return null;
 
@@ -35,8 +36,9 @@ export const getLastVisited = createServerFn().handler(
 );
 
 /** Update the last visited timestamp to now */
-export const updateLastVisited = createServerFn({ method: "POST" }).handler(
-	async (): Promise<{ success: boolean }> => {
+export const updateLastVisited = createServerFn(
+	{ method: "POST" },
+	async (request: Request, context: any): Promise<{ success: boolean }> => {
 		const db = getDB();
 		if (!db) return { success: false };
 

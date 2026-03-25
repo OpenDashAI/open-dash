@@ -1,6 +1,6 @@
 /**
- * Scram Jet Metrics Webhook
- * Direct Hono handlers for webhook integration
+ * Scram Jet Metrics Webhook Handler
+ * Export handler function for use in worker.ts middleware
  *
  * POST /api/metrics - Receive metrics from Scram Jet pipelines
  * GET /api/metrics - Retrieve recent metrics
@@ -22,18 +22,44 @@ const MetricSchema = z.object({
 	metadata: z.any().optional(),
 });
 
-type MetricInput = z.infer<typeof MetricSchema>;
+// IP whitelist for security
+const METRICS_IP_WHITELIST = ["76.240.123.80"];
 
-export async function metricsHandler(request: Request, context: any) {
-	if (request.method === "POST") {
-		return handleMetricsPost(request, context);
-	} else if (request.method === "GET") {
-		return handleMetricsGet(request, context);
-	}
-	return new Response("Method not allowed", { status: 405 });
+function checkIP(request: Request): boolean {
+	const clientIp = request.headers.get("cf-connecting-ip") ||
+	                 request.headers.get("x-forwarded-for")?.split(",")[0] ||
+	                 "unknown";
+	return METRICS_IP_WHITELIST.includes(clientIp.trim());
 }
 
-async function handleMetricsPost(request: Request, context: any) {
+export async function metricsHandler(request: Request, context: any): Promise<Response> {
+	try {
+		// Check IP whitelist
+		if (!checkIP(request)) {
+			const clientIp = request.headers.get("cf-connecting-ip") || "unknown";
+			console.warn(`[Metrics] IP denied: ${clientIp}`);
+			return new Response(JSON.stringify({ success: false, error: "Access denied" }), {
+				status: 403,
+				headers: { "Content-Type": "application/json" },
+			});
+		}
+
+		if (request.method === "POST") {
+			return handleMetricsPost(request, context);
+		} else if (request.method === "GET") {
+			return handleMetricsGet(request, context);
+		}
+		return new Response("Method not allowed", { status: 405 });
+	} catch (error) {
+		console.error("[Metrics Handler Error]", error);
+		return new Response(JSON.stringify({ success: false, error: String(error) }), {
+			status: 500,
+			headers: { "Content-Type": "application/json" },
+		});
+	}
+}
+
+async function handleMetricsPost(request: Request, context: any): Promise<Response> {
 	try {
 		const authHeader = request.headers.get("Authorization");
 		const secret = context.env?.SCRAMJET_WEBHOOK_SECRET;
@@ -76,7 +102,7 @@ async function handleMetricsPost(request: Request, context: any) {
 	}
 }
 
-async function handleMetricsGet(request: Request, context: any) {
+async function handleMetricsGet(request: Request, context: any): Promise<Response> {
 	try {
 		const url = new URL(request.url);
 		const limit = Math.min(parseInt(url.searchParams.get("limit") || "10") || 10, 100);
@@ -109,7 +135,7 @@ async function handleMetricsGet(request: Request, context: any) {
 		console.error("[Metrics GET]", error);
 		return new Response(JSON.stringify({ success: false, error: String(error) }), {
 			status: 500,
-			headers: { "Content-Type": "application/json" } ,
+			headers: { "Content-Type": "application/json" },
 		});
 	}
 }

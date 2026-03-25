@@ -15,6 +15,7 @@ import { IssueCard } from "../cards/IssueCard";
 import { StatusCard } from "../cards/StatusCard";
 import { AnalyticsDashboard } from "../analytics/AnalyticsDashboard";
 import { SerpTrendingPanel } from "./SerpTrendingPanel";
+import { MetricsPanel } from "./MetricsPanel";
 
 function handleAction(item: BriefingItem) {
 	// If this is an escalation with an approval action, approve it
@@ -255,6 +256,13 @@ function AnalyticsView() {
 
 	return (
 		<div className="space-y-4">
+			{/* Scram Jet Metrics Panel */}
+			<MetricsPanel
+				title="Scram Jet Metrics"
+				limit={10}
+				refreshInterval={30000}
+			/>
+
 			{/* SERP Trending Panel */}
 			<SerpTrendingPanel title="Competitive SERP Tracking" />
 

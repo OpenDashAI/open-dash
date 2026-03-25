@@ -47,6 +47,9 @@
   // - CLERK_SECRET_KEY: Clerk secret key (for JWT validation)
   // - CLERK_PUBLISHABLE_KEY: Clerk publishable key (for frontend)
   //
+  // Scram Jet Integration (EPIC #99):
+  // - SCRAMJET_WEBHOOK_SECRET: Bearer token for Scram Jet → /api/metrics webhook validation
+  //
   // Competitive Intelligence Secrets (Week 1+):
   // - BRAVE_API_KEY: BraveSearch API key for SERP tracking
   // - SIMILARWEB_API_KEY: SimilarWeb API key for domain metrics (optional)

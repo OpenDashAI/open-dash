@@ -11,18 +11,16 @@ import type { ActivityEvent, Brand, Issue, Machine } from "../lib/types";
  * Each source contributes items ranked by urgency.
  * Items created/updated after lastVisited are marked isNew.
  */
-export const getBriefing = createServerFn().handler(
-	async ({
-		data,
-	}: {
-		data: {
+export const getBriefing = createServerFn(
+	{ method: "POST" },
+	async (request: Request, context: any): Promise<BriefingItem[]> => {
+		const data = (await request.json()) as {
 			machines: Machine[];
 			brands: Brand[];
 			issues: Issue[];
 			events: ActivityEvent[];
 			lastVisited: string | null;
 		};
-	}): Promise<BriefingItem[]> => {
 		const items: BriefingItem[] = [];
 		const lastVisitedMs = data.lastVisited
 			? new Date(data.lastVisited).getTime()

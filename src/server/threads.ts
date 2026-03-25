@@ -31,8 +31,9 @@ export interface StoredMessage {
 }
 
 /** List all threads, most recent first. */
-export const listThreads = createServerFn().handler(
-	async (): Promise<ThreadSummary[]> => {
+export const listThreads = createServerFn(
+	{ method: "POST" },
+	async (request: Request, context: any): Promise<ThreadSummary[]> => {
 		const db = getDB();
 		if (!db)
 			return [
@@ -75,8 +76,10 @@ export const listThreads = createServerFn().handler(
 );
 
 /** Load messages for a thread from D1. Returns empty array if DB unavailable. */
-export const getThreadMessages = createServerFn().handler(
-	async ({ data: threadId }: { data: string }): Promise<StoredMessage[]> => {
+export const getThreadMessages = createServerFn(
+	{ method: "POST" },
+	async (request: Request, context: any): Promise<StoredMessage[]> => {
+		const threadId = (await request.json()) as string;
 		const db = getDB();
 		if (!db) return [];
 

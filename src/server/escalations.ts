@@ -76,8 +76,9 @@ function rowToEscalation(row: EscalationRow): Escalation {
 }
 
 /** Get all pending escalations as briefing items */
-export const getPendingEscalations = createServerFn().handler(
-	async (): Promise<BriefingItem[]> => {
+export const getPendingEscalations = createServerFn(
+	{ method: "POST" },
+	async (request: Request, context: any): Promise<BriefingItem[]> => {
 		const db = getDB();
 		if (!db) return [];
 
@@ -107,11 +108,10 @@ export const getPendingEscalations = createServerFn().handler(
 );
 
 /** Create a new escalation (called by SM webhook or internal) */
-export const createEscalation = createServerFn({ method: "POST" }).handler(
-	async ({
-		data,
-	}: {
-		data: {
+export const createEscalation = createServerFn(
+	{ method: "POST" },
+	async (request: Request, context: any): Promise<{ success: boolean; id: string }> => {
+		const data = (await request.json()) as {
 			id?: string;
 			priority?: BriefingPriority;
 			category?: BriefingCategory;
@@ -123,7 +123,6 @@ export const createEscalation = createServerFn({ method: "POST" }).handler(
 			actionUrl?: string;
 			requiresApproval?: boolean;
 		};
-	}): Promise<{ success: boolean; id: string }> => {
 		const db = getDB();
 		const id =
 			data.id ?? `esc-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;

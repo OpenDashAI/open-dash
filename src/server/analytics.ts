@@ -37,9 +37,14 @@ export interface AnomalyData {
 /**
  * Get trending data for a datasource
  */
-export const getTrendingData = createServerFn()
-	.input<{ datasourceId: string; hours?: number }>()
-	.handler(async ({ data }) => {
+export const getTrendingData = createServerFn(
+	{ method: "POST" },
+	async (request: Request, context: any) => {
+		const { datasourceId, hours } = (await request.json()) as {
+			datasourceId: string;
+			hours?: number;
+		};
+		const data = { datasourceId, hours };
 		const db = getWorkerDb();
 		if (!db) {
 			return { error: "Database not initialized", trending: null };
@@ -70,9 +75,14 @@ export const getTrendingData = createServerFn()
 /**
  * Get anomalies for a datasource
  */
-export const getAnomalyData = createServerFn()
-	.input<{ datasourceId: string; hours?: number }>()
-	.handler(async ({ data }) => {
+export const getAnomalyData = createServerFn(
+	{ method: "POST" },
+	async (request: Request, context: any) => {
+		const { datasourceId, hours } = (await request.json()) as {
+			datasourceId: string;
+			hours?: number;
+		};
+		const data = { datasourceId, hours };
 		const db = getWorkerDb();
 		if (!db) {
 			return { error: "Database not initialized", anomalies: [] };
