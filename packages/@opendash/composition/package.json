@@ -1,0 +1,44 @@
+{
+  "name": "@opendash/composition",
+  "version": "1.0.0",
+  "description": "Event-driven composition system for OpenDash components. The shared contract for component interop.",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "test": "vitest run",
+    "type-check": "tsc --noEmit"
+  },
+  "keywords": [
+    "opendash",
+    "composition",
+    "event-bus",
+    "composable-components"
+  ],
+  "author": "OpenDash Contributors",
+  "license": "MIT",
+  "peerDependencies": {
+    "react": "^18.0.0 || ^19.0.0"
+  },
+  "devDependencies": {
+    "react": "^19.0.0",
+    "@types/react": "^19.0.0",
+    "typescript": "^5.3.0",
+    "vitest": "^0.34.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/OpenDashAI/open-dash.git",
+    "directory": "packages/@opendash/composition"
+  }
+}

@@ -27,6 +27,7 @@
     "@assistant-ui/react-ui": "^0.2.1",
     "@clerk/backend": "^3.2.2",
     "@cloudflare/vite-plugin": "^1.26.0",
+    "@opendash/composition": "workspace:*",
     "@streamdown/code": "^1.1.0",
     "@tailwindcss/vite": "^4.1.18",
     "@tanstack/ai": "^0.8.0",
