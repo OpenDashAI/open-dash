@@ -89,5 +89,17 @@ Standards for architecture, code quality, and operations patterns across OpenDas
 
 ---
 
+## Component Interoperability (2026-03-25)
+
+**opendash-virtual-media-component-interop.md**
+- Shared monorepo workspace architecture
+- Both teams' components work together
+- Single SDK source of truth
+- Phase 1-2 validation approach
+- Governance & collaboration model
+- Migration path to Phase 3 (npm/registry/separate repos)
+
+---
+
 **Last Updated**: 2026-03-25
-**Total Standards**: 5
+**Total Standards**: 6
