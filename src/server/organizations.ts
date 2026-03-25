@@ -28,6 +28,7 @@ import {
 	getEmailService,
 	generateInviteLink,
 } from "@/server/email-service";
+import { createReferralCode } from "@/lib/referral/code-generator";
 
 /**
  * Tier limits by plan
@@ -108,6 +109,20 @@ export async function createOrgForUser(
 	};
 
 	await addTeamMember(drizzleDb, member);
+
+	// Generate friend code for referral system (Batch 6)
+	try {
+		const friendCode = await createReferralCode(drizzleDb, orgId);
+		console.log(
+			`Created friend code for org ${orgId}: ${friendCode}`
+		);
+	} catch (error) {
+		// Log but don't fail org creation if code generation fails
+		console.error(
+			`Failed to generate friend code for org ${orgId}:`,
+			error
+		);
+	}
 
 	return { orgId, slug };
 }

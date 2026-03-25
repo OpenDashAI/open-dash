@@ -1137,3 +1137,146 @@ export type TierLimitInsert = typeof tierLimitsTable.$inferInsert;
 
 export type StripeEvent = typeof stripeEventsTable.$inferSelect;
 export type StripeEventInsert = typeof stripeEventsTable.$inferInsert;
+
+// ============================================================================
+// BATCH 6: FRIEND CODES & REFERRAL SYSTEM (Growth Engine)
+// ============================================================================
+
+/**
+ * Campaigns — Referral program definitions
+ *
+ * One campaign per organization. Defines the reward structure:
+ * - referrerReward: credit given to person sharing the code
+ * - refereeDiscount: discount/credit given to new user redeeming code
+ */
+export const campaignsTable = sqliteTable(
+	"campaigns",
+	{
+		id: text("id").primaryKey(),
+		orgId: text("org_id").notNull().unique(),
+		name: text("name").notNull(),
+		status: text("status", {
+			enum: ["active", "paused", "ended"],
+		})
+			.notNull()
+			.default("active"),
+
+		// Reward amounts (in dollars)
+		referrerReward: real("referrer_reward").notNull(),
+		refereeDiscount: real("referee_discount").notNull(),
+
+		createdAt: integer("created_at")
+			.notNull()
+			.default(sql`(cast(strftime('%s', 'now') * 1000 as integer))`),
+	},
+	(table) => [index("idx_campaigns_org").on(table.orgId)]
+);
+
+/**
+ * Referral Codes — Individual friend codes
+ *
+ * Generated unique 8-character codes (36^8 = 2.8 trillion combinations).
+ * One code per organization, shared widely for viral growth.
+ * Tracks usage count and expiration.
+ */
+export const referralCodesTable = sqliteTable(
+	"referral_codes",
+	{
+		id: text("id").primaryKey(),
+		campaignId: text("campaign_id").notNull(),
+		code: text("code").notNull().unique(),
+
+		// Usage constraints
+		maxUses: integer("max_uses"), // null = unlimited
+		currentUses: integer("current_uses").notNull().default(0),
+		expiresAt: integer("expires_at"), // null = never expires
+
+		// Status
+		isActive: integer("is_active", { mode: "boolean" })
+			.notNull()
+			.default(true),
+
+		createdAt: integer("created_at")
+			.notNull()
+			.default(sql`(cast(strftime('%s', 'now') * 1000 as integer))`),
+	},
+	(table) => [
+		index("idx_referral_codes_code").on(table.code),
+		index("idx_referral_codes_active_expiry").on(
+			table.isActive,
+			table.expiresAt
+		),
+		index("idx_referral_codes_campaign").on(table.campaignId),
+	]
+);
+
+/**
+ * Redemptions — Audit log of code uses
+ *
+ * Records each time a user redeems a referral code.
+ * Prevents double-redemption with unique constraint.
+ * Tracks IP for fraud detection.
+ */
+export const redemptionsTable = sqliteTable(
+	"redemptions",
+	{
+		id: text("id").primaryKey(),
+		codeId: text("code_id").notNull(),
+		userId: text("user_id").notNull(),
+
+		redeemedAt: integer("redeemed_at").notNull(),
+		discountApplied: real("discount_applied"),
+
+		status: text("status", {
+			enum: ["applied", "refunded"],
+		})
+			.notNull()
+			.default("applied"),
+
+		ipAddress: text("ip_address"),
+	},
+	(table) => [
+		index("idx_redemptions_user").on(table.userId),
+		index("idx_redemptions_code").on(table.codeId),
+		index("idx_redemptions_timestamp").on(table.redeemedAt),
+	]
+);
+
+/**
+ * Referral Rewards — Track rewards earned by referrers
+ *
+ * When a new user redeems a code, the referrer earns a reward.
+ * This table tracks who referred whom and the reward earned.
+ */
+export const referralRewardsTable = sqliteTable(
+	"referral_rewards",
+	{
+		id: text("id").primaryKey(),
+		referrerUserId: text("referrer_user_id").notNull(),
+		refereeUserId: text("referee_user_id").notNull(),
+		codeId: text("code_id").notNull(),
+
+		rewardAmount: real("reward_amount").notNull(),
+		earnedAt: integer("earned_at")
+			.notNull()
+			.default(sql`(cast(strftime('%s', 'now') * 1000 as integer))`),
+	},
+	(table) => [
+		index("idx_referral_rewards_referrer").on(table.referrerUserId),
+		index("idx_referral_rewards_referee").on(table.refereeUserId),
+		index("idx_referral_rewards_timestamp").on(table.earnedAt),
+	]
+);
+
+// Types
+export type Campaign = typeof campaignsTable.$inferSelect;
+export type CampaignInsert = typeof campaignsTable.$inferInsert;
+
+export type ReferralCode = typeof referralCodesTable.$inferSelect;
+export type ReferralCodeInsert = typeof referralCodesTable.$inferInsert;
+
+export type Redemption = typeof redemptionsTable.$inferSelect;
+export type RedemptionInsert = typeof redemptionsTable.$inferInsert;
+
+export type ReferralReward = typeof referralRewardsTable.$inferSelect;
+export type ReferralRewardInsert = typeof referralRewardsTable.$inferInsert;
