@@ -25,10 +25,10 @@ Complete guide to all research, architecture, implementation, and strategy docum
 | Document | Purpose | Length |
 |----------|---------|--------|
 | [README.md](../README.md) | Main product overview | Short |
-| [PRODUCT.md](../PRODUCT.md) | Product definition | Medium |
-| [EXECUTIVE-SUMMARY.md](../EXECUTIVE-SUMMARY.md) | One-page executive summary | 1 page |
-| [B2B-STRATEGIC-BUNDLE.md](../B2B-STRATEGIC-BUNDLE.md) | B2B positioning, TAM, pricing | Long |
-| [USER_GUIDE.md](../USER_GUIDE.md) | How to use OpenDash dashboard | Medium |
+| [PRODUCT.md](strategy/PRODUCT.md) | Product definition | Medium |
+| [EXECUTIVE-SUMMARY.md](archive/EXECUTIVE-SUMMARY.md) | One-page executive summary | 1 page |
+| [B2B-STRATEGIC-BUNDLE.md](strategy/B2B-STRATEGIC-BUNDLE.md) | B2B positioning, TAM, pricing | Long |
+| [USER_GUIDE.md](guides/USER_GUIDE.md) | How to use OpenDash dashboard | Medium |
 
 **Key decisions**:
 - Product: B2B intelligence platform for marketing teams (not founder-facing)
@@ -44,17 +44,17 @@ Complete guide to all research, architecture, implementation, and strategy docum
 
 | Document | Purpose |
 |----------|---------|
-| [STRATEGIC-PIVOT-ANALYSIS.md](../STRATEGIC-PIVOT-ANALYSIS.md) | Why we pivoted from founder MVP to B2B |
-| [STRATEGIC-REVIEW-SUMMARY.md](../STRATEGIC-REVIEW-SUMMARY.md) | Complete strategic review |
-| [OPENDASH-IN-ATLAS-ECOSYSTEM.md](../OPENDASH-IN-ATLAS-ECOSYSTEM.md) | How OpenDash fits in Atlas platform |
+| [STRATEGIC-PIVOT-ANALYSIS.md](strategy/STRATEGIC-PIVOT-ANALYSIS.md) | Why we pivoted from founder MVP to B2B |
+| [STRATEGIC-REVIEW-SUMMARY.md](strategy/STRATEGIC-REVIEW-SUMMARY.md) | Complete strategic review |
+| [OPENDASH-IN-ATLAS-ECOSYSTEM.md](strategy/OPENDASH-IN-ATLAS-ECOSYSTEM.md) | How OpenDash fits in Atlas platform |
 
 ### Growth & Revenue
 
 | Document | Purpose |
 |----------|---------|
-| [BATCH-6-GROWTH-ENGINE.md](../BATCH-6-GROWTH-ENGINE.md) | Friend codes + referral system (D1 + Stripe integration) |
-| [LIFETIME-DEALS-STRATEGY.md](../LIFETIME-DEALS-STRATEGY.md) | LTD campaign strategy (Paddle, pricing math, margins) |
-| [ANALYTICS-BUSINESS-CASE.md](../ANALYTICS-BUSINESS-CASE.md) | Business case for analytics features |
+| [BATCH-6-GROWTH-ENGINE.md](strategy/BATCH-6-GROWTH-ENGINE.md) | Friend codes + referral system (D1 + Stripe integration) |
+| [LIFETIME-DEALS-STRATEGY.md](strategy/LIFETIME-DEALS-STRATEGY.md) | LTD campaign strategy (Paddle, pricing math, margins) |
+| [ANALYTICS-BUSINESS-CASE.md](research/ANALYTICS-BUSINESS-CASE.md) | Business case for analytics features |
 
 ---
 
@@ -64,42 +64,42 @@ Complete guide to all research, architecture, implementation, and strategy docum
 
 | Document | Scope | Status |
 |----------|-------|--------|
-| [COMPLETE_EXECUTION_PLAN.md](../COMPLETE_EXECUTION_PLAN.md) | Full end-to-end execution (all 12 weeks) | Comprehensive |
-| [EXECUTION_PLAN_EPIC27.md](../EXECUTION_PLAN_EPIC27.md) | Epic #27 specific plan (B2B platform) | Detailed |
-| [EXECUTION-CHECKLIST.md](../EXECUTION-CHECKLIST.md) | Tactical checklist (Phase 1-3) | Actionable |
+| [COMPLETE_EXECUTION_PLAN.md](execution/COMPLETE_EXECUTION_PLAN.md) | Full end-to-end execution (all 12 weeks) | Comprehensive |
+| [EXECUTION_PLAN_EPIC27.md](execution/EXECUTION_PLAN_EPIC27.md) | Epic #27 specific plan (B2B platform) | Detailed |
+| [EXECUTION-CHECKLIST.md](execution/EXECUTION-CHECKLIST.md) | Tactical checklist (Phase 1-3) | Actionable |
 
 ### Roadmaps
 
 | Document | Timeline | Detail |
 |----------|----------|--------|
-| [90-DAY-ROADMAP.md](../90-DAY-ROADMAP.md) | Q1 2026 roadmap (3 months) | High-level |
-| [PROJECT-PLAN-2026.md](../PROJECT-PLAN-2026.md) | Full year 2026 plan | Comprehensive |
-| [ROADMAP-OVERVIEW.md](../ROADMAP-OVERVIEW.md) | Strategic roadmap overview | Medium |
-| [NEXT-CYCLE-PRIORITIES.md](../NEXT-CYCLE-PRIORITIES.md) | What comes next (prioritized) | Concise |
-| [ARCHITECTURE-ROADMAP.md](../ARCHITECTURE-ROADMAP.md) | Technical architecture evolution | Technical |
+| [90-DAY-ROADMAP.md](roadmaps/90-DAY-ROADMAP.md) | Q1 2026 roadmap (3 months) | High-level |
+| [PROJECT-PLAN-2026.md](roadmaps/PROJECT-PLAN-2026.md) | Full year 2026 plan | Comprehensive |
+| [ROADMAP-OVERVIEW.md](archive/ROADMAP-OVERVIEW.md) | Strategic roadmap overview | Medium |
+| [NEXT-CYCLE-PRIORITIES.md](roadmaps/NEXT-CYCLE-PRIORITIES.md) | What comes next (prioritized) | Concise |
+| [ARCHITECTURE-ROADMAP.md](architecture/ARCHITECTURE-ROADMAP.md) | Technical architecture evolution | Technical |
 
 ### Weekly/Sprint Plans
 
 | Document | Timeline | Focus |
 |----------|----------|-------|
-| [WEEK1-MVP-LAUNCH-PLAN.md](../WEEK1-MVP-LAUNCH-PLAN.md) | Week 1 detailed plan | MVP launch |
-| [WEEK3-FOUNDER-VALIDATION-PLAN.md](../WEEK3-FOUNDER-VALIDATION-PLAN.md) | Week 3 detailed plan | Founder validation |
+| [WEEK1-MVP-LAUNCH-PLAN.md](roadmaps/weekly/WEEK1-MVP-LAUNCH-PLAN.md) | Week 1 detailed plan | MVP launch |
+| [WEEK3-FOUNDER-VALIDATION-PLAN.md](roadmaps/weekly/WEEK3-FOUNDER-VALIDATION-PLAN.md) | Week 3 detailed plan | Founder validation |
 
 ### Phases (Implementation Breakdown)
 
 | Document | Phase | Content |
 |----------|-------|---------|
-| [PHASE1-DASHBOARD-YAML.md](../PHASE1-DASHBOARD-YAML.md) | Phase 1 | Declarative dashboard config |
-| [PHASE2-DYNAMIC-DATASOURCES.md](../PHASE2-DYNAMIC-DATASOURCES.md) | Phase 2 | Dynamic datasource loading |
-| [PHASE3-ROUTES-UI.md](../PHASE3-ROUTES-UI.md) | Phase 3 | Routes and UI implementation |
-| [PHASE4-HYBRID-CONFIG-LOADER.md](../PHASE4-HYBRID-CONFIG-LOADER.md) | Phase 4 | Hybrid filesystem + API config |
+| [PHASE1-DASHBOARD-YAML.md](roadmaps/phases/PHASE1-DASHBOARD-YAML.md) | Phase 1 | Declarative dashboard config |
+| [PHASE2-DYNAMIC-DATASOURCES.md](roadmaps/phases/PHASE2-DYNAMIC-DATASOURCES.md) | Phase 2 | Dynamic datasource loading |
+| [PHASE3-ROUTES-UI.md](roadmaps/phases/PHASE3-ROUTES-UI.md) | Phase 3 | Routes and UI implementation |
+| [PHASE4-HYBRID-CONFIG-LOADER.md](roadmaps/phases/PHASE4-HYBRID-CONFIG-LOADER.md) | Phase 4 | Hybrid filesystem + API config |
 
 ### Epic Plans
 
 | Document | Epic | Scope |
 |----------|------|-------|
-| [EPIC-27-B2B-INTELLIGENCE-PLATFORM.md](../EPIC-27-B2B-INTELLIGENCE-PLATFORM.md) | Epic #27 | B2B platform (all 12 issues) |
-| [EPIC-MVP-LAUNCH.md](../EPIC-MVP-LAUNCH.md) | Epic MVP | Launch readiness |
+| [EPIC-27-B2B-INTELLIGENCE-PLATFORM.md](roadmaps/epics/EPIC-27-B2B-INTELLIGENCE-PLATFORM.md) | Epic #27 | B2B platform (all 12 issues) |
+| [EPIC-MVP-LAUNCH.md](roadmaps/epics/EPIC-MVP-LAUNCH.md) | Epic MVP | Launch readiness |
 
 ---
 
@@ -109,16 +109,16 @@ Complete guide to all research, architecture, implementation, and strategy docum
 
 | Document | Topic | Depth |
 |----------|-------|-------|
-| [TECHNICAL-ARCHITECTURE-REVIEW.md](../TECHNICAL-ARCHITECTURE-REVIEW.md) | Full architecture assessment (production-ready) | Comprehensive |
-| [DATASOURCES-VS-PRIME-ARCHITECTURE.md](../DATASOURCES-VS-PRIME-ARCHITECTURE.md) | Datasource plugin system design | Technical |
-| [DECLARATIVE-ARCHITECTURE-ASSESSMENT.md](../DECLARATIVE-ARCHITECTURE-ASSESSMENT.md) | Dashboard YAML declarative approach | Design |
+| [TECHNICAL-ARCHITECTURE-REVIEW.md](architecture/TECHNICAL-ARCHITECTURE-REVIEW.md) | Full architecture assessment (production-ready) | Comprehensive |
+| [DATASOURCES-VS-PRIME-ARCHITECTURE.md](architecture/DATASOURCES-VS-PRIME-ARCHITECTURE.md) | Datasource plugin system design | Technical |
+| [DECLARATIVE-ARCHITECTURE-ASSESSMENT.md](architecture/DECLARATIVE-ARCHITECTURE-ASSESSMENT.md) | Dashboard YAML declarative approach | Design |
 
 ### Technical Deep-Dives
 
 | Document | Topic | Focus |
 |----------|-------|-------|
-| [ARCHITECTURE-REVIEW-data-integrity-schema.md](../ARCHITECTURE-REVIEW-data-integrity-schema.md) | Data integrity (Zod + Drizzle) | Type safety |
-| [TECHNICAL-DEBT-ROADMAP.md](../TECHNICAL-DEBT-ROADMAP.md) | Known tech debt and fixes | Maintenance |
+| [ARCHITECTURE-REVIEW-data-integrity-schema.md](architecture/ARCHITECTURE-REVIEW-data-integrity-schema.md) | Data integrity (Zod + Drizzle) | Type safety |
+| [TECHNICAL-DEBT-ROADMAP.md](research/TECHNICAL-DEBT-ROADMAP.md) | Known tech debt and fixes | Maintenance |
 
 ---
 
@@ -128,36 +128,36 @@ Complete guide to all research, architecture, implementation, and strategy docum
 
 | Document | Tool | Purpose |
 |----------|------|---------|
-| [D1_SETUP.md](../D1_SETUP.md) | Cloudflare D1 | Schema, migrations, setup guide |
+| [D1_SETUP.md](setup/D1_SETUP.md) | Cloudflare D1 | Schema, migrations, setup guide |
 
 ### Deployment Guides
 
 | Document | Target | Detail |
 |----------|--------|--------|
-| [DEPLOYMENT.md](../DEPLOYMENT.md) | Full deployment guide | Comprehensive |
-| [DEPLOYMENT-GUIDE.md](../DEPLOYMENT-GUIDE.md) | Step-by-step guide | Tactical |
-| [DEPLOYMENT-READY.md](../DEPLOYMENT-READY.md) | Deployment checklist | Ready-to-go |
+| [DEPLOYMENT.md](guides/DEPLOYMENT.md) | Full deployment guide | Comprehensive |
+| [DEPLOYMENT-GUIDE.md](guides/DEPLOYMENT-GUIDE.md) | Step-by-step guide | Tactical |
+| [DEPLOYMENT-READY.md](archive/DEPLOYMENT-READY.md) | Deployment checklist | Ready-to-go |
 
 ### CI/CD & Monitoring
 
 | Document | Purpose | Setup |
 |----------|---------|-------|
-| [CI_CD_SETUP.md](../CI_CD_SETUP.md) | GitHub Actions + deployment | Step-by-step |
-| [SENTRY_SETUP.md](../SENTRY_SETUP.md) | Error tracking integration | 30 min |
-| [GRAFANA-INTEGRATION.md](../GRAFANA-INTEGRATION.md) | Metrics dashboard | Grafana config |
+| [CI_CD_SETUP.md](setup/CI_CD_SETUP.md) | GitHub Actions + deployment | Step-by-step |
+| [SENTRY_SETUP.md](setup/SENTRY_SETUP.md) | Error tracking integration | 30 min |
+| [GRAFANA-INTEGRATION.md](setup/GRAFANA-INTEGRATION.md) | Metrics dashboard | Grafana config |
 
 ### External Services
 
 | Document | Service | Setup |
 |----------|---------|-------|
-| [EMAIL_PROVIDER_SETUP.md](../EMAIL_PROVIDER_SETUP.md) | Email (Resend) | Invitations, notifications |
-| [SECURITY-SECRETS-AUDIT.md](../SECURITY-SECRETS-AUDIT.md) | Secrets management | Wrangler secrets |
+| [EMAIL_PROVIDER_SETUP.md](setup/EMAIL_PROVIDER_SETUP.md) | Email (Resend) | Invitations, notifications |
+| [SECURITY-SECRETS-AUDIT.md](audits/SECURITY-SECRETS-AUDIT.md) | Secrets management | Wrangler secrets |
 
 ### Security & Headers
 
 | Document | Topic | Content |
 |----------|-------|---------|
-| [SECURITY-MIDDLEWARE-GUIDE.md](../SECURITY-MIDDLEWARE-GUIDE.md) | Middleware implementation | Code examples |
+| [SECURITY-MIDDLEWARE-GUIDE.md](guides/SECURITY-MIDDLEWARE-GUIDE.md) | Middleware implementation | Code examples |
 
 ---
 
@@ -167,29 +167,29 @@ Complete guide to all research, architecture, implementation, and strategy docum
 
 | Document | Topic | Scope |
 |----------|-------|-------|
-| [COMPETITIVE-INTELLIGENCE-SYSTEM.md](../COMPETITIVE-INTELLIGENCE-SYSTEM.md) | Full system design | Complete |
-| [COMPETITOR-INTELLIGENCE-SYSTEM.md](../COMPETITOR-INTELLIGENCE-SYSTEM.md) | Competitor monitoring | Tactical |
-| [COMPETITIVE-INTEL-CLOUDFLARE-EDITION.md](../COMPETITIVE-INTEL-CLOUDFLARE-EDITION.md) | Cloudflare-native implementation | Technical |
+| [COMPETITIVE-INTELLIGENCE-SYSTEM.md](competitive-intel/COMPETITIVE-INTELLIGENCE-SYSTEM.md) | Full system design | Complete |
+| [COMPETITOR-INTELLIGENCE-SYSTEM.md](competitive-intel/COMPETITOR-INTELLIGENCE-SYSTEM.md) | Competitor monitoring | Tactical |
+| [COMPETITIVE-INTEL-CLOUDFLARE-EDITION.md](competitive-intel/COMPETITIVE-INTEL-CLOUDFLARE-EDITION.md) | Cloudflare-native implementation | Technical |
 
 ### Operations & Usage
 
 | Document | Purpose | Level |
 |----------|---------|-------|
-| [COMPETITOR-INTEL-OPERATIONS.md](../COMPETITOR-INTEL-OPERATIONS.md) | How to run CI system | Operational |
-| [COMPETITIVE-INTELLIGENCE-QUICKSTART.md](../COMPETITIVE-INTELLIGENCE-QUICKSTART.md) | 15-minute setup | Beginner |
-| [COMPETITIVE-INTELLIGENCE-README.md](../COMPETITIVE-INTELLIGENCE-README.md) | Feature overview | Overview |
+| [COMPETITOR-INTEL-OPERATIONS.md](competitive-intel/COMPETITOR-INTEL-OPERATIONS.md) | How to run CI system | Operational |
+| [COMPETITIVE-INTELLIGENCE-QUICKSTART.md](competitive-intel/COMPETITIVE-INTELLIGENCE-QUICKSTART.md) | 15-minute setup | Beginner |
+| [COMPETITIVE-INTELLIGENCE-README.md](competitive-intel/COMPETITIVE-INTELLIGENCE-README.md) | Feature overview | Overview |
 
 ### Integration
 
 | Document | Aspect | Detail |
 |----------|--------|--------|
-| [MARKETING-INTELLIGENCE-PIPELINE.md](../MARKETING-INTELLIGENCE-PIPELINE.md) | Marketing data pipeline | Data flow |
+| [MARKETING-INTELLIGENCE-PIPELINE.md](competitive-intel/MARKETING-INTELLIGENCE-PIPELINE.md) | Marketing data pipeline | Data flow |
 
 ### Analytics & Research
 
 | Document | Purpose | Length |
 |----------|---------|--------|
-| [PROJECT-PLAN-DIAGRAMS.md](../PROJECT-PLAN-DIAGRAMS.md) | Architecture diagrams | Visual |
+| [PROJECT-PLAN-DIAGRAMS.md](research/PROJECT-PLAN-DIAGRAMS.md) | Architecture diagrams | Visual |
 
 ---
 
@@ -219,34 +219,34 @@ Complete guide to all research, architecture, implementation, and strategy docum
 
 | Document | Type | Focus |
 |----------|------|-------|
-| [ACCESSIBILITY-AUDIT.md](../ACCESSIBILITY-AUDIT.md) | Audit | WCAG AA compliance (95%) |
-| [PERFORMANCE-AUDIT.md](../PERFORMANCE-AUDIT.md) | Audit | Lighthouse (84/100) |
+| [ACCESSIBILITY-AUDIT.md](audits/ACCESSIBILITY-AUDIT.md) | Audit | WCAG AA compliance (95%) |
+| [PERFORMANCE-AUDIT.md](audits/PERFORMANCE-AUDIT.md) | Audit | Lighthouse (84/100) |
 
 ### Code Quality & Reviews
 
 | Document | Type | Purpose |
 |----------|------|---------|
-| [REVIEW-SYSTEM-OVERVIEW.md](../REVIEW-SYSTEM-OVERVIEW.md) | Framework | Review process |
-| [REVIEW-SYSTEM-INDEX.md](../REVIEW-SYSTEM-INDEX.md) | Index | All review docs |
-| [REVIEW-PROCESS-GUIDE.md](../REVIEW-PROCESS-GUIDE.md) | Guide | How to review |
-| [REVIEW-RECOMMENDATIONS-TRACKER.md](../REVIEW-RECOMMENDATIONS-TRACKER.md) | Tracker | Action items |
+| [REVIEW-SYSTEM-OVERVIEW.md](audits/review-system/REVIEW-SYSTEM-OVERVIEW.md) | Framework | Review process |
+| [REVIEW-SYSTEM-INDEX.md](audits/review-system/REVIEW-SYSTEM-INDEX.md) | Index | All review docs |
+| [REVIEW-PROCESS-GUIDE.md](audits/review-system/REVIEW-PROCESS-GUIDE.md) | Guide | How to review |
+| [REVIEW-RECOMMENDATIONS-TRACKER.md](audits/review-system/REVIEW-RECOMMENDATIONS-TRACKER.md) | Tracker | Action items |
 
 ### Templates (for conducting reviews)
 
 | Document | Purpose | Use |
 |----------|---------|-----|
-| [TECHNICAL-REVIEW-TEMPLATE.md](../TECHNICAL-REVIEW-TEMPLATE.md) | Technical review | Template |
-| [SECURITY-REVIEW-TEMPLATE.md](../SECURITY-REVIEW-TEMPLATE.md) | Security review | Template |
-| [PERFORMANCE-REVIEW-TEMPLATE.md](../PERFORMANCE-REVIEW-TEMPLATE.md) | Performance review | Template |
-| [ACCESSIBILITY-REVIEW-TEMPLATE.md](../ACCESSIBILITY-REVIEW-TEMPLATE.md) | Accessibility review | Template |
-| [INFRASTRUCTURE-REVIEW-TEMPLATE.md](../INFRASTRUCTURE-REVIEW-TEMPLATE.md) | Infrastructure review | Template |
+| [TECHNICAL-REVIEW-TEMPLATE.md](audits/templates/TECHNICAL-REVIEW-TEMPLATE.md) | Technical review | Template |
+| [SECURITY-REVIEW-TEMPLATE.md](audits/templates/SECURITY-REVIEW-TEMPLATE.md) | Security review | Template |
+| [PERFORMANCE-REVIEW-TEMPLATE.md](audits/templates/PERFORMANCE-REVIEW-TEMPLATE.md) | Performance review | Template |
+| [ACCESSIBILITY-REVIEW-TEMPLATE.md](audits/templates/ACCESSIBILITY-REVIEW-TEMPLATE.md) | Accessibility review | Template |
+| [INFRASTRUCTURE-REVIEW-TEMPLATE.md](audits/templates/INFRASTRUCTURE-REVIEW-TEMPLATE.md) | Infrastructure review | Template |
 
 ### Unified Review Framework
 
 | Document | Purpose | Scope |
 |----------|---------|-------|
-| [UNIFIED-REVIEW-FRAMEWORK.md](../UNIFIED-REVIEW-FRAMEWORK.md) | Complete review methodology | All aspects |
-| [UNIFIED-REVIEW-TRACKER.md](../UNIFIED-REVIEW-TRACKER.md) | Centralized tracking | All reviews |
+| [UNIFIED-REVIEW-FRAMEWORK.md](audits/review-system/UNIFIED-REVIEW-FRAMEWORK.md) | Complete review methodology | All aspects |
+| [UNIFIED-REVIEW-TRACKER.md](audits/review-system/UNIFIED-REVIEW-TRACKER.md) | Centralized tracking | All reviews |
 
 ---
 
@@ -256,13 +256,13 @@ Complete guide to all research, architecture, implementation, and strategy docum
 
 | Document | Topic | Findings |
 |----------|-------|----------|
-| [OPEN-SOURCE-RESEARCH-FINDINGS.md](../OPEN-SOURCE-RESEARCH-FINDINGS.md) | OSS alternatives analysis | Comparison |
+| [OPEN-SOURCE-RESEARCH-FINDINGS.md](research/OPEN-SOURCE-RESEARCH-FINDINGS.md) | OSS alternatives analysis | Comparison |
 
 ### Business & Market Analysis
 
 | Document | Analysis | Detail |
 |----------|----------|--------|
-| [SYSTEMATIC-REVIEW-2026-03-24.md](../SYSTEMATIC-REVIEW-2026-03-24.md) | Complete systematic review | Comprehensive |
+| [SYSTEMATIC-REVIEW-2026-03-24.md](research/SYSTEMATIC-REVIEW-2026-03-24.md) | Complete systematic review | Comprehensive |
 
 ---
 
@@ -272,24 +272,24 @@ Complete guide to all research, architecture, implementation, and strategy docum
 
 | Document | Purpose | Frequency |
 |----------|---------|-----------|
-| [STATUS.md](../STATUS.md) | Current status snapshot | Updated daily |
-| [MVP-LAUNCH-STATUS.md](../MVP-LAUNCH-STATUS.md) | MVP launch readiness | Updated weekly |
-| [STARTUP-VERIFICATION.md](../STARTUP-VERIFICATION.md) | Startup verification checklist | Updated per deployment |
+| [STATUS.md](status/STATUS.md) | Current status snapshot | Updated daily |
+| [MVP-LAUNCH-STATUS.md](status/MVP-LAUNCH-STATUS.md) | MVP launch readiness | Updated weekly |
+| [STARTUP-VERIFICATION.md](execution/STARTUP-VERIFICATION.md) | Startup verification checklist | Updated per deployment |
 
 ### Progress Tracking
 
 | Document | Purpose | Scope |
 |----------|---------|-------|
-| [PROGRESS-REVIEW-AND-ATLAS-INTEGRATION.md](../PROGRESS-REVIEW-AND-ATLAS-INTEGRATION.md) | Progress review | Full scope |
-| [PROGRESS-REVIEW-TEMPLATE.md](../PROGRESS-REVIEW-TEMPLATE.md) | Template for reviews | Template |
+| [PROGRESS-REVIEW-AND-ATLAS-INTEGRATION.md](status/PROGRESS-REVIEW-AND-ATLAS-INTEGRATION.md) | Progress review | Full scope |
+| [PROGRESS-REVIEW-TEMPLATE.md](audits/templates/PROGRESS-REVIEW-TEMPLATE.md) | Template for reviews | Template |
 
 ### Issue & PR Tracking
 
 | Document | Purpose | Coverage |
 |----------|---------|----------|
-| [GITHUB-ISSUES-SUMMARY.md](../GITHUB-ISSUES-SUMMARY.md) | All created GitHub issues | Comprehensive |
-| [GITHUB-ISSUES-UPDATE.md](../GITHUB-ISSUES-UPDATE.md) | Issue status updates | Current |
-| [CREATED-ISSUES-SUMMARY.md](../CREATED-ISSUES-SUMMARY.md) | Issues summary | Quick reference |
+| [GITHUB-ISSUES-SUMMARY.md](status/GITHUB-ISSUES-SUMMARY.md) | All created GitHub issues | Comprehensive |
+| [GITHUB-ISSUES-UPDATE.md](status/GITHUB-ISSUES-UPDATE.md) | Issue status updates | Current |
+| [CREATED-ISSUES-SUMMARY.md](status/CREATED-ISSUES-SUMMARY.md) | Issues summary | Quick reference |
 
 ---
 
@@ -299,14 +299,14 @@ Complete guide to all research, architecture, implementation, and strategy docum
 
 | Document | Purpose | Length |
 |----------|---------|--------|
-| [ODA-QUICKREF.md](../ODA-QUICKREF.md) | CLI quick reference | 1-2 pages |
-| [ODA-GUIDE.md](../ODA-GUIDE.md) | CLI complete guide | 10+ pages |
+| [ODA-QUICKREF.md](guides/ODA-QUICKREF.md) | CLI quick reference | 1-2 pages |
+| [ODA-GUIDE.md](guides/ODA-GUIDE.md) | CLI complete guide | 10+ pages |
 
 ### Logging & Architecture History
 
 | Document | Purpose | Content |
 |----------|---------|---------|
-| [ARCHITECTURE-REVIEW-LOG.md](../ARCHITECTURE-REVIEW-LOG.md) | Architecture evolution | Timeline |
+| [ARCHITECTURE-REVIEW-LOG.md](audits/logs/ARCHITECTURE-REVIEW-LOG.md) | Architecture evolution | Timeline |
 
 ---
 
@@ -315,28 +315,28 @@ Complete guide to all research, architecture, implementation, and strategy docum
 ### I want to...
 
 **Understand the product**:
-→ Read [PRODUCT.md](../PRODUCT.md), then [B2B-STRATEGIC-BUNDLE.md](../B2B-STRATEGIC-BUNDLE.md)
+→ Read [PRODUCT.md](strategy/PRODUCT.md), then [B2B-STRATEGIC-BUNDLE.md](strategy/B2B-STRATEGIC-BUNDLE.md)
 
 **Deploy to production**:
-→ Follow [DEPLOYMENT-GUIDE.md](../DEPLOYMENT-GUIDE.md) and [CI_CD_SETUP.md](../CI_CD_SETUP.md)
+→ Follow [DEPLOYMENT-GUIDE.md](guides/DEPLOYMENT-GUIDE.md) and [CI_CD_SETUP.md](setup/CI_CD_SETUP.md)
 
 **Plan the next sprint**:
-→ Check [NEXT-CYCLE-PRIORITIES.md](../NEXT-CYCLE-PRIORITIES.md) and [EXECUTION-CHECKLIST.md](../EXECUTION-CHECKLIST.md)
+→ Check [NEXT-CYCLE-PRIORITIES.md](roadmaps/NEXT-CYCLE-PRIORITIES.md) and [EXECUTION-CHECKLIST.md](execution/EXECUTION-CHECKLIST.md)
 
 **Understand competitive intelligence**:
-→ Start with [COMPETITIVE-INTELLIGENCE-QUICKSTART.md](../COMPETITIVE-INTELLIGENCE-QUICKSTART.md), then [COMPETITIVE-INTELLIGENCE-SYSTEM.md](../COMPETITIVE-INTELLIGENCE-SYSTEM.md)
+→ Start with [COMPETITIVE-INTELLIGENCE-QUICKSTART.md](competitive-intel/COMPETITIVE-INTELLIGENCE-QUICKSTART.md), then [COMPETITIVE-INTELLIGENCE-SYSTEM.md](competitive-intel/COMPETITIVE-INTELLIGENCE-SYSTEM.md)
 
 **Review code quality**:
-→ Use [UNIFIED-REVIEW-FRAMEWORK.md](../UNIFIED-REVIEW-FRAMEWORK.md) + appropriate [TEMPLATE.md](../TECHNICAL-REVIEW-TEMPLATE.md)
+→ Use [UNIFIED-REVIEW-FRAMEWORK.md](audits/review-system/UNIFIED-REVIEW-FRAMEWORK.md) + appropriate [TEMPLATE.md](audits/templates/TECHNICAL-REVIEW-TEMPLATE.md)
 
 **Set up a new service**:
-→ Find the relevant SETUP.md file (D1, Email, Sentry, etc.)
+→ Find the relevant SETUP.md file in setup/ (D1, Email, Sentry, etc.)
 
 **Understand architecture**:
-→ Read [TECHNICAL-ARCHITECTURE-REVIEW.md](../TECHNICAL-ARCHITECTURE-REVIEW.md)
+→ Read [TECHNICAL-ARCHITECTURE-REVIEW.md](architecture/TECHNICAL-ARCHITECTURE-REVIEW.md)
 
 **Track progress**:
-→ Check [STATUS.md](../STATUS.md), [MVP-LAUNCH-STATUS.md](../MVP-LAUNCH-STATUS.md), [GITHUB-ISSUES-SUMMARY.md](../GITHUB-ISSUES-SUMMARY.md)
+→ Check [STATUS.md](status/STATUS.md), [MVP-LAUNCH-STATUS.md](status/MVP-LAUNCH-STATUS.md), [GITHUB-ISSUES-SUMMARY.md](status/GITHUB-ISSUES-SUMMARY.md)
 
 **Learn about components**:
 → See [Standards/component-sdk-spec.md](../Standards/component-sdk-spec.md)

@@ -10,9 +10,9 @@ Quick path to understanding and deploying OpenDash.
 A B2B intelligence platform for marketing teams. Combines morning briefing, competitive intelligence, and campaign performance in one dashboard.
 
 **Read these in order:**
-1. [PRODUCT.md](../PRODUCT.md) — Product definition
-2. [EXECUTIVE-SUMMARY.md](../EXECUTIVE-SUMMARY.md) — One-page overview
-3. [B2B-STRATEGIC-BUNDLE.md](../B2B-STRATEGIC-BUNDLE.md) — Market position and strategy
+1. [PRODUCT.md](strategy/PRODUCT.md) — Product definition
+2. [EXECUTIVE-SUMMARY.md](archive/EXECUTIVE-SUMMARY.md) — One-page overview
+3. [B2B-STRATEGIC-BUNDLE.md](strategy/B2B-STRATEGIC-BUNDLE.md) — Market position and strategy
 
 **Key facts:**
 - Target: Marketing teams (agency ops, in-house marketing)
@@ -31,8 +31,8 @@ A B2B intelligence platform for marketing teams. Combines morning briefing, comp
 - Datasources: Pluggable components (Stripe, GA4, Google Ads, etc.)
 
 **Read these:**
-1. [TECHNICAL-ARCHITECTURE-REVIEW.md](../TECHNICAL-ARCHITECTURE-REVIEW.md) — Production-ready assessment (176 tests passing)
-2. [DATASOURCES-VS-PRIME-ARCHITECTURE.md](../DATASOURCES-VS-PRIME-ARCHITECTURE.md) — Datasource plugin system
+1. [TECHNICAL-ARCHITECTURE-REVIEW.md](architecture/TECHNICAL-ARCHITECTURE-REVIEW.md) — Production-ready assessment (176 tests passing)
+2. [DATASOURCES-VS-PRIME-ARCHITECTURE.md](architecture/DATASOURCES-VS-PRIME-ARCHITECTURE.md) — Datasource plugin system
 
 **Key insights:**
 - Three-panel HUD (context, briefing, chat)
@@ -54,9 +54,9 @@ A B2B intelligence platform for marketing teams. Combines morning briefing, comp
 | Weeks 9-12 | Billing + Growth Engine | IN PROGRESS |
 
 **Read these:**
-1. [90-DAY-ROADMAP.md](../90-DAY-ROADMAP.md) — Full 3-month roadmap
-2. [EXECUTION-CHECKLIST.md](../EXECUTION-CHECKLIST.md) — Tactical checklist
-3. [NEXT-CYCLE-PRIORITIES.md](../NEXT-CYCLE-PRIORITIES.md) — What's next
+1. [90-DAY-ROADMAP.md](roadmaps/90-DAY-ROADMAP.md) — Full 3-month roadmap
+2. [EXECUTION-CHECKLIST.md](execution/EXECUTION-CHECKLIST.md) — Tactical checklist
+3. [NEXT-CYCLE-PRIORITIES.md](roadmaps/NEXT-CYCLE-PRIORITIES.md) — What's next
 
 ---
 
@@ -70,7 +70,7 @@ A B2B intelligence platform for marketing teams. Combines morning briefing, comp
 **Steps:**
 1. Clone repo: `git clone https://github.com/OpenDashAI/open-dash`
 2. Install: `pnpm install`
-3. Set up D1: Follow [D1_SETUP.md](../D1_SETUP.md)
+3. Set up D1: Follow [D1_SETUP.md](setup/D1_SETUP.md)
 4. Create `.dev.vars`:
    ```
    API_MOM_URL=https://apimom.dev
@@ -93,8 +93,8 @@ A B2B intelligence platform for marketing teams. Combines morning briefing, comp
 - Market insights
 
 **Read these:**
-1. [COMPETITIVE-INTELLIGENCE-QUICKSTART.md](../COMPETITIVE-INTELLIGENCE-QUICKSTART.md) — 15-minute setup
-2. [COMPETITOR-INTELLIGENCE-SYSTEM.md](../COMPETITOR-INTELLIGENCE-SYSTEM.md) — How it works
+1. [COMPETITIVE-INTELLIGENCE-QUICKSTART.md](competitive-intel/COMPETITIVE-INTELLIGENCE-QUICKSTART.md) — 15-minute setup
+2. [COMPETITOR-INTELLIGENCE-SYSTEM.md](competitive-intel/COMPETITOR-INTELLIGENCE-SYSTEM.md) — How it works
 
 ---
 
@@ -102,15 +102,15 @@ A B2B intelligence platform for marketing teams. Combines morning briefing, comp
 
 **Deployment checklist:**
 
-1. Set environment variables: [SECURITY-SECRETS-AUDIT.md](../SECURITY-SECRETS-AUDIT.md)
-2. Set up D1: [D1_SETUP.md](../D1_SETUP.md)
+1. Set environment variables: [SECURITY-SECRETS-AUDIT.md](audits/SECURITY-SECRETS-AUDIT.md)
+2. Set up D1: [D1_SETUP.md](setup/D1_SETUP.md)
 3. Deploy: `wrangler deploy`
-4. Set up email: [EMAIL_PROVIDER_SETUP.md](../EMAIL_PROVIDER_SETUP.md)
-5. Configure monitoring: [SENTRY_SETUP.md](../SENTRY_SETUP.md)
-6. Set up CI/CD: [CI_CD_SETUP.md](../CI_CD_SETUP.md)
+4. Set up email: [EMAIL_PROVIDER_SETUP.md](setup/EMAIL_PROVIDER_SETUP.md)
+5. Configure monitoring: [SENTRY_SETUP.md](setup/SENTRY_SETUP.md)
+6. Set up CI/CD: [CI_CD_SETUP.md](setup/CI_CD_SETUP.md)
 
 **Read:**
-- [DEPLOYMENT-GUIDE.md](../DEPLOYMENT-GUIDE.md) — Step-by-step
+- [DEPLOYMENT-GUIDE.md](guides/DEPLOYMENT-GUIDE.md) — Step-by-step
 
 ---
 
@@ -123,9 +123,9 @@ A B2B intelligence platform for marketing teams. Combines morning briefing, comp
 - Month 9-12: PLG + SMB sales
 
 **Read these:**
-1. [BATCH-6-GROWTH-ENGINE.md](../BATCH-6-GROWTH-ENGINE.md) — Referral system (implemented)
-2. [LIFETIME-DEALS-STRATEGY.md](../LIFETIME-DEALS-STRATEGY.md) — LTD campaign
-3. [B2B-STRATEGIC-BUNDLE.md](../B2B-STRATEGIC-BUNDLE.md) — Go-to-market
+1. [BATCH-6-GROWTH-ENGINE.md](strategy/BATCH-6-GROWTH-ENGINE.md) — Referral system (implemented)
+2. [LIFETIME-DEALS-STRATEGY.md](strategy/LIFETIME-DEALS-STRATEGY.md) — LTD campaign
+3. [B2B-STRATEGIC-BUNDLE.md](strategy/B2B-STRATEGIC-BUNDLE.md) — Go-to-market
 
 **Revenue target:**
 - Month 1-3: $0 (foundation)
@@ -166,8 +166,8 @@ Pluggable datasources that fetch data from external systems (Stripe, GA4, GitHub
 - 176+ tests passing
 
 **Read:**
-- [TECHNICAL-ARCHITECTURE-REVIEW.md](../TECHNICAL-ARCHITECTURE-REVIEW.md) — Code quality assessment
-- [UNIFIED-REVIEW-FRAMEWORK.md](../UNIFIED-REVIEW-FRAMEWORK.md) — Review process
+- [TECHNICAL-ARCHITECTURE-REVIEW.md](architecture/TECHNICAL-ARCHITECTURE-REVIEW.md) — Code quality assessment
+- [UNIFIED-REVIEW-FRAMEWORK.md](audits/review-system/UNIFIED-REVIEW-FRAMEWORK.md) — Review process
 
 ---
 
@@ -183,9 +183,9 @@ Pluggable datasources that fetch data from external systems (Stripe, GA4, GitHub
 - Tests: 184 passing ✅
 
 **See:**
-- [STATUS.md](../STATUS.md) — Daily status
-- [MVP-LAUNCH-STATUS.md](../MVP-LAUNCH-STATUS.md) — Launch readiness
-- [GITHUB-ISSUES-SUMMARY.md](../GITHUB-ISSUES-SUMMARY.md) — All issues
+- [STATUS.md](status/STATUS.md) — Daily status
+- [MVP-LAUNCH-STATUS.md](status/MVP-LAUNCH-STATUS.md) — Launch readiness
+- [GITHUB-ISSUES-SUMMARY.md](status/GITHUB-ISSUES-SUMMARY.md) — All issues
 
 ---
 
@@ -194,24 +194,24 @@ Pluggable datasources that fetch data from external systems (Stripe, GA4, GitHub
 ### I'm a...
 
 **Developer**:
-1. Understand architecture → [TECHNICAL-ARCHITECTURE-REVIEW.md](../TECHNICAL-ARCHITECTURE-REVIEW.md)
+1. Understand architecture → [TECHNICAL-ARCHITECTURE-REVIEW.md](architecture/TECHNICAL-ARCHITECTURE-REVIEW.md)
 2. Set up locally → Step 4 above
-3. Start on issue → [GITHUB-ISSUES-SUMMARY.md](../GITHUB-ISSUES-SUMMARY.md)
+3. Start on issue → [GITHUB-ISSUES-SUMMARY.md](status/GITHUB-ISSUES-SUMMARY.md)
 
 **Designer**:
-1. Understand product → [PRODUCT.md](../PRODUCT.md)
-2. Review HUD → [USER_GUIDE.md](../USER_GUIDE.md)
-3. Check accessibility → [ACCESSIBILITY-AUDIT.md](../ACCESSIBILITY-AUDIT.md)
+1. Understand product → [PRODUCT.md](strategy/PRODUCT.md)
+2. Review HUD → [USER_GUIDE.md](guides/USER_GUIDE.md)
+3. Check accessibility → [ACCESSIBILITY-AUDIT.md](audits/ACCESSIBILITY-AUDIT.md)
 
 **Product Manager**:
-1. Understand strategy → [B2B-STRATEGIC-BUNDLE.md](../B2B-STRATEGIC-BUNDLE.md)
-2. Review roadmap → [90-DAY-ROADMAP.md](../90-DAY-ROADMAP.md)
-3. Track progress → [GITHUB-ISSUES-SUMMARY.md](../GITHUB-ISSUES-SUMMARY.md)
+1. Understand strategy → [B2B-STRATEGIC-BUNDLE.md](strategy/B2B-STRATEGIC-BUNDLE.md)
+2. Review roadmap → [90-DAY-ROADMAP.md](roadmaps/90-DAY-ROADMAP.md)
+3. Track progress → [GITHUB-ISSUES-SUMMARY.md](status/GITHUB-ISSUES-SUMMARY.md)
 
 **DevOps**:
-1. Deployment → [DEPLOYMENT-GUIDE.md](../DEPLOYMENT-GUIDE.md)
-2. CI/CD → [CI_CD_SETUP.md](../CI_CD_SETUP.md)
-3. Monitoring → [SENTRY_SETUP.md](../SENTRY_SETUP.md)
+1. Deployment → [DEPLOYMENT-GUIDE.md](guides/DEPLOYMENT-GUIDE.md)
+2. CI/CD → [CI_CD_SETUP.md](setup/CI_CD_SETUP.md)
+3. Monitoring → [SENTRY_SETUP.md](setup/SENTRY_SETUP.md)
 
 ---
 
@@ -227,6 +227,6 @@ Pluggable datasources that fetch data from external systems (Stripe, GA4, GitHub
 ## Questions?
 
 - **Architecture**: See [docs/README.md](./README.md)
-- **Deployment**: See [DEPLOYMENT-GUIDE.md](../DEPLOYMENT-GUIDE.md)
-- **Code**: Read [TECHNICAL-ARCHITECTURE-REVIEW.md](../TECHNICAL-ARCHITECTURE-REVIEW.md)
-- **Growth**: Check [B2B-STRATEGIC-BUNDLE.md](../B2B-STRATEGIC-BUNDLE.md)
+- **Deployment**: See [DEPLOYMENT-GUIDE.md](guides/DEPLOYMENT-GUIDE.md)
+- **Code**: Read [TECHNICAL-ARCHITECTURE-REVIEW.md](architecture/TECHNICAL-ARCHITECTURE-REVIEW.md)
+- **Growth**: Check [B2B-STRATEGIC-BUNDLE.md](strategy/B2B-STRATEGIC-BUNDLE.md)
