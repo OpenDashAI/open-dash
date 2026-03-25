@@ -1,0 +1,31 @@
+{
+  "name": "@opendash/sdk",
+  "version": "1.0.0",
+  "description": "OpenDash Component SDK - Interface contract for building components",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "test": "vitest",
+    "dev": "tsc --watch",
+    "typecheck": "tsc --noEmit"
+  },
+  "keywords": [
+    "opendash",
+    "component",
+    "sdk",
+    "interface",
+    "datasource"
+  ],
+  "author": "OpenDash Team",
+  "license": "MIT",
+  "devDependencies": {
+    "typescript": "^5.3.0",
+    "vitest": "^1.0.0",
+    "@types/node": "^20.0.0"
+  }
+}

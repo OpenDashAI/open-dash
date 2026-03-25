@@ -1,0 +1,3 @@
+packages:
+  - 'packages/@opendash/sdk'
+  - 'packages/@opendash-components/*'
