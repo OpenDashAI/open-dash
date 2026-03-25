@@ -1280,3 +1280,34 @@ export type RedemptionInsert = typeof redemptionsTable.$inferInsert;
 
 export type ReferralReward = typeof referralRewardsTable.$inferSelect;
 export type ReferralRewardInsert = typeof referralRewardsTable.$inferInsert;
+
+/**
+ * Scram Jet Metrics — Pipeline output ingestion
+ * Stores metrics from Scram Jet YAML pipelines via webhook
+ * Powered: Dashboard metrics display and real-time analytics
+ */
+export const metricsTable = sqliteTable(
+	"metrics",
+	{
+		id: text("id").primaryKey(),
+		source: text("source").notNull(), // 'stripe', 'ga4', 'ads', 'meta', 'hubspot', etc.
+		priority: text("priority").notNull(), // 'high', 'normal', 'low'
+		category: text("category").notNull(), // 'revenue', 'traffic', 'ads', 'email', etc.
+		title: text("title").notNull(), // Display title
+		detail: text("detail").notNull(), // Description/detail
+		timestamp: integer("timestamp").notNull(), // Unix timestamp in ms (when metric occurred)
+		createdAt: integer("created_at")
+			.notNull()
+			.default(sql`(cast(strftime('%s', 'now') * 1000 as integer))`), // When metric arrived at OpenDash
+		metadata: text("metadata"), // JSON: {totalDollars: 250, transactionCount: 10, etc.}
+	},
+	(table) => [
+		index("idx_metrics_source_timestamp").on(table.source, table.timestamp),
+		index("idx_metrics_created_at").on(table.createdAt),
+		index("idx_metrics_priority").on(table.priority),
+		index("idx_metrics_category").on(table.category),
+	]
+);
+
+export type Metric = typeof metricsTable.$inferSelect;
+export type MetricInsert = typeof metricsTable.$inferInsert;
