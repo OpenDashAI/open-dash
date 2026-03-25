@@ -1002,3 +1002,138 @@ export type EmailMetricsSnapshotInsert = typeof emailMetricsSnapshotsTable.$infe
 
 export type CampaignAnomaly = typeof campaignAnomaliesTable.$inferSelect;
 export type CampaignAnomalyInsert = typeof campaignAnomaliesTable.$inferInsert;
+
+// ============================================================================
+// BATCH 5: BILLING SYSTEM
+// ============================================================================
+
+/**
+ * Subscriptions — Stripe integration + tier management
+ *
+ * Tracks SaaS subscription state, billing cycles, and Stripe customer IDs.
+ * Links organizations to their tier and payment status.
+ */
+export const subscriptionsTable = sqliteTable(
+	"subscriptions",
+	{
+		id: text("id").primaryKey(),
+		orgId: text("org_id").notNull().unique(),
+
+		// Pricing tier
+		tier: text("tier", { enum: ["starter", "pro", "enterprise"] })
+			.notNull()
+			.default("starter"),
+
+		// Stripe integration
+		stripeSubscriptionId: text("stripe_subscription_id").unique(),
+		stripeCustomerId: text("stripe_customer_id").unique(),
+
+		// Billing cycle dates (Unix ms)
+		billingCycleStart: integer("billing_cycle_start"),
+		billingCycleEnd: integer("billing_cycle_end"),
+		nextBillingDate: integer("next_billing_date"),
+
+		// Subscription status
+		status: text("status", {
+			enum: ["active", "past_due", "canceled", "expired"],
+		})
+			.notNull()
+			.default("active"),
+
+		// Payment status
+		paymentStatus: text("payment_status", {
+			enum: ["paid", "unpaid", "no_payment_method"],
+		})
+			.notNull()
+			.default("paid"),
+
+		// Timestamps
+		createdAt: integer("created_at")
+			.notNull()
+			.default(sql`(cast(strftime('%s', 'now') * 1000 as integer))`),
+		updatedAt: integer("updated_at")
+			.notNull()
+			.default(sql`(cast(strftime('%s', 'now') * 1000 as integer))`),
+		canceledAt: integer("canceled_at"),
+	},
+	(table) => [
+		index("idx_subscriptions_org_id").on(table.orgId),
+		index("idx_subscriptions_status").on(table.status),
+		index("idx_subscriptions_stripe_customer").on(table.stripeCustomerId),
+	]
+);
+
+/**
+ * Tier Limits — defines resource caps per pricing tier
+ *
+ * Stores max brands, users, competitors, alert rules, and monthly price.
+ * Referenced for tier enforcement and billing validation.
+ */
+export const tierLimitsTable = sqliteTable("tier_limits", {
+	id: text("id").primaryKey(),
+	tier: text("tier", { enum: ["starter", "pro", "enterprise"] })
+		.notNull()
+		.unique(),
+
+	// Resource limits
+	maxBrands: integer("max_brands").notNull(),
+	maxUsers: integer("max_users").notNull(),
+	maxCompetitorsPerBrand: integer("max_competitors_per_brand").notNull(),
+	maxAlertRules: integer("max_alert_rules").notNull(),
+
+	// Pricing (in cents)
+	monthlyPriceCents: integer("monthly_price_cents").notNull(),
+
+	createdAt: integer("created_at")
+		.notNull()
+		.default(sql`(cast(strftime('%s', 'now') * 1000 as integer))`),
+});
+
+/**
+ * Stripe Events — webhook event log
+ *
+ * Audit trail of Stripe webhook events for reconciliation and debugging.
+ * Ensures idempotent processing of subscription changes.
+ */
+export const stripeEventsTable = sqliteTable(
+	"stripe_events",
+	{
+		id: text("id").primaryKey(),
+		stripeEventId: text("stripe_event_id").notNull().unique(),
+
+		// Event type (e.g., customer.subscription.created)
+		eventType: text("event_type").notNull(),
+
+		// Related IDs
+		orgId: text("org_id"),
+		subscriptionId: text("subscription_id"),
+		stripeSubscriptionId: text("stripe_subscription_id"),
+
+		// Raw event data (JSON string)
+		eventData: text("event_data").notNull(),
+
+		// Processing status
+		processed: integer("processed", { mode: "boolean" }).default(false),
+		error: text("error"),
+
+		createdAt: integer("created_at")
+			.notNull()
+			.default(sql`(cast(strftime('%s', 'now') * 1000 as integer))`),
+		processedAt: integer("processed_at"),
+	},
+	(table) => [
+		index("idx_stripe_events_type").on(table.eventType),
+		index("idx_stripe_events_org").on(table.orgId),
+		index("idx_stripe_events_processed").on(table.processed),
+	]
+);
+
+// Types
+export type Subscription = typeof subscriptionsTable.$inferSelect;
+export type SubscriptionInsert = typeof subscriptionsTable.$inferInsert;
+
+export type TierLimit = typeof tierLimitsTable.$inferSelect;
+export type TierLimitInsert = typeof tierLimitsTable.$inferInsert;
+
+export type StripeEvent = typeof stripeEventsTable.$inferSelect;
+export type StripeEventInsert = typeof stripeEventsTable.$inferInsert;
