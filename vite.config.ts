@@ -10,7 +10,7 @@ import { cloudflare } from '@cloudflare/vite-plugin'
 
 const config = defineConfig({
   plugins: [
-    devtools(),
+    // devtools(), // Temporarily disabled to debug global scope error
     cloudflare({ viteEnvironment: { name: 'ssr' } }),
     tsconfigPaths({ projects: ['./tsconfig.json'] }),
     tailwindcss(),

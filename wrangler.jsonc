@@ -1,18 +1,20 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "open-dash",
-  "compatibility_date": "2025-12-01",
+  "compatibility_date": "2026-03-24",
   "compatibility_flags": ["nodejs_compat"],
   "main": "src/worker.ts",
   "durable_objects": {
     "bindings": [
       {
         "name": "HUD_SOCKET",
-        "class_name": "HudSocket"
+        "class_name": "HudSocket",
+        "script_name": "open-dash"
       },
       {
         "name": "COMPETITIVE_INTEL",
-        "class_name": "CompetitiveIntelligenceCoordinator"
+        "class_name": "CompetitiveIntelligenceCoordinator",
+        "script_name": "open-dash"
       }
     ]
   },

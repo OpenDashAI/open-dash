@@ -41,6 +41,7 @@
     "@tanstack/router-plugin": "^1.132.0",
     "@tauri-apps/api": "^2.10.1",
     "ai": "^6.0.116",
+    "date-fns": "^3.6.0",
     "drizzle-orm": "^0.45.1",
     "lucide-react": "^0.545.0",
     "react": "^19.2.0",
