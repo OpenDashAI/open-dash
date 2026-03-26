@@ -50,19 +50,25 @@ Layer 4: COMPOSITION    AI wires domain components via event contracts
 
 ---
 
-## Layer 2: Primitives — shadcn + Composition Layer
+## Layer 2: Primitives — Headless Composition Hooks
 
-**What**: shadcn/ui components wrapped with the composition layer (`@opendash/composition`). We do NOT build new UI primitives — shadcn already has production-quality Table, Card, Form, Chart, etc. We add the event-driven wiring that makes them talk to each other.
+**What**: Headless hooks that add event-driven wiring to ANY styled component. Zero styling, zero UI opinions. Any design system (shadcn, Magic UI, custom) can use these hooks.
 
-Each composable wrapper:
-- **Uses shadcn UI underneath** (no custom UI code)
+```
+Composition hook (headless — events only)     ← what we build
+Design system (shadcn / Magic UI / custom)    ← chosen at print time
+Domain component (composition + styling)      ← AI generates this
+```
+
+Each hook:
+- **Is purely headless** (returns data + emit functions, NEVER JSX)
 - **Registers** with CompositionProvider on mount
-- **Emits events** on user interaction (row-selected, form-submitted, etc.)
+- **Emits events** on interaction (item-selected, form-submitted, etc.)
 - **Listens to events** from other components (data-ready, filter-updated, etc.)
-- Has **customization slots** (data shape, fields, styling, labels)
-- Is described in the registry (`public/r/index.json`) with slot metadata
+- Has **customization slots** (data shape, fields, event payloads)
+- Is described in the registry (`public/r/index.json`) with event contracts
 
-**The differentiation is NOT the UI components. It's the composition layer on top.**
+**The differentiation is NOT the UI components (shadcn has those). It's the headless composition layer that makes ANY component composable by AI.**
 
 ### The Primitive Library
 
