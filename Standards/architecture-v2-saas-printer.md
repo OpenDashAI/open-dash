@@ -50,15 +50,19 @@ Layer 4: COMPOSITION    AI wires domain components via event contracts
 
 ---
 
-## Layer 2: Primitives — Structural Component Library
+## Layer 2: Primitives — shadcn + Composition Layer
 
-**What**: ~20 structural component primitives that define behavior and structure but NOT domain-specific opinions.
+**What**: shadcn/ui components wrapped with the composition layer (`@opendash/composition`). We do NOT build new UI primitives — shadcn already has production-quality Table, Card, Form, Chart, etc. We add the event-driven wiring that makes them talk to each other.
 
-Each primitive:
-- Has well-defined **structure** (what it renders, how it behaves)
+Each composable wrapper:
+- **Uses shadcn UI underneath** (no custom UI code)
+- **Registers** with CompositionProvider on mount
+- **Emits events** on user interaction (row-selected, form-submitted, etc.)
+- **Listens to events** from other components (data-ready, filter-updated, etc.)
 - Has **customization slots** (data shape, fields, styling, labels)
-- Uses `@opendash/composition` for event communication
 - Is described in the registry (`public/r/index.json`) with slot metadata
+
+**The differentiation is NOT the UI components. It's the composition layer on top.**
 
 ### The Primitive Library
 
