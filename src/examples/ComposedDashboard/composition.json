@@ -1,0 +1,54 @@
+{
+  "name": "Dashboard (from JSON)",
+  "description": "The same Dashboard example, but rendered from a declarative composition instead of hand-written JSX.",
+  "layout": "sidebar-main-panel",
+  "components": [
+    {
+      "id": "selector",
+      "component": "DataSelector",
+      "slot": "sidebar",
+      "props": {
+        "items": [
+          "Google Analytics Dashboard",
+          "Stripe Revenue Report",
+          "GitHub Activity Feed",
+          "CloudFlare Analytics",
+          "Email Campaign Metrics",
+          "Tailscale Network Status",
+          "Meta Ads Performance",
+          "Market Insights Report",
+          "Competitor Domain Tracking",
+          "SEO Performance Dashboard"
+        ],
+        "label": "Available Data Sources"
+      }
+    },
+    {
+      "id": "filter",
+      "component": "Filter",
+      "slot": "sidebar",
+      "listenTo": "selector",
+      "props": {
+        "label": "Search Results"
+      }
+    },
+    {
+      "id": "display",
+      "component": "Display",
+      "slot": "main",
+      "listenTo": "filter",
+      "props": {
+        "label": "Results"
+      }
+    },
+    {
+      "id": "summary",
+      "component": "Summary",
+      "slot": "panel",
+      "listenTo": "display",
+      "props": {
+        "label": "Statistics"
+      }
+    }
+  ]
+}
