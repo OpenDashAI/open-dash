@@ -1,0 +1,34 @@
+{
+  "name": "Booking Page",
+  "description": "Cal.com-style booking page — extracted from design analysis, rendered by CompositionRenderer",
+  "layout": "sidebar-main",
+  "slotClasses": {
+    "container": "min-h-screen flex items-center justify-center bg-gray-50 p-8",
+    "sidebar": "w-80 flex-shrink-0 border-r border-gray-200 bg-white rounded-l-xl p-6",
+    "main": "flex-1 bg-white rounded-r-xl p-6"
+  },
+  "components": [
+    {
+      "id": "event-info",
+      "component": "EventInfoCard",
+      "slot": "sidebar"
+    },
+    {
+      "id": "calendar",
+      "component": "DatePicker",
+      "slot": "main"
+    },
+    {
+      "id": "time-slots",
+      "component": "TimeSlotPicker",
+      "slot": "main",
+      "listenTo": "calendar"
+    },
+    {
+      "id": "booking-form",
+      "component": "BookingForm",
+      "slot": "main",
+      "listenTo": "time-slots"
+    }
+  ]
+}

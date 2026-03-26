@@ -1,0 +1,77 @@
+{
+  "name": "Cal.com Booking",
+  "description": "Scheduling page where visitors pick a time slot to book a meeting.",
+  "domain": "booking",
+  "source": "cal.com",
+  "views": {
+    "booking": {
+      "layout": "sidebar-main",
+      "slotClasses": {
+        "container": "min-h-screen flex items-center justify-center bg-gray-50 p-8",
+        "sidebar": "w-80 flex-shrink-0 border-r border-gray-200 bg-white rounded-l-xl p-6",
+        "main": "flex-1 bg-white rounded-r-xl p-6"
+      },
+      "components": [
+        {
+          "id": "event-info",
+          "component": "EventInfoCard",
+          "slot": "sidebar",
+          "listenTo": null,
+          "props": {},
+          "meta": {
+            "hook": "useComposableCard",
+            "dataShape": "{ title: string, host: string, duration: number, location: string, description: string, avatar: string }",
+            "styling": "Avatar at top, event title bold, duration with clock icon, location with pin icon, description in muted text. Clean, minimal.",
+            "interactions": "Display only — static info about the event"
+          }
+        },
+        {
+          "id": "calendar",
+          "component": "DatePicker",
+          "slot": "main",
+          "listenTo": null,
+          "props": {},
+          "meta": {
+            "hook": "useComposableList",
+            "dataShape": "{ date: string, available: boolean, slots: number }",
+            "styling": "Month calendar grid, available dates in dark text, unavailable grayed out, selected date has blue circle, today has dot indicator",
+            "interactions": "Click date → emits date-selected → TimeSlotPicker updates"
+          }
+        },
+        {
+          "id": "time-slots",
+          "component": "TimeSlotPicker",
+          "slot": "main",
+          "listenTo": "calendar",
+          "props": {},
+          "meta": {
+            "hook": "useComposableList",
+            "dataShape": "{ time: string, available: boolean, timezone: string }",
+            "styling": "Vertical list of time buttons, available slots in blue outline, hover fills blue, selected fills solid blue. Timezone selector at top.",
+            "interactions": "Click time slot → emits slot-selected → confirms booking"
+          }
+        },
+        {
+          "id": "booking-form",
+          "component": "BookingConfirmation",
+          "slot": "main",
+          "listenTo": "time-slots",
+          "props": {},
+          "meta": {
+            "hook": "useComposableForm",
+            "dataShape": "{ name: string, email: string, notes: string, guests: string[] }",
+            "styling": "Slides in after time selection. Name + email required fields, optional notes textarea, add guests button. Confirm button in blue.",
+            "interactions": "Fill form → submit → emits booking-confirmed → success state"
+          }
+        }
+      ],
+      "flow": "Visitor sees event info on left. Picks a date from calendar → time slots appear. Picks a time → booking form slides in. Fills name + email → confirms."
+    }
+  },
+  "designTokens": {
+    "theme": "light",
+    "spacing": "spacious",
+    "corners": "rounded",
+    "typography": "modern"
+  }
+}

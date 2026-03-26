@@ -1,0 +1,100 @@
+{
+  "name": "Stage Timer",
+  "description": "Remote-controlled countdown timer for live events. Controller on one device, fullscreen display on stage.",
+  "domain": "timer",
+  "source": "stagetimer.io",
+  "views": {
+    "controller": {
+      "layout": "sidebar-main",
+      "slotClasses": {
+        "container": "min-h-screen flex bg-zinc-950",
+        "sidebar": "w-80 flex-shrink-0 border-r border-zinc-800 bg-zinc-900 p-4",
+        "main": "flex-1 flex flex-col"
+      },
+      "components": [
+        {
+          "id": "timer-list",
+          "component": "TimerSchedule",
+          "slot": "sidebar",
+          "listenTo": null,
+          "props": {},
+          "meta": {
+            "hook": "useComposableList",
+            "dataShape": "{ id: string, label: string, duration: number, status: 'waiting' | 'running' | 'done', order: number }",
+            "styling": "Dark background, compact rows, drag handles for reorder, green highlight on active timer, strikethrough on done",
+            "interactions": "Click to select timer, drag to reorder, double-click to edit duration"
+          }
+        },
+        {
+          "id": "timer-controls",
+          "component": "TimerControlBar",
+          "slot": "main",
+          "listenTo": "timer-list",
+          "props": {},
+          "meta": {
+            "hook": "useComposableTimer",
+            "dataShape": "{ remaining: number, isRunning: boolean, isComplete: boolean }",
+            "styling": "Large centered countdown, green start button, red stop button, transport-style controls",
+            "interactions": "Click start/stop/reset, spacebar toggles play/pause"
+          }
+        },
+        {
+          "id": "message-sender",
+          "component": "MessageComposer",
+          "slot": "main",
+          "listenTo": null,
+          "props": {},
+          "meta": {
+            "hook": "useComposableForm",
+            "dataShape": "{ text: string, urgent: boolean }",
+            "styling": "Text input at bottom, send button, flash/urgent toggle",
+            "interactions": "Type message, click send or press Enter, toggle urgent mode"
+          }
+        }
+      ],
+      "flow": "Operator sees timer schedule on left. Selects a timer → controls appear in main area. Starts/stops timer. Can send messages to stage display."
+    },
+    "viewer": {
+      "layout": "single",
+      "slotClasses": {
+        "container": "min-h-screen flex items-center justify-center bg-black",
+        "fullscreen": "w-full h-screen flex flex-col items-center justify-center"
+      },
+      "components": [
+        {
+          "id": "stage-display",
+          "component": "FullscreenTimer",
+          "slot": "fullscreen",
+          "listenTo": "timer-controls",
+          "props": {},
+          "meta": {
+            "hook": "useComposableTimer",
+            "dataShape": "{ remaining: number, isRunning: boolean }",
+            "styling": "Black background, massive white countdown text (text-[20vw]), color changes to yellow <60s, red <30s, flashing when complete",
+            "interactions": "Display only — no interaction on stage view"
+          }
+        },
+        {
+          "id": "message-overlay",
+          "component": "StageMessage",
+          "slot": "fullscreen",
+          "listenTo": "message-sender",
+          "props": {},
+          "meta": {
+            "hook": "useComposableCard",
+            "dataShape": "{ text: string, urgent: boolean }",
+            "styling": "Overlay at bottom of screen, white text on semi-transparent black, slides up on new message, urgent mode flashes screen border red",
+            "interactions": "Display only — auto-dismisses after 10 seconds"
+          }
+        }
+      ],
+      "flow": "Speaker sees countdown on screen. When operator sends message, it appears as overlay. When time is up, display turns red and flashes."
+    }
+  },
+  "designTokens": {
+    "theme": "dark",
+    "spacing": "spacious",
+    "corners": "rounded",
+    "typography": "mono"
+  }
+}

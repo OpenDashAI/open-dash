@@ -1,0 +1,78 @@
+{
+  "name": "Linear Issue Tracker",
+  "description": "Project management tool with issue list, detail view, and filtering.",
+  "domain": "project",
+  "source": "linear.app",
+  "views": {
+    "issues": {
+      "layout": "sidebar-main-panel",
+      "slotClasses": {
+        "container": "min-h-screen flex bg-gray-950 text-white",
+        "sidebar": "w-56 flex-shrink-0 border-r border-gray-800 bg-gray-950 py-3",
+        "main": "flex-1 flex flex-col",
+        "panel": "w-[480px] flex-shrink-0 border-l border-gray-800 bg-gray-900"
+      },
+      "components": [
+        {
+          "id": "nav",
+          "component": "ProjectNav",
+          "slot": "sidebar",
+          "listenTo": null,
+          "props": {},
+          "meta": {
+            "hook": "useComposableList",
+            "dataShape": "{ id: string, name: string, icon: string, count: number, type: 'project' | 'view' | 'team' }",
+            "styling": "Dark sidebar, sections: My Issues, Projects, Views, Teams. Each item: icon + label + count badge. Active item has left blue bar. Hover: bg-gray-800.",
+            "interactions": "Click project → filters issue list. Click view (Backlog, Active, Done) → changes filter."
+          }
+        },
+        {
+          "id": "issue-list",
+          "component": "IssueTable",
+          "slot": "main",
+          "listenTo": "nav",
+          "props": {},
+          "meta": {
+            "hook": "useComposableList",
+            "dataShape": "{ id: string, identifier: string, title: string, status: 'backlog' | 'todo' | 'in_progress' | 'done' | 'cancelled', priority: 0|1|2|3|4, assignee: { name: string, avatar: string } | null, labels: string[], createdAt: string }",
+            "styling": "Table with rows. Each row: status icon (colored circle) + identifier (gray, mono) + title (white) + priority icon + assignee avatar + labels (colored pills). Row hover: bg-gray-800. Keyboard navigable. Groupable by status.",
+            "interactions": "Click row → opens detail in panel. Cmd+K → command palette. Arrow keys navigate. Status/priority inline-editable."
+          }
+        },
+        {
+          "id": "filter-bar",
+          "component": "IssueFilters",
+          "slot": "main",
+          "listenTo": null,
+          "props": {},
+          "meta": {
+            "hook": "useComposableForm",
+            "dataShape": "{ status: string[], priority: number[], assignee: string[], label: string[], search: string }",
+            "styling": "Horizontal bar above issue list. Filter chips: Status, Priority, Assignee, Label. Active filters shown as removable chips. Search input on right with Cmd+K hint.",
+            "interactions": "Click filter → dropdown with options. Select → adds chip. Click chip X → removes. Type in search → filters in real-time."
+          }
+        },
+        {
+          "id": "issue-detail",
+          "component": "IssueDetailPanel",
+          "slot": "panel",
+          "listenTo": "issue-list",
+          "props": {},
+          "meta": {
+            "hook": "useComposableCard",
+            "dataShape": "{ id: string, identifier: string, title: string, description: string, status: string, priority: number, assignee: object | null, labels: string[], comments: { author: string, text: string, time: string }[], activity: { type: string, time: string }[] }",
+            "styling": "Title editable at top (large, bold). Status/priority/assignee as dropdown selectors in row below title. Description as rich text editor. Activity timeline below. Comments at bottom with input.",
+            "interactions": "Edit title inline. Click status/priority/assignee → dropdown to change. Type description → auto-saves. Add comment → emits comment-added."
+          }
+        }
+      ],
+      "flow": "User sees projects/views in sidebar. Selects a project → issue list filters. Scans issues by status groups. Clicks an issue → detail panel opens on right. Edits status/priority/assignee inline. Adds comments."
+    }
+  },
+  "designTokens": {
+    "theme": "dark",
+    "spacing": "compact",
+    "corners": "rounded",
+    "typography": "modern"
+  }
+}
