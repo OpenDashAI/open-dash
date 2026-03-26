@@ -20,13 +20,20 @@
 - ❌ Component SDK with fetch() → BriefingItem[]
 - ❌ Pre-built domain components (AI generates them from primitives)
 
-### Active Issues
-- **#127** — Epic: SaaS Printer v2 Implementation
-- **#128** — Build 5 core structural primitives
-- **#129** — AI generation: primitive → domain component
-- **#130** — Composition format: JSON that runtime renders
+### What Already Exists (DO NOT rebuild)
+- **Auth**: Clerk + RBAC + org management + multi-tenancy (src/server/auth.ts, rbac.ts)
+- **Transport**: HudSocket DO + WebSocket + useLiveData (src/server/hud-socket.ts)
+- **Server Actions**: 15+ API routes + D1 CRUD (src/routes/api/*.ts)
+- **Data**: Scram Jet + metrics-collector + D1 (workers/metrics-collector/)
+
+### Active Issues (Epic #127)
+- **#128** — 5 headless composition hooks (useComposableList, Form, Card, Chart, Timer)
+- **#129** — AI generation: hook + context → domain component
+- **#130** — Composition format: JSON → runtime renderer
 - **#131** — D1 schema generation for arbitrary domains
-- **#132** — Update registry format for primitive customization slots
+- **#132** — Registry format for hook customization slots
+- **#133** — Bridge CompositionProvider → HudSocket (remote events)
+- **#134** — Server action hooks (event → server function → response)
 
 ### Key Files
 - `public/r/index.json` — Component registry

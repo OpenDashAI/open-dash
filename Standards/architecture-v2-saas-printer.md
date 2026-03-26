@@ -15,14 +15,36 @@ type: standard
 
 OpenDash is a SaaS printer. Describe what you need, AI generates a complete micro-SaaS from structural component primitives — customized for your domain, composed via event contracts, backed by a unified data layer.
 
-The architecture has four layers:
+The architecture has seven layers — five already built, two to build:
 
 ```
-Layer 1: DATA           Scram Jet YAML pipelines → D1 unified storage
-Layer 2: PRIMITIVES     ~20 structural components (List, Form, Chart, Timer, etc.)
-Layer 3: GENERATION     AI customizes primitives into domain components (once)
-Layer 4: COMPOSITION    AI wires domain components via event contracts
+Layer 1: DATA           Scram Jet YAML pipelines → D1 unified storage          ✅ EXISTS
+Layer 2: AUTH           Clerk + RBAC + multi-tenancy + org management           ✅ EXISTS
+Layer 3: TRANSPORT      HudSocket DO + WebSocket + useLiveData                  ✅ EXISTS
+Layer 4: SERVER ACTIONS TanStack server functions + D1 mutations                ✅ EXISTS
+Layer 5: HOOKS          Headless composition hooks (useComposableList, etc.)    🔨 TO BUILD
+Layer 6: GENERATION     AI customizes hooks into domain components (once)       🔨 TO BUILD
+Layer 7: COMPOSITION    AI wires domain components → JSON → runtime renders    🔨 TO BUILD
 ```
+
+### What Already Exists (and doesn't need to be rebuilt)
+
+**Auth** (src/server/auth.ts, rbac.ts, auth-middleware.ts, worker-context.ts):
+- Clerk session validation, login page
+- RBAC: owner/editor/viewer roles with permission matrix
+- Org management: create, invite, tier limits (starter/pro/enterprise)
+- Per-request auth context injection
+
+**Real-time Transport** (src/server/hud-socket.ts, src/routes/api/ws.tsx, src/lib/use-live-data.ts):
+- HudSocket Durable Object (WebSocket hub, broadcast, hibernation)
+- Client hook with auto-reconnect, heartbeat, fallback polling
+- Needs: bridge to CompositionProvider (emit remote events)
+
+**Server Actions** (src/routes/api/*.ts, src/server/*.ts):
+- 15+ API endpoints with auth + permissions
+- TanStack Start server functions
+- D1 CRUD via Drizzle ORM
+- AI chat with 40+ orchestrator tools
 
 ---
 
@@ -316,32 +338,43 @@ Any application in the ecosystem imports this package. Everything else (primitiv
 
 ## Execution Phases
 
-### Phase 1: Foundation (Current → Next 2 weeks)
+### Phase 1: Composition Layer (Current → Next 2 weeks)
+
+**Already done**:
 - [x] CompositionProvider + event system
 - [x] @opendash/composition shared package
 - [x] Registry format with event contracts
 - [x] 12 proof-of-concept composable components
-- [x] 3 working example compositions
-- [ ] **Build 5 structural primitives** (List, Form, Card, Chart, Timer)
-- [ ] **AI generation proof-of-concept** (primitive → domain component)
-- [ ] **Composition format** (JSON that runtime renders)
-- [ ] **D1 schema generation** (AI generates schema for a domain)
+- [x] 3 working example compositions (Dashboard, MusicPlayer, EmailClient)
+- [x] Auth: Clerk + RBAC + org management + multi-tenancy
+- [x] Transport: HudSocket DO + WebSocket + useLiveData
+- [x] Server actions: 15+ API routes + D1 CRUD
+- [x] Data: Scram Jet + metrics-collector + D1
+
+**To build**:
+- [ ] #128 — 5 headless composition hooks (useComposableList, Form, Card, Chart, Timer)
+- [ ] #129 — AI generation: hook + context → domain component
+- [ ] #130 — Composition format: JSON → CompositionRenderer
+- [ ] #131 — D1 schema generation for arbitrary domains
+- [ ] #132 — Registry format for hook customization slots
+- [ ] #133 — Bridge CompositionProvider → HudSocket (remote events)
+- [ ] #134 — Server action hooks (composition event → server function → response event)
 
 ### Phase 2: First Print (Weeks 3-4)
-- [ ] Print Dashboard #1 (founder morning briefing)
-- [ ] Full flow: user describes → AI generates → composition renders
-- [ ] Validate: does it work end-to-end?
-- [ ] Scram Jet integration (Stripe, GA4, GitHub pipelines)
+- [ ] Print Dashboard #1 (founder morning briefing) using full v2 flow
+- [ ] User describes → AI generates hooks+components → composition renders
+- [ ] Scram Jet pipelines (Stripe, GA4, GitHub) feeding D1
+- [ ] Auth-protected, multi-tenant
 
 ### Phase 3: Second Print (Weeks 5-6)
-- [ ] Print a non-dashboard product (stage timer or similar)
-- [ ] Validates that primitives are truly reusable across domains
-- [ ] Identifies which primitives need refinement
+- [ ] Print a multi-device product (stage timer)
+- [ ] Validates remote transport bridge (controller ↔ viewer via HudSocket)
+- [ ] Validates hooks are truly design-system-agnostic
 - [ ] Registry grows with new domain components
 
 ### Phase 4: Scale (Weeks 7-12)
 - [ ] Print 5 more products across different domains
-- [ ] Build remaining ~15 primitives as needed
+- [ ] Build remaining hooks as needed
 - [ ] AI composition UX (user-facing interface)
 - [ ] Public launch
 
