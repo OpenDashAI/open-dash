@@ -1,54 +1,38 @@
 # Current Session Priority
 
-**Status**: Component Registry Prototype Complete (#125)
+**Status**: Architecture v2 Defined — Ready to Build
 
-## What We Built
-
-✅ **Registry** (`public/r/index.json`) — 15 component entries with event contracts
-✅ **Proof** — Registry correctly describes all 3 example apps (Dashboard, Music Player, Email Client)
-✅ **Issue** — #125 created with full architecture description
-✅ **Design docs** — Why event contracts solve the AI composition problem
-
-## Architecture (Confirmed)
+## Architecture v2: SaaS Printer
 
 ```
-Scram Jet (YAML) → D1 metrics → Composable Components → User Dashboard
-                                        ↑
-                                  Registry (shadcn model)
-                                  + Event contracts in meta
-                                        ↑
-                                   AI Composition
-                                (constraint satisfaction)
+Layer 1: DATA           Scram Jet → D1
+Layer 2: PRIMITIVES     ~20 structural components
+Layer 3: GENERATION     AI customizes primitives → domain components (once)
+Layer 4: COMPOSITION    AI wires via event contracts → JSON → runtime renders
 ```
 
-- **Scram Jet** collects all data (no components call external APIs)
-- **Components** are local, event-driven (shadcn copy model, not npm packages)
-- **Registry** describes components with event contracts so AI can compose them
-- **AI** solves constraint satisfaction (select components, wire events, validate)
+Full spec: `Standards/architecture-v2-saas-printer.md`
 
-## Next Steps
+## Epic #127: Phase 1 — Foundation
 
-1. **Build D1-connected components** — MetricsSource, BriefingDisplay, AlertFilter, TrendChart
-   - These read from D1 (Scram Jet data) and emit events
-   - Add them to registry with data binding metadata
+| Issue | Task | Status |
+|-------|------|--------|
+| #128 | Build 5 core primitives (List, Form, Card, Chart, Timer) | TODO |
+| #129 | AI generation: primitive → domain component | TODO |
+| #130 | Composition format: JSON that runtime renders | TODO |
+| #131 | D1 schema generation for arbitrary domains | TODO |
+| #132 | Update registry format for primitive customization slots | TODO |
 
-2. **Composition format** — JSON/YAML that AI generates and runtime renders
-   - Declarative description of a composition (components + wiring)
-   - Runtime interprets this and renders CompositionProvider tree
-
-3. **AI composition endpoint** — Takes user intent, returns composition
-   - Reads registry, selects components, validates wiring
-   - Returns composition format
-
-4. **CLI tooling** — `npx opendash add metrics-source` (shadcn-style)
+**Start with**: #128 (primitives) and #132 (registry format) in parallel — these are independent.
+Then: #129 (AI generation) depends on #128 + #132.
+Then: #130 (composition format) and #131 (D1 schema) can run in parallel.
 
 ## Key Files
 
+- `Standards/architecture-v2-saas-printer.md` — Definitive architecture
+- `packages/@opendash/composition/` — Shared event bus
 - `public/r/index.json` — Component registry
-- `src/lib/composition-provider.tsx` — Event bus
-- `src/components/composable/` — 12 composable components
-- `src/examples/` — 3 working example compositions
-- `Standards/component-registry-solves-ai-composition.md` — Design rationale
+- `src/components/primitives/` — Structural primitives (to build)
 
 ---
 Last updated: 2026-03-25

@@ -1,23 +1,32 @@
-# OpenDash — Composable Intelligence Platform
+# OpenDash — SaaS Printer
 
-## ⚠️ ARCHITECTURE (Read First)
+## ⚠️ ARCHITECTURE v2 (Read First)
 
 **Always check `PRIORITY.md` at repo root before starting work.**
+**Full spec: `Standards/architecture-v2-saas-printer.md`**
 
-### Three Layers
-1. **Scram Jet** — YAML pipelines collect ALL external data (Stripe, GA4, Google Ads, Meta, GitHub, Email) → D1 metrics table. Components NEVER call external APIs.
-2. **Composable Components** — Local (shadcn copy model), event-driven via CompositionProvider. Read from D1, emit/listen to events. NOT npm packages.
-3. **Registry** — `public/r/index.json` describes components with event contracts in `meta`. AI composes dashboards via constraint satisfaction (select components, wire events, validate graph).
+### Four Layers
+1. **Data** — Scram Jet YAML pipelines collect ALL external data → D1. Internal state also in D1. Components NEVER call external APIs.
+2. **Primitives** — ~20 structural components (List, Form, Card, Chart, Timer) that define behavior/structure but NOT domain opinions. Local files, NOT npm packages.
+3. **Generation** — AI customizes primitives into domain components (ContactList, TimerDisplay, DealPipeline) by filling in customization slots. Done ONCE at print time. Generated files owned by the project (shadcn model).
+4. **Composition** — AI wires domain components via event contracts. Outputs declarative JSON. Runtime renders CompositionProvider tree.
+
+### Shared Contract
+`@opendash/composition` — the ONE npm package (event bus: CompositionProvider, CompositionContext, useCompositionContext)
 
 ### What Does NOT Exist
-- ❌ npm packages for components (no @opendash-components/*)
+- ❌ npm packages for domain components
 - ❌ Component marketplace or third-party distribution
 - ❌ Component SDK with fetch() → BriefingItem[]
-- ❌ packages/@opendash/sdk as distribution mechanism
+- ❌ Pre-built domain components (AI generates them from primitives)
 
-### Active Architecture Issues
-- **#125** — shadcn-style registry with event contracts for AI composition
-- **#126** — D1-connected composable components (MetricsSource, BriefingDisplay, AlertFilter)
+### Active Issues
+- **#127** — Epic: SaaS Printer v2 Implementation
+- **#128** — Build 5 core structural primitives
+- **#129** — AI generation: primitive → domain component
+- **#130** — Composition format: JSON that runtime renders
+- **#131** — D1 schema generation for arbitrary domains
+- **#132** — Update registry format for primitive customization slots
 
 ### Key Files
 - `public/r/index.json` — Component registry
