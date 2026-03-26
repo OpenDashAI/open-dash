@@ -1,36 +1,40 @@
 # Current Session Priority
 
-**Status**: Architecture v2 Complete — Ready to Build
+**Status**: Composition system built. Frontasy is the engine. OpenDash is a product.
 
-## The Stack (5 layers exist, 2 to build)
+## Architecture Split (2026-03-25)
 
-```
-✅ Layer 1: DATA           Scram Jet → D1
-✅ Layer 2: AUTH           Clerk + RBAC + multi-tenancy
-✅ Layer 3: TRANSPORT      HudSocket DO + WebSocket
-✅ Layer 4: SERVER ACTIONS TanStack server functions + D1
-🔨 Layer 5: HOOKS          Headless composition hooks
-🔨 Layer 6: GENERATION     AI customizes hooks → domain components
-🔨 Layer 7: COMPOSITION    JSON format → runtime renderer
-```
+**Frontasy** = front-end generation engine (hooks, renderer, AI generation, design retrieval)
+**OpenDash** = dashboard intelligence product (Scram Jet → D1 → briefings, alerts)
 
-## Epic #127: Phase 1 Tasks
+Composition system migrating to Frontasy. OpenDash will consume `@frontasy/*` packages.
 
-| Issue | Task | Depends On | Status |
-|-------|------|-----------|--------|
-| #128 | 5 headless composition hooks (List, Form, Card, Chart, Timer) | — | TODO |
-| #132 | Registry format for hook customization slots | — | TODO |
-| #129 | AI generation: hook + context → domain component | #128, #132 | TODO |
-| #130 | Composition format: JSON → runtime renderer | — | TODO |
-| #131 | D1 schema generation for arbitrary domains | — | TODO |
-| #133 | Bridge CompositionProvider → HudSocket (remote events) | #128 | TODO |
-| #134 | Server action hooks (event → server function → response) | #128 | TODO |
+## OpenDash-Specific Work
 
-**Start with**: #128 + #132 + #130 (all independent, run in parallel)
+| Task | Status |
+|------|--------|
+| Scram Jet → D1 data pipeline | ✅ Working |
+| Auth (Clerk + RBAC + multi-tenancy) | ✅ Working |
+| HudSocket (WebSocket transport) | ✅ Working |
+| Server actions (15+ API routes) | ✅ Working |
+| Dashboard views (briefing, portfolio) | Needs update to use @frontasy/* |
+| D1-connected composable components (#126) | Blocked on Frontasy migration (#41) |
+| Bridge CompositionProvider → HudSocket (#133) | TODO |
+| Server action hooks (#134) | TODO |
 
-## Full Spec
+## Next OpenDash Session
 
-`Standards/architecture-v2-saas-printer.md`
+Wait for Frontasy Sprint 1 (#41-43), then:
+1. `pnpm add @frontasy/composition @frontasy/hooks @frontasy/renderer`
+2. Build D1-connected components (MetricsSource, BriefingDisplay, AlertFilter)
+3. Wire to Scram Jet metrics data
+4. Bridge events to HudSocket for real-time
+
+## See Also
+
+- `Standards/architecture-v2-saas-printer.md` — Full architecture
+- `Standards/frontasy-opendash-split.md` — What lives where
+- Frontasy `PRIORITY.md` — Engine development priorities
 
 ---
 Last updated: 2026-03-25
