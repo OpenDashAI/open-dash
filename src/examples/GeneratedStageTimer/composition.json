@@ -1,0 +1,21 @@
+{
+  "name": "Stage Timer",
+  "description": "AI-generated stage timer from useComposableList + useComposableTimer hooks",
+  "layout": "sidebar-main",
+  "components": [
+    {
+      "id": "schedule",
+      "component": "TimerList",
+      "slot": "sidebar"
+    },
+    {
+      "id": "countdown",
+      "component": "StageTimerDisplay",
+      "slot": "main",
+      "listenTo": "schedule",
+      "props": {
+        "duration": 1800
+      }
+    }
+  ]
+}
