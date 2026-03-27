@@ -16,7 +16,8 @@
     "deploy": "npm run build && wrangler deploy",
     "tauri": "tauri",
     "tauri:dev": "tauri dev",
-    "tauri:build": "tauri build"
+    "tauri:build": "tauri build",
+    "infra:deploy": "npx tsx alchemy.run.ts"
   },
   "dependencies": {
     "@ai-sdk/openai-compatible": "^2.0.35",
@@ -66,6 +67,7 @@
     "@types/react": "^19.2.0",
     "@types/react-dom": "^19.2.0",
     "@vitejs/plugin-react": "^5.1.4",
+    "alchemy": "^0.90.1",
     "jsdom": "^28.1.0",
     "typescript": "^5.7.2",
     "vite": "^7.3.1",
