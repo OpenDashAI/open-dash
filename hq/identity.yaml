@@ -1,0 +1,59 @@
+# OpenDash — Repo Identity Card
+
+name: "OpenDash"
+slug: "open-dash"
+type: infrastructure
+description: "SaaS dashboard and org command center — three-panel HUD with real-time metrics, AI chat, and competitive intelligence"
+status: production
+owner: athena
+
+domain: "opendash.ai"
+
+provides:
+  - service: "dashboard-ui"
+    description: "Three-panel HUD (context, focus, chat) for org operations"
+    endpoint: "/"
+    consumers: [atlas]
+  - service: "metrics-display"
+    description: "Real-time metrics via HudSocket Durable Object and WebSocket transport"
+    endpoint: "/api/metrics"
+    consumers: [atlas]
+  - service: "chat-interface"
+    description: "AI chat interface with tiered model routing via API Mom and OpenRouter"
+    endpoint: "/api/chat"
+    consumers: []
+  - service: "competitive-intelligence"
+    description: "SERP tracking, domain metrics, and social monitoring via CompetitiveIntelligenceCoordinator DO"
+    endpoint: "/api/intel"
+    consumers: [atlas]
+
+consumes:
+  - provider: "api-mom"
+    service: "llm-proxy"
+    purpose: "Tiered LLM routing (Qwen 72B for chat, GatherFeed for research)"
+  - provider: "scalable-media"
+    service: "brand-management"
+    purpose: "Brand data and content status for dashboard display"
+  - provider: "scram-jet"
+    service: "metrics-pipeline"
+    purpose: "YAML pipeline engine collecting external data into D1 via metrics-collector worker"
+  - provider: "gather-feed"
+    service: "research-data"
+    purpose: "L1-L4 investigation queries for research tier"
+
+infrastructure:
+  workers: ["open-dash", "metrics-collector"]
+  d1: ["open-dash-db"]
+  durable_objects: ["HudSocket", "CompetitiveIntelligenceCoordinator"]
+
+secrets:
+  vault: "OpenDash"
+  items:
+    - name: "API_MOM_URL"
+      ref: "op://Data APIs/API Mom/url"
+    - name: "API_MOM_KEY"
+      ref: "op://Internal Service Keys/API Mom OpenDash/credential"
+    - name: "CLERK_SECRET_KEY"
+      ref: "op://OpenDash/Clerk/secret-key"
+    - name: "SCRAMJET_WEBHOOK_SECRET"
+      ref: "op://Internal Service Keys/Scram Jet Webhook/credential"
