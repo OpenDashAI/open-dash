@@ -1,0 +1,19 @@
+name: 'Monthly issue metrics'
+on:
+  schedule:
+    - cron: '0 0 1 * *'  # First of each month
+  workflow_dispatch:
+
+permissions:
+  issues: write
+
+jobs:
+  metrics:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: github/issue-metrics@v3
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SEARCH_QUERY: 'repo:garywu/open-dash is:issue'
+        with:
+          days: 30
