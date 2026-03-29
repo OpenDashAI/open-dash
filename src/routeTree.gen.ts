@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as StatusRouteImport } from './routes/status'
 import { Route as OnboardingRouteImport } from './routes/onboarding'
 import { Route as MusicRouteImport } from './routes/music'
 import { Route as LoginRouteImport } from './routes/login'
@@ -22,7 +23,13 @@ import { Route as ApiOrchestrateRouteImport } from './routes/api/orchestrate'
 import { Route as ApiOnboardingRouteImport } from './routes/api/onboarding'
 import { Route as ApiCompetitiveIntelligenceRouteImport } from './routes/api/competitive-intelligence'
 import { Route as ApiChatRouteImport } from './routes/api/chat'
+import { Route as ApiAgentStatusRouteImport } from './routes/api/agent-status'
 
+const StatusRoute = StatusRouteImport.update({
+  id: '/status',
+  path: '/status',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const OnboardingRoute = OnboardingRouteImport.update({
   id: '/onboarding',
   path: '/onboarding',
@@ -89,6 +96,11 @@ const ApiChatRoute = ApiChatRouteImport.update({
   path: '/api/chat',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiAgentStatusRoute = ApiAgentStatusRouteImport.update({
+  id: '/api/agent-status',
+  path: '/api/agent-status',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -97,6 +109,8 @@ export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
   '/music': typeof MusicRoute
   '/onboarding': typeof OnboardingRoute
+  '/status': typeof StatusRoute
+  '/api/agent-status': typeof ApiAgentStatusRoute
   '/api/chat': typeof ApiChatRoute
   '/api/competitive-intelligence': typeof ApiCompetitiveIntelligenceRoute
   '/api/onboarding': typeof ApiOnboardingRoute
@@ -112,6 +126,8 @@ export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/music': typeof MusicRoute
   '/onboarding': typeof OnboardingRoute
+  '/status': typeof StatusRoute
+  '/api/agent-status': typeof ApiAgentStatusRoute
   '/api/chat': typeof ApiChatRoute
   '/api/competitive-intelligence': typeof ApiCompetitiveIntelligenceRoute
   '/api/onboarding': typeof ApiOnboardingRoute
@@ -128,6 +144,8 @@ export interface FileRoutesById {
   '/login': typeof LoginRoute
   '/music': typeof MusicRoute
   '/onboarding': typeof OnboardingRoute
+  '/status': typeof StatusRoute
+  '/api/agent-status': typeof ApiAgentStatusRoute
   '/api/chat': typeof ApiChatRoute
   '/api/competitive-intelligence': typeof ApiCompetitiveIntelligenceRoute
   '/api/onboarding': typeof ApiOnboardingRoute
@@ -145,6 +163,8 @@ export interface FileRouteTypes {
     | '/login'
     | '/music'
     | '/onboarding'
+    | '/status'
+    | '/api/agent-status'
     | '/api/chat'
     | '/api/competitive-intelligence'
     | '/api/onboarding'
@@ -160,6 +180,8 @@ export interface FileRouteTypes {
     | '/login'
     | '/music'
     | '/onboarding'
+    | '/status'
+    | '/api/agent-status'
     | '/api/chat'
     | '/api/competitive-intelligence'
     | '/api/onboarding'
@@ -175,6 +197,8 @@ export interface FileRouteTypes {
     | '/login'
     | '/music'
     | '/onboarding'
+    | '/status'
+    | '/api/agent-status'
     | '/api/chat'
     | '/api/competitive-intelligence'
     | '/api/onboarding'
@@ -191,6 +215,8 @@ export interface RootRouteChildren {
   LoginRoute: typeof LoginRoute
   MusicRoute: typeof MusicRoute
   OnboardingRoute: typeof OnboardingRoute
+  StatusRoute: typeof StatusRoute
+  ApiAgentStatusRoute: typeof ApiAgentStatusRoute
   ApiChatRoute: typeof ApiChatRoute
   ApiCompetitiveIntelligenceRoute: typeof ApiCompetitiveIntelligenceRoute
   ApiOnboardingRoute: typeof ApiOnboardingRoute
@@ -201,6 +227,13 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/status': {
+      id: '/status'
+      path: '/status'
+      fullPath: '/status'
+      preLoaderRoute: typeof StatusRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/onboarding': {
       id: '/onboarding'
       path: '/onboarding'
@@ -292,6 +325,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiChatRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/agent-status': {
+      id: '/api/agent-status'
+      path: '/api/agent-status'
+      fullPath: '/api/agent-status'
+      preLoaderRoute: typeof ApiAgentStatusRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -313,6 +353,8 @@ const rootRouteChildren: RootRouteChildren = {
   LoginRoute: LoginRoute,
   MusicRoute: MusicRoute,
   OnboardingRoute: OnboardingRoute,
+  StatusRoute: StatusRoute,
+  ApiAgentStatusRoute: ApiAgentStatusRoute,
   ApiChatRoute: ApiChatRoute,
   ApiCompetitiveIntelligenceRoute: ApiCompetitiveIntelligenceRoute,
   ApiOnboardingRoute: ApiOnboardingRoute,
