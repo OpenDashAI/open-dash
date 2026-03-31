@@ -58,15 +58,21 @@ export const Route = createFileRoute("/")({
 			getLastVisited(),
 		]);
 
-		// Fetch briefing items from DataSource registry + D1 escalations
-		const [sourceResult, escalations] = await Promise.all([
-			fetchAllSources({ data: { lastVisited } }),
-			getPendingEscalations(),
-		]);
-		const briefing = [...escalations, ...sourceResult.items];
+		// Fetch briefing items from DataSource registry
+		// TODO: getPendingEscalations returns non-iterable - needs debug
+		let briefing: any[] = [];
+		let dataSources: any[] = [];
+		try {
+			const sourceResult = await fetchAllSources({ data: { lastVisited } });
+			briefing = Array.isArray(sourceResult?.items) ? sourceResult.items : [];
+			dataSources = Array.isArray(sourceResult?.sources) ? sourceResult.sources : [];
+		} catch (e) {
+			console.error("Error fetching sources:", e);
+		}
 
 		// Update last visited timestamp (fire-and-forget)
-		updateLastVisited().catch(() => {});
+		// TODO: updateLastVisited is a server function that doesn't work in loader context
+		// updateLastVisited().catch(() => {});
 
 		return {
 			machines,
@@ -78,7 +84,7 @@ export const Route = createFileRoute("/")({
 			threads,
 			briefing,
 			lastVisited,
-			dataSources: sourceResult.sources,
+			dataSources,
 		};
 	},
 });
